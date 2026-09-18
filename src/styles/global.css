@@ -1,13 +1,27 @@
 :root {
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", Inter, system-ui, sans-serif;
-  color: #f5f5f7; background: #050505; font-synthesis: none; text-rendering: optimizeLegibility;
-  --accent: #8f8f98; --accent-soft: rgba(143,143,152,.16);
+  color: #f5f5f7;
+  background: #050505;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  --accent: #8b8b92;
+  --accent-soft: rgba(139,139,146,.16);
 }
+:root[data-theme="white"] { --accent:#5f6368; --accent-soft:rgba(95,99,104,.13); }
+:root[data-theme="midnight"] { --accent:#777dff; --accent-soft:rgba(119,125,255,.16); }
 :root[data-theme="rose"] { --accent:#e76f9a; --accent-soft:rgba(231,111,154,.16); }
+:root[data-theme="blush"] { --accent:#f0a6c1; --accent-soft:rgba(240,166,193,.17); }
 :root[data-theme="lavender"] { --accent:#9b8cf2; --accent-soft:rgba(155,140,242,.16); }
 :root[data-theme="ocean"] { --accent:#5e9fe8; --accent-soft:rgba(94,159,232,.16); }
 :root[data-theme="emerald"] { --accent:#57b98b; --accent-soft:rgba(87,185,139,.16); }
+:root[data-theme="sage"] { --accent:#8fae91; --accent-soft:rgba(143,174,145,.16); }
 :root[data-theme="gold"] { --accent:#caa65b; --accent-soft:rgba(202,166,91,.16); }
+:root[data-theme="champagne"] { --accent:#d8c19a; --accent-soft:rgba(216,193,154,.18); }
+:root[data-theme="peach"] { --accent:#efa77d; --accent-soft:rgba(239,167,125,.17); }
+:root[data-theme="coral"] { --accent:#e87972; --accent-soft:rgba(232,121,114,.16); }
+:root[data-theme="sky"] { --accent:#78bce8; --accent-soft:rgba(120,188,232,.16); }
+:root[data-theme="mint"] { --accent:#75c9ae; --accent-soft:rgba(117,201,174,.16); }
+:root[data-theme="plum"] { --accent:#a978b5; --accent-soft:rgba(169,120,181,.16); }
 * { box-sizing:border-box; }
 html,body,#root { min-width:320px; min-height:100%; margin:0; }
 body { min-height:100vh; }
@@ -32,7 +46,7 @@ h1 { margin:3px 0 0; font-size:17px; letter-spacing:-.03em; }
 .status { width:fit-content; margin:28px auto 0; padding:10px 14px; display:flex; align-items:center; gap:8px; border-radius:999px; font-size:12px; font-weight:650; }
 .status-dot { width:7px; height:7px; border-radius:50%; background:var(--accent); }
 .sheet-backdrop { position:fixed; inset:0; z-index:50; display:flex; align-items:flex-end; justify-content:center; padding:16px; background:rgba(0,0,0,.32); backdrop-filter:blur(10px); }
-.theme-sheet { width:min(100%,520px); padding:20px; border-radius:30px; animation:sheet-in 220ms ease-out; }
+.theme-sheet { width:min(100%,520px); max-height:min(82vh,720px); overflow:auto; padding:20px; border-radius:30px; animation:sheet-in 220ms ease-out; }
 .sheet-header { display:flex; align-items:flex-start; justify-content:space-between; gap:20px; }
 .sheet-header h2 { margin:4px 0 0; font-size:28px; letter-spacing:-.04em; }
 .sheet-copy { margin:12px 0 20px; opacity:.62; line-height:1.5; font-size:14px; }
@@ -40,6 +54,8 @@ h1 { margin:3px 0 0; font-size:17px; letter-spacing:-.03em; }
 .theme-card { min-height:72px; padding:12px; display:flex; align-items:center; gap:10px; border:1px solid rgba(127,127,127,.16); border-radius:18px; color:inherit; background:var(--theme-soft); cursor:pointer; text-align:left; }
 .theme-card.selected { border-color:var(--theme-accent); box-shadow:inset 0 0 0 1px var(--theme-accent); }
 .theme-card svg { margin-left:auto; color:var(--theme-accent); }
-.theme-orb { width:30px; height:30px; flex:0 0 auto; border-radius:50%; background:var(--theme-accent); box-shadow:0 0 24px var(--theme-accent); }
+.theme-orb { width:30px; height:30px; flex:0 0 auto; border-radius:50%; background:var(--theme-accent); box-shadow:0 0 24px color-mix(in srgb,var(--theme-accent) 55%,transparent); }
+.theme-orb-black { background:#080808; border:1px solid #777; }
+.theme-orb-white { background:#fff; border:1px solid #aaa; }
 @keyframes sheet-in { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
 @media (max-width:560px) { .app{padding-left:12px;padding-right:12px;} .topbar{border-radius:20px;} .hero{margin-top:14vh;} .theme-grid{grid-template-columns:1fr 1fr;} }
