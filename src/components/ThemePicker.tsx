@@ -28,18 +28,19 @@ export function ThemePicker({ theme, onThemeChange }: ThemePickerProps) {
                 <X size={18} />
               </button>
             </div>
-            <p className="sheet-copy">Choose an aesthetic while keeping the same RP WORLD design language.</p>
+            <p className="sheet-copy">A restrained accent system for your profile and feed. Your RP WORLD layout stays consistent.</p>
             <div className="theme-grid">
               {themes.map((item) => (
                 <button
                   className={item.id === theme ? "theme-card selected" : "theme-card"}
                   key={item.id}
                   type="button"
+                  aria-pressed={item.id === theme}
                   style={{ "--theme-accent": item.accent, "--theme-soft": item.accentSoft } as React.CSSProperties}
                   onClick={() => { onThemeChange(item.id); setOpen(false); }}
                 >
-                  <span className={`theme-orb theme-orb-${item.id}`} />
-                  <span>{item.label}</span>
+                  <span className={`theme-orb theme-orb-\${item.id}`} />
+                  <span className="theme-card-label">{item.label}</span>
                   {item.id === theme && <Check size={15} aria-hidden="true" />}
                 </button>
               ))}
