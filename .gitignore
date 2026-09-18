@@ -1,0 +1,20 @@
+# dependencies
+node_modules/
+.pnpm-store/
+
+# build
+dist/
+.vite/
+
+# local environment
+.env
+.env.*
+!.env.example
+
+# editor / OS
+.DS_Store
+.vscode/
+.idea/
+
+# logs
+*.log
