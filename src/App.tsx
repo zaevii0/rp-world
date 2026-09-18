@@ -1,5 +1,6 @@
 import { Moon, Sun, LogOut } from "lucide-react";
 import { useEffect, useState } from "react";
+import type { Session } from "@supabase/supabase-js";
 import { ThemePicker } from "./components/ThemePicker";
 import { AuthScreen } from "./components/AuthScreen";
 import { ProfileSetup } from "./components/ProfileSetup";
@@ -49,7 +50,7 @@ export function App() {
       setSessionReady(true);
     }
 
-    async function handleSession(currentSession: typeof supabase.auth extends never ? never : any) {
+    async function handleSession(currentSession: Session | null) {
       setSignedIn(Boolean(currentSession));
       if (!currentSession) {
         setProfile(null);
