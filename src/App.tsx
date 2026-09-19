@@ -1,4 +1,4 @@
-import { Check, LogIn, LogOut, Mail, Moon, Palette, Sparkles, Sun, UserPlus, X } from "lucide-react";
+import { LogIn, LogOut, Mail, Moon, Sparkles, Sun, UserPlus, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { ThemePicker } from "./components/ThemePicker";
 import { supabase, supabaseConfigured } from "./lib/supabase";
