@@ -26,3 +26,12 @@ RP WORLD is being built as a real application, not a monolithic HTML file.
 ## Status
 
 Foundation v0.1 — initial project scaffold.
+
+
+## Supabase profile setup
+
+The repository now includes a secure profile migration at `supabase/migrations/0001_profiles.sql`.
+
+Before testing profile onboarding, open the Supabase Dashboard → SQL Editor, paste the migration contents, and run it once. The migration enables Row Level Security and restricts profile inserts/updates to the authenticated owner.
+
+Never add a Supabase service-role key to the frontend or commit it to this repository. Only the browser-safe publishable key belongs in the Vite environment variables.
