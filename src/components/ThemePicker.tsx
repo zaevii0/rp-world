@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
 import { Check, Palette, X } from "lucide-react";
 import { themes, type ThemeId } from "../types/theme";
 
@@ -7,7 +7,7 @@ interface ThemePickerProps {
   onThemeChange: (theme: ThemeId) => void;
 }
 
-type ThemeCardStyle = React.CSSProperties & {
+type ThemeCardStyle = CSSProperties & {
   "--theme-accent": string;
   "--theme-soft": string;
 };
