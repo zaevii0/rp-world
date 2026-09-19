@@ -7,6 +7,11 @@ interface ThemePickerProps {
   onThemeChange: (theme: ThemeId) => void;
 }
 
+type ThemeCardStyle = React.CSSProperties & {
+  "--theme-accent": string;
+  "--theme-soft": string;
+};
+
 export function ThemePicker({ theme, onThemeChange }: ThemePickerProps) {
   const [open, setOpen] = useState(false);
 
@@ -56,7 +61,12 @@ export function ThemePicker({ theme, onThemeChange }: ThemePickerProps) {
                   className={item.id === theme ? "theme-card selected" : "theme-card"}
                   key={item.id}
                   type="button"
-                  style={{ "--theme-accent": item.accent, "--theme-soft": item.accentSoft }}
+                  style={
+                    {
+                      "--theme-accent": item.accent,
+                      "--theme-soft": item.accentSoft,
+                    } as ThemeCardStyle
+                  }
                   onClick={() => {
                     onThemeChange(item.id);
                     setOpen(false);
