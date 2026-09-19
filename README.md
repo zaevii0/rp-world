@@ -35,3 +35,19 @@ The repository now includes a secure profile migration at `supabase/migrations/0
 Before testing profile onboarding, open the Supabase Dashboard → SQL Editor, paste the migration contents, and run it once. The migration enables Row Level Security and restricts profile inserts/updates to the authenticated owner.
 
 Never add a Supabase service-role key to the frontend or commit it to this repository. Only the browser-safe publishable key belongs in the Vite environment variables.
+
+## Deployment
+
+RP WORLD is deployment-ready for GitHub-connected Vercel or Cloudflare Pages deployments.
+
+- Vercel configuration: `vercel.json`
+- Cloudflare Pages SPA fallback: `public/_redirects`
+- Node version: `.nvmrc`
+- Deployment guide: `DEPLOYMENT.md`
+
+Required browser environment variables:
+
+- `VITE_SUPABASE_URL`
+- `VITE_SUPABASE_PUBLISHABLE_KEY`
+
+Never expose service-role keys or other server-side infrastructure credentials in frontend environment variables.
