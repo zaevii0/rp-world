@@ -3390,6 +3390,7 @@ export function App() {
       )}
 
 
+      {composerOpen && (
         <div
           className="sheet-backdrop"
           role="presentation"
