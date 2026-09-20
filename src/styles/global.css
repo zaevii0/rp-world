@@ -523,16 +523,16 @@ h1 { margin:3px 0 0; font-size:17px; letter-spacing:-.03em; }
 .style-preview-circle { border-radius:50%; border:2px solid color-mix(in srgb,var(--accent) 42%,rgba(127,127,127,.2)); }
 .style-preview-portrait { border-radius:10px; border:1px solid color-mix(in srgb,var(--accent) 35%,rgba(127,127,127,.2)); }
 .highlight-card-circle .highlight-image { border-radius:50%; }
-.highlight-card-portrait { position:relative; width:68px; flex-basis:68px; min-height:152px; grid-template-rows:152px; gap:0; }
+.highlight-card-portrait { position:relative; width:88px; flex-basis:88px; min-height:152px; grid-template-rows:152px; gap:0; }
 .highlight-card-portrait strong { position:absolute; z-index:2; left:8px; right:8px; bottom:9px; width:auto; padding:18px 6px 5px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:10px; font-weight:700; line-height:1.2; text-align:left; color:#fff; text-shadow:0 1px 8px rgba(0,0,0,.72); background:linear-gradient(to bottom,transparent,rgba(0,0,0,.62)); pointer-events:none; }
-.highlight-card-portrait .highlight-image { width:68px; height:152px; aspect-ratio:17 / 38; border-radius:13px; border:1px solid rgba(127,127,127,.18); padding:0; box-shadow:0 5px 18px rgba(0,0,0,.12); }
+.highlight-card-portrait .highlight-image { width:88px; height:152px; aspect-ratio:11 / 19; border-radius:13px; border:1px solid rgba(127,127,127,.18); padding:0; box-shadow:0 5px 18px rgba(0,0,0,.12); }
 .highlight-card-portrait:hover .highlight-image,
 .highlight-card-portrait:focus-visible .highlight-image { border-color:rgba(127,127,127,.18); box-shadow:0 8px 22px rgba(0,0,0,.12); outline:none; }
-.highlight-card-portrait .add-highlight > span { border-radius:13px; aspect-ratio:22 / 43; }
+.highlight-card-portrait .add-highlight > span { border-radius:13px; aspect-ratio:11 / 19; }
 @media (max-width:560px) {
   .highlight-card-portrait { width:68px; flex-basis:68px; min-height:152px; grid-template-rows:152px; }
   .highlight-card-portrait strong { left:7px; right:7px; bottom:8px; }
-  .highlight-card-portrait .highlight-image { width:68px; height:152px; }
+  .highlight-card-portrait .highlight-image { width:88px; height:152px; }
 }
 
 
