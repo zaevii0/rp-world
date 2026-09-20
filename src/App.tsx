@@ -128,6 +128,8 @@ export function App() {
   const [bio, setBio] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
   const [coverUrl, setCoverUrl] = useState("");
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [coverFile, setCoverFile] = useState<File | null>(null);
 
   const [postText, setPostText] = useState("");
 
@@ -394,13 +396,58 @@ export function App() {
       return;
     }
 
+    async function uploadProfileImage(file: File, folder: "avatar" | "cover") {
+      const extension =
+        file.name.split(".").pop()?.toLowerCase() || "jpg";
+      const filePath = `${session.user.id}/${folder}-${crypto.randomUUID()}.${extension}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("profile-media")
+        .upload(filePath, file, {
+          cacheControl: "3600",
+          contentType: file.type || "image/jpeg",
+          upsert: false,
+        });
+
+      if (uploadError) throw uploadError;
+
+      return supabase.storage
+        .from("profile-media")
+        .getPublicUrl(filePath).data.publicUrl;
+    }
+
+    let uploadedAvatarUrl = cleanAvatarUrl || null;
+    let uploadedCoverUrl = cleanCoverUrl || null;
+
+    try {
+      if (avatarFile) {
+        uploadedAvatarUrl = await uploadProfileImage(
+          avatarFile,
+          "avatar",
+        );
+      }
+
+      if (coverFile) {
+        uploadedCoverUrl = await uploadProfileImage(
+          coverFile,
+          "cover",
+        );
+      }
+    } catch (uploadError) {
+      setProfileBusy(false);
+      setProfileError(
+        `Image upload failed: ${uploadError instanceof Error ? uploadError.message : "Unknown error"}`,
+      );
+      return;
+    }
+
     const profilePayload = {
       id: session.user.id,
       username: cleanUsername,
       display_name: cleanDisplayName,
       bio: cleanBio,
-      avatar_url: cleanAvatarUrl || null,
-      cover_url: cleanCoverUrl || null,
+      avatar_url: uploadedAvatarUrl,
+      cover_url: uploadedCoverUrl,
       theme_id: theme,
     };
 
@@ -439,6 +486,8 @@ export function App() {
     }
 
     setProfile(result.data as Profile);
+    setAvatarFile(null);
+    setCoverFile(null);
     setProfileOpen(false);
   }
 
@@ -2082,7 +2131,7 @@ export function App() {
 
               <label>
                 <span>
-                  Avatar URL{" "}
+                  Profile photo{" "}
                   <small>optional</small>
                 </span>
 
@@ -2090,21 +2139,20 @@ export function App() {
                   <Camera size={15} />
 
                   <input
-                    type="url"
-                    value={avatarUrl}
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,image/gif"
                     onChange={(event) =>
-                      setAvatarUrl(
-                        event.target.value,
+                      setAvatarFile(
+                        event.target.files?.[0] ?? null,
                       )
                     }
-                    placeholder="https://…"
                   />
                 </div>
               </label>
 
               <label>
                 <span>
-                  Cover photo URL{" "}
+                  Cover photo{" "}
                   <small>optional</small>
                 </span>
 
@@ -2112,14 +2160,13 @@ export function App() {
                   <Image size={15} />
 
                   <input
-                    type="url"
-                    value={coverUrl}
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,image/gif"
                     onChange={(event) =>
-                      setCoverUrl(
-                        event.target.value,
+                      setCoverFile(
+                        event.target.files?.[0] ?? null,
                       )
                     }
-                    placeholder="https://…"
                   />
                 </div>
               </label>
