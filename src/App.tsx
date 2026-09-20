@@ -2298,15 +2298,17 @@ export function App() {
                           </button>
 
                           <div>
-                            <button
-                              className="post-more-button"
-                              type="button"
-                              aria-label="Post options"
-                              title="Post options"
-                              onClick={() => setPostActionTarget(post)}
-                            >
-                              <MoreVertical size={18} />
-                            </button>
+                            {post.author_id === session?.user.id && !post.shared_post_id && (
+                              <button
+                                className="post-more-button"
+                                type="button"
+                                aria-label="Post options"
+                                title="Post options"
+                                onClick={() => setPostActionTarget(post)}
+                              >
+                                <MoreVertical size={18} />
+                              </button>
+                            )}
                             <button
                               className="profile-name-link"
                               type="button"
@@ -2838,15 +2840,17 @@ export function App() {
                               </div>
 
                               <div>
-                                <button
-                                  className="post-more-button"
-                                  type="button"
-                                  aria-label="Post options"
-                                  title="Post options"
-                                  onClick={() => setPostActionTarget(post)}
-                                >
-                                  <MoreVertical size={18} />
-                                </button>
+                                {!viewAs && (
+                                  <button
+                                    className="post-more-button"
+                                    type="button"
+                                    aria-label="Post options"
+                                    title="Post options"
+                                    onClick={() => setPostActionTarget(post)}
+                                  >
+                                    <MoreVertical size={18} />
+                                  </button>
+                                )}
                                 <strong>
                                   {
                                     profile.display_name
