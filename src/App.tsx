@@ -2019,7 +2019,8 @@ export function App() {
                 </span>
               </div>
             ) : (
-              <div className="social-auth">
+              <>
+                <div className="social-auth">
                 <button
                   className="google-auth-button"
                   type="button"
@@ -2126,6 +2127,7 @@ export function App() {
                       : "Create account"}
                 </button>
               </form>
+              </>
             )}
 
             <button
