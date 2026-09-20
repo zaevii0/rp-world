@@ -1,0 +1,12 @@
+/* Profile avatar — slightly larger, balanced iOS proportions. */
+.profile-avatar {
+  width: 132px;
+  height: 132px;
+}
+
+@media (max-width: 560px) {
+  .profile-avatar {
+    width: 116px;
+    height: 116px;
+  }
+}
