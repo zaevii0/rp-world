@@ -119,6 +119,7 @@ export function App() {
   const [highlightImage, setHighlightImage] = useState("");
   const [highlightFile, setHighlightFile] = useState<File | null>(null);
   const [highlightBusy, setHighlightBusy] = useState(false);
+  const [activeHighlight, setActiveHighlight] = useState<Highlight | null>(null);
 
   const [view, setView] = useState<
     "home" | "discover" | "profile" | "menu"
@@ -1578,11 +1579,14 @@ export function App() {
                     )}
 
                     {highlights.map((item) => (
-                      <div
-                        className="highlight-card glass"
+                      <button
+                        className="highlight-card"
                         key={item.id}
+                        type="button"
+                        onClick={() => setActiveHighlight(item)}
+                        aria-label={`Open highlight: ${item.title}`}
                       >
-                        <div
+                        <span
                           className="highlight-image"
                           style={
                             item.image_url
@@ -1595,12 +1599,12 @@ export function App() {
                           {!item.image_url && (
                             <Sparkles size={20} />
                           )}
-                        </div>
+                        </span>
 
                         <strong>
                           {item.title}
                         </strong>
-                      </div>
+                      </button>
                     ))}
                   </div>
                 </div>
@@ -2208,6 +2212,51 @@ export function App() {
                   : "Add highlight"}
               </button>
             </form>
+          </section>
+        </div>
+      )}
+
+      {activeHighlight && (
+        <div
+          className="highlight-viewer"
+          role="presentation"
+          onClick={() => setActiveHighlight(null)}
+        >
+          <section
+            className="highlight-viewer-card"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="active-highlight-title"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <button
+              className="highlight-viewer-close"
+              type="button"
+              aria-label="Close highlight"
+              onClick={() => setActiveHighlight(null)}
+            >
+              <X size={20} />
+            </button>
+
+            <div
+              className="highlight-viewer-image"
+              style={
+                activeHighlight.image_url
+                  ? {
+                      backgroundImage: `url(${activeHighlight.image_url})`,
+                    }
+                  : undefined
+              }
+            >
+              {!activeHighlight.image_url && <Sparkles size={38} />}
+            </div>
+
+            <div className="highlight-viewer-caption">
+              <strong id="active-highlight-title">
+                {activeHighlight.title}
+              </strong>
+              <span>RP WORLD highlight</span>
+            </div>
           </section>
         </div>
       )}
