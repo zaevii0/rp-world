@@ -1584,3 +1584,194 @@ b,
 @media (min-width: 561px) {
   .bottom-nav:has(.public-back-nav) { grid-template-columns: 1fr 1fr .72fr 1fr 1fr 1fr; }
 }
+
+
+/* Post header/menu alignment — keep the overflow control anchored to the card edge. */
+.post-head {
+  position: relative;
+  align-items: flex-start;
+}
+.post-head > div {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+  padding-right: 40px;
+}
+.post-more-button {
+  position: absolute;
+  top: -3px;
+  right: 0;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  color: inherit;
+  background: transparent;
+  opacity: .58;
+  cursor: pointer;
+  z-index: 2;
+  transition: background .16s ease, color .16s ease, opacity .16s ease, transform .16s ease;
+}
+.post-more-button:hover,
+.post-more-button:focus-visible {
+  color: var(--accent);
+  background: var(--accent-soft);
+  opacity: 1;
+  outline: none;
+}
+.post-more-button:active {
+  transform: scale(.94);
+}
+
+/* Media in posts stays contained in the card; tapping it opens a correctly sized viewer. */
+.post-media-button {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 18px;
+  color: inherit;
+  background: transparent;
+  text-align: left;
+  cursor: zoom-in;
+  overflow: hidden;
+}
+.post-media-button .post-media {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  max-height: min(620px, 72dvh);
+  margin: 0;
+  object-fit: contain;
+  object-position: center;
+  border-radius: 18px;
+  background: rgba(127,127,127,.08);
+}
+.post-media-button .post-video {
+  width: 100%;
+  aspect-ratio: auto;
+  object-fit: contain;
+}
+.post-media-button:focus-visible {
+  outline: 2px solid color-mix(in srgb,var(--accent) 55%,transparent);
+  outline-offset: 2px;
+}
+
+/* Full-screen media viewer: preserve the source aspect ratio instead of stretching/cropping it. */
+.post-media-viewer {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: max(18px, env(safe-area-inset-top)) max(18px, env(safe-area-inset-right)) max(18px, env(safe-area-inset-bottom)) max(18px, env(safe-area-inset-left));
+  background: rgba(0,0,0,.78);
+  backdrop-filter: blur(22px) saturate(120%);
+  -webkit-backdrop-filter: blur(22px) saturate(120%);
+}
+.post-media-viewer-card {
+  position: relative;
+  width: min(100%, 1100px);
+  height: min(92dvh, 900px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.16);
+  border-radius: 26px;
+  background: rgba(12,12,14,.86);
+  box-shadow: 0 28px 90px rgba(0,0,0,.48);
+}
+.post-media-viewer-content {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  padding: 22px;
+}
+.post-media-viewer-content img,
+.post-media-viewer-content video {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 14px;
+}
+.post-media-viewer-content video {
+  width: min(100%, 1040px);
+  max-height: 100%;
+}
+.post-media-viewer-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 2;
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255,255,255,.2);
+  border-radius: 50%;
+  color: #fff;
+  background: rgba(0,0,0,.42);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  cursor: pointer;
+  transition: transform .16s ease, background .16s ease;
+}
+.post-media-viewer-close:hover,
+.post-media-viewer-close:focus-visible {
+  background: rgba(0,0,0,.62);
+  outline: none;
+}
+.post-media-viewer-close:active {
+  transform: scale(.94);
+}
+
+@media (max-width: 560px) {
+  .post-more-button {
+    top: -5px;
+    right: -2px;
+  }
+  .post-head > div {
+    padding-right: 36px;
+  }
+  .post-media-button,
+  .post-media-button .post-media {
+    border-radius: 15px;
+  }
+  .post-media-button .post-media {
+    max-height: 70dvh;
+  }
+  .post-media-viewer {
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  }
+  .post-media-viewer-card {
+    width: 100%;
+    height: 100dvh;
+    border: 0;
+    border-radius: 0;
+    background: rgba(8,8,10,.94);
+  }
+  .post-media-viewer-content {
+    padding: 18px;
+  }
+  .post-media-viewer-content img,
+  .post-media-viewer-content video {
+    max-width: 100%;
+    max-height: calc(100dvh - 36px);
+    border-radius: 10px;
+  }
+  .post-media-viewer-close {
+    top: max(12px, env(safe-area-inset-top));
+    right: 12px;
+  }
+}
