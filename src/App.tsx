@@ -1299,16 +1299,7 @@ export function App() {
                         : undefined
                     }
                   >
-                    <button
-                      className="profile-edit-float"
-                      type="button"
-                      onClick={() =>
-                        setProfileOpen(true)
-                      }
-                      aria-label="Edit profile"
-                    >
-                      <Pencil size={15} />
-                    </button>
+
                   </div>
 
                   <div className="profile-main">
@@ -1342,16 +1333,7 @@ export function App() {
                           </span>
                         </div>
 
-                        <button
-                          className="outline-button"
-                          type="button"
-                          onClick={() =>
-                            setProfileOpen(true)
-                          }
-                        >
-                          <Pencil size={14} />
-                          Edit
-                        </button>
+
                       </div>
 
                       <p className="profile-bio">
