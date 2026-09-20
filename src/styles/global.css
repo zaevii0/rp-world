@@ -632,6 +632,45 @@ h1 { margin:3px 0 0; font-size:17px; letter-spacing:-.03em; }
 }
 
 
+/* Password visibility toggle */
+.password-input-wrap {
+  position:relative;
+}
+
+.password-input-wrap input {
+  padding-right:48px;
+}
+
+.password-toggle {
+  position:absolute;
+  top:50%;
+  right:10px;
+  width:32px;
+  height:32px;
+  display:grid;
+  place-items:center;
+  transform:translateY(-50%);
+  border:0;
+  border-radius:10px;
+  color:inherit;
+  background:transparent;
+  opacity:.58;
+  cursor:pointer;
+  transition:opacity 160ms ease,background 160ms ease,transform 160ms ease;
+}
+
+.password-toggle:hover,
+.password-toggle:focus-visible {
+  opacity:1;
+  background:rgba(127,127,127,.1);
+  outline:none;
+}
+
+.password-toggle:active {
+  transform:translateY(-50%) scale(.94);
+}
+
+
 /* Google OAuth */
 .social-auth {
   display:grid;
