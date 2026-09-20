@@ -13,6 +13,7 @@
 :root[data-theme="ocean"] { --accent:#5e9fe8; --accent-soft:rgba(94,159,232,.16); }
 :root[data-theme="emerald"] { --accent:#57b98b; --accent-soft:rgba(87,185,139,.16); }
 :root[data-theme="gold"] { --accent:#caa65b; --accent-soft:rgba(202,166,91,.16); }
+:root[data-theme="coquette"] { --accent:#f28bb5; --accent-soft:rgba(242,139,181,.18); }
 * { box-sizing:border-box; }
 html,body,#root { min-width:320px; min-height:100%; margin:0; }
 body { min-height:100vh; }
