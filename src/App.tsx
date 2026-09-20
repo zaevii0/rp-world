@@ -947,7 +947,7 @@ export function App() {
       id: row.id, author_id: row.author_id, content: row.content, media_url: row.media_url,
       media_type: row.media_type ?? null, created_at: row.created_at, profile: targetProfile, likes: row.post_likes?.[0]?.count ?? 0,
       liked: likedSet.has(row.id), liked_at: likedAtMap.get(row.id) ?? null, comments: row.post_comments?.[0]?.count ?? 0,
-      reposts: 0, reposted: false,
+      reposts: 0, shares: 0, reposted: false,
     })));
 
     const { data: targetHighlights } = await supabase.from("profile_highlights")
@@ -1656,7 +1656,7 @@ export function App() {
     const sharedPost: Post = {
       id: data.id, author_id: data.author_id, content: data.content, media_url: data.media_url,
       created_at: data.created_at, profile: profile ?? undefined, likes: 0, liked: false,
-      liked_at: null, comments: 0, reposts: 0, reposted: false, shared_post_id: data.shared_post_id,
+      liked_at: null, comments: 0, reposts: 0, shares: (shareTarget.shares ?? 0) + 1, reposted: false, shared_post_id: data.shared_post_id,
       share_caption: data.share_caption, shared_original: sharedOriginal,
     };
     setPosts((current) => [sharedPost, ...current]);
