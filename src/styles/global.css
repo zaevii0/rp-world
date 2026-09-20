@@ -534,7 +534,9 @@ h1 { margin:3px 0 0; font-size:17px; letter-spacing:-.03em; }
   .highlight-card-portrait strong { left:7px; right:7px; bottom:8px; }
   .highlight-card-portrait .highlight-image { width:80px; height:156px; }
 }
-\n\n/* Theme selector — always expose the full palette */
+
+
+/* Theme selector — always expose the full palette */
 .theme-trigger {
   width:42px;
   height:36px;
