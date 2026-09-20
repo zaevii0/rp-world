@@ -702,3 +702,25 @@ h1 { margin:3px 0 0; font-size:17px; letter-spacing:-.03em; }
     min-height:48px;
   }
 }
+
+
+/* Center login / sign-up sheet */
+.sheet-backdrop:has(.auth-sheet) {
+  align-items:center;
+}
+
+.auth-sheet {
+  margin:auto;
+}
+
+@media (max-width:560px) {
+  .sheet-backdrop:has(.auth-sheet) {
+    align-items:center;
+    padding:16px 12px;
+  }
+
+  .auth-sheet {
+    width:min(100%,420px);
+    max-height:calc(100dvh - 32px);
+  }
+}
