@@ -2324,10 +2324,11 @@ export function App() {
                 : "nav-item"
             }
             type="button"
+            aria-label="Home"
+            title="Home"
             onClick={() => setView("home")}
           >
             <Home size={19} />
-            <span>Home</span>
           </button>
 
           <button
@@ -2337,18 +2338,20 @@ export function App() {
                 : "nav-item"
             }
             type="button"
+            aria-label="Discover"
+            title="Discover"
             onClick={() =>
               setView("discover")
             }
           >
             <Search size={19} />
-            <span>Discover</span>
           </button>
 
           <button
             className="nav-create"
             type="button"
             aria-label="Create post"
+            title="Create post"
             onClick={() =>
               setComposerOpen(true)
             }
@@ -2363,12 +2366,13 @@ export function App() {
                 : "nav-item"
             }
             type="button"
+            aria-label="Profile"
+            title="Profile"
             onClick={() =>
               setView("profile")
             }
           >
             <User size={19} />
-            <span>Profile</span>
           </button>
 
           <button
@@ -2378,10 +2382,11 @@ export function App() {
                 : "nav-item"
             }
             type="button"
+            aria-label="Menu"
+            title="Menu"
             onClick={() => setView("menu")}
           >
             <Menu size={19} />
-            <span>Menu</span>
           </button>
         </nav>
       )}
