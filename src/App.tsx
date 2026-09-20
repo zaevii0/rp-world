@@ -10,7 +10,6 @@ import {
   Menu,
   MessageCircle,
   Moon,
-  Pencil,
   Plus,
   Search,
   Sparkles,
