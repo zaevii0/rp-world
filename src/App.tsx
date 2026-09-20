@@ -1570,7 +1570,7 @@ export function App() {
                   <div className="highlights-row">
                     {!viewAs && (
                       <button
-                        className={highlightStyle === "portrait" ? "highlight-card add-highlight glass highlight-card-portrait" : "highlight-card add-highlight glass highlight-card-circle"}
+                        className={highlightStyle === "portrait" ? "highlight-card add-highlight highlight-card-portrait" : "highlight-card add-highlight highlight-card-circle"}
                         type="button"
                         onClick={() =>
                           setHighlightOpen(true)
