@@ -1,6 +1,8 @@
 import {
+  ArrowLeft,
   Camera,
   Clock,
+  Eye,
   Heart,
   Home,
   Image,
@@ -11,6 +13,7 @@ import {
   Menu,
   MessageCircle,
   Moon,
+  Pencil,
   Plus,
   Search,
   Sparkles,
@@ -159,6 +162,7 @@ export function App() {
   >({});
   const [commentBusy, setCommentBusy] = useState<string | null>(null);
   const [openTimestamp, setOpenTimestamp] = useState<string | null>(null);
+  const [viewAs, setViewAs] = useState(false);
 
   useEffect(() => {
     localStorage.setItem(THEME_KEY, theme);
@@ -868,6 +872,7 @@ export function App() {
     setProfilePosts([]);
     setHighlights([]);
     setView("home");
+    setViewAs(false);
     setProfileOpen(false);
   }
 
@@ -1432,7 +1437,38 @@ export function App() {
                           </span>
                         </div>
 
+                        {!viewAs && (
+                          <div className="profile-actions">
+                            <button
+                              className="profile-action-button"
+                              type="button"
+                              onClick={() => setProfileOpen(true)}
+                            >
+                              <Pencil size={14} />
+                              Edit
+                            </button>
 
+                            <button
+                              className="profile-action-button"
+                              type="button"
+                              onClick={() => setViewAs(true)}
+                            >
+                              <Eye size={14} />
+                              View as
+                            </button>
+                          </div>
+                        )}
+
+                        {viewAs && (
+                          <button
+                            className="profile-action-button"
+                            type="button"
+                            onClick={() => setViewAs(false)}
+                          >
+                            <ArrowLeft size={14} />
+                            Back
+                          </button>
+                        )}
                       </div>
 
                       <p className="profile-bio">
@@ -1486,32 +1522,36 @@ export function App() {
                       <h3>Moments</h3>
                     </div>
 
-                    <button
-                      className="small-add"
-                      type="button"
-                      onClick={() =>
-                        setHighlightOpen(true)
-                      }
-                    >
-                      <Plus size={14} />
-                      Add
-                    </button>
+                    {!viewAs && (
+                      <button
+                        className="small-add"
+                        type="button"
+                        onClick={() =>
+                          setHighlightOpen(true)
+                        }
+                      >
+                        <Plus size={14} />
+                        Add
+                      </button>
+                    )}
                   </div>
 
                   <div className="highlights-row">
-                    <button
-                      className="highlight-card add-highlight glass"
-                      type="button"
-                      onClick={() =>
-                        setHighlightOpen(true)
-                      }
-                    >
-                      <span>
-                        <Plus size={19} />
-                      </span>
+                    {!viewAs && (
+                      <button
+                        className="highlight-card add-highlight glass"
+                        type="button"
+                        onClick={() =>
+                          setHighlightOpen(true)
+                        }
+                      >
+                        <span>
+                          <Plus size={19} />
+                        </span>
 
-                      <strong>New</strong>
-                    </button>
+                        <strong>New</strong>
+                      </button>
+                    )}
 
                     {highlights.map((item) => (
                       <div
@@ -1545,7 +1585,7 @@ export function App() {
                   <div className="section-heading">
                     <div>
                       <p className="eyebrow">
-                        YOUR ACTIVITY
+                        {viewAs ? "PUBLIC PROFILE" : "YOUR ACTIVITY"}
                       </p>
 
                       <h3>Posts</h3>
@@ -1565,15 +1605,17 @@ export function App() {
                         appear here.
                       </span>
 
-                      <button
-                        className="primary-button"
-                        type="button"
-                        onClick={() =>
-                          setComposerOpen(true)
-                        }
-                      >
-                        Create a post
-                      </button>
+                      {!viewAs && (
+                        <button
+                          className="primary-button"
+                          type="button"
+                          onClick={() =>
+                            setComposerOpen(true)
+                          }
+                        >
+                          Create a post
+                        </button>
+                      )}
                     </div>
                   ) : (
                     <div className="feed-list">
@@ -1687,7 +1729,7 @@ export function App() {
               </section>
             )}
 
-            {view === "menu" && (
+            {view === "menu" && !viewAs && (
               <div className="menu-card glass">
                 <button
                   type="button"
