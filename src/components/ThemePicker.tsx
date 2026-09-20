@@ -18,13 +18,18 @@ export function ThemePicker({ theme, onThemeChange }: ThemePickerProps) {
   return (
     <>
       <button
-        className="icon-button glass"
+        className="theme-trigger glass"
         type="button"
-        aria-label="Customize RP World theme"
+        aria-label="Choose RP World theme"
         aria-expanded={open}
         onClick={() => setOpen(true)}
       >
-        <Palette size={17} />
+        <span
+          className="theme-trigger-swatch"
+          style={{ background: themes.find((item) => item.id === theme)?.accent }}
+          aria-hidden="true"
+        />
+        <Palette size={16} aria-hidden="true" />
       </button>
 
       {open && (
