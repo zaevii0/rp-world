@@ -274,8 +274,9 @@ h1 { margin:3px 0 0; font-size:17px; letter-spacing:-.03em; }
 .profile-name-row {
   display:flex;
   align-items:flex-start;
-  justify-content:space-between;
+  justify-content:center;
   gap:12px;
+  text-align:center;
 }
 
 .profile-actions {
@@ -288,7 +289,8 @@ h1 { margin:3px 0 0; font-size:17px; letter-spacing:-.03em; }
 
 .profile-social-actions {
   width:100%;
-  margin-top:10px;
+  margin-top:0;
+  justify-content:center;
 }
 
 .profile-action-button {
