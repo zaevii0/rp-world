@@ -5,6 +5,7 @@ export interface Profile {
   bio: string;
   avatar_url: string | null;
   cover_url: string | null;
+  highlight_style: "circle" | "portrait";
   rp_id: string;
   theme_id: string;
   profile_visibility: "public" | "private";
