@@ -49,6 +49,14 @@ type Post = {
   reposts: number;
   reposted: boolean;
   reposted_at?: string | null;
+  shared_post_id?: string | null;
+  share_caption?: string | null;
+  shared_original?: {
+    content: string;
+    media_url: string | null;
+    created_at: string;
+    profile?: Profile;
+  } | null;
 };
 
 type HighlightStyle = "circle" | "portrait";
@@ -164,6 +172,10 @@ export function App() {
   const [profileBusy, setProfileBusy] = useState(false);
   const [postBusy, setPostBusy] = useState(false);
   const [repostBusy, setRepostBusy] = useState<string | null>(null);
+  const [shareOpen, setShareOpen] = useState(false);
+  const [shareTarget, setShareTarget] = useState<Post | null>(null);
+  const [shareCaption, setShareCaption] = useState("");
+  const [shareBusy, setShareBusy] = useState(false);
 
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -326,7 +338,7 @@ export function App() {
     const { data, error: loadError } = await supabase
       .from("posts")
       .select(
-        "id, author_id, content, media_url, created_at, post_likes(count), post_comments(count)",
+        "id, author_id, content, media_url, created_at, shared_post_id, share_caption, post_likes(count), post_comments(count)",
       )
       .order("created_at", { ascending: false })
       .limit(30);
@@ -344,10 +356,38 @@ export function App() {
     >;
 
     const authorIds = [...new Set(rows.map((row) => row.author_id))];
+    const sharedPostIds = [...new Set(rows.map((row) => row.shared_post_id).filter(Boolean))] as string[];
 
     const { data: profiles } = authorIds.length
       ? await supabase.from("profiles").select("*").in("id", authorIds)
       : { data: [] as Profile[] };
+
+    const { data: sharedRows } = sharedPostIds.length
+      ? await supabase
+          .from("posts")
+          .select("id, content, media_url, created_at, author_id")
+          .in("id", sharedPostIds)
+      : { data: [] as Array<{ id: string; content: string; media_url: string | null; created_at: string; author_id: string }> };
+
+    const sharedAuthorIds = [...new Set((sharedRows ?? []).map((row) => row.author_id))];
+    const { data: sharedProfiles } = sharedAuthorIds.length
+      ? await supabase.from("profiles").select("*").in("id", sharedAuthorIds)
+      : { data: [] as Profile[] };
+
+    const sharedProfileMap = new Map(
+      (sharedProfiles ?? []).map((item) => [item.id, item as Profile]),
+    );
+    const sharedMap = new Map(
+      (sharedRows ?? []).map((row) => [
+        row.id,
+        {
+          content: row.content,
+          media_url: row.media_url,
+          created_at: row.created_at,
+          profile: sharedProfileMap.get(row.author_id),
+        },
+      ]),
+    );
 
     const profileMap = new Map(
       (profiles ?? []).map((item) => [item.id, item as Profile]),
@@ -384,6 +424,9 @@ export function App() {
         comments: row.post_comments?.[0]?.count ?? 0,
         reposts: 0,
         reposted: false,
+        shared_post_id: row.shared_post_id ?? null,
+        share_caption: row.share_caption ?? null,
+        shared_original: row.shared_post_id ? sharedMap.get(row.shared_post_id) ?? null : null,
       })),
     );
   }
@@ -1366,42 +1409,63 @@ export function App() {
     ));
   }
 
-  async function sharePost(post: Post) {
+  function sharePost(post: Post) {
+    setShareTarget(post);
+    setShareCaption("");
+    setShareOpen(true);
+  }
+
+  async function sharePostToFeed() {
+    if (!supabase || !session?.user || !shareTarget) return;
+    setShareBusy(true);
+    const caption = shareCaption.trim();
+    const { data, error: shareError } = await supabase
+      .from("posts")
+      .insert({
+        author_id: session.user.id,
+        content: caption || "Shared a post",
+        media_url: shareTarget.media_url,
+        shared_post_id: shareTarget.shared_post_id ?? shareTarget.id,
+        share_caption: caption || null,
+      })
+      .select("id, author_id, content, media_url, created_at, shared_post_id, share_caption")
+      .single();
+    setShareBusy(false);
+    if (shareError || !data) {
+      setMessage("Could not share this post right now.");
+      return;
+    }
+    const sharedOriginal = shareTarget.shared_post_id
+      ? shareTarget.shared_original
+      : { content: shareTarget.content, media_url: shareTarget.media_url, created_at: shareTarget.created_at, profile: shareTarget.profile };
+    const sharedPost: Post = {
+      id: data.id, author_id: data.author_id, content: data.content, media_url: data.media_url,
+      created_at: data.created_at, profile: profile ?? undefined, likes: 0, liked: false,
+      liked_at: null, comments: 0, reposts: 0, reposted: false, shared_post_id: data.shared_post_id,
+      share_caption: data.share_caption, shared_original: sharedOriginal,
+    };
+    setPosts((current) => [sharedPost, ...current]);
+    setShareOpen(false); setShareTarget(null); setShareCaption("");
+    setMessage("Post shared to your feed.");
+  }
+
+  async function sharePostExternally(post: Post) {
+    const original = post.shared_original ?? post;
+    const shareText = post.share_caption?.trim() ? post.share_caption.trim() + "\n\n" + original.content : original.content;
     const shareData = {
-      title: post.profile?.display_name
-        ? `${post.profile.display_name} on RP WORLD`
-        : "RP WORLD post",
-      text: post.content,
+      title: original.profile?.display_name ? original.profile.display_name + " on RP WORLD" : "RP WORLD post",
+      text: shareText,
       url: window.location.href,
     };
-
     try {
-      if (navigator.share) {
-        await navigator.share(shareData);
-        return;
-      }
-
-      if (navigator.clipboard) {
-        await navigator.clipboard.writeText(
-          `${post.content}\n\n${window.location.href}`,
-        );
-        setMessage("Post link copied to clipboard.");
-        return;
-      }
-
+      if (navigator.share) { await navigator.share(shareData); return; }
+      if (navigator.clipboard) { await navigator.clipboard.writeText(shareText + "\n\n" + shareData.url); setMessage("Post link copied to clipboard."); return; }
       setMessage("Sharing is not available in this browser.");
     } catch (shareError) {
-      if (
-        shareError instanceof DOMException &&
-        shareError.name === "AbortError"
-      ) {
-        return;
-      }
-
+      if (shareError instanceof DOMException && shareError.name === "AbortError") return;
       setMessage("Could not share this post right now.");
     }
   }
-
 
   async function toggleLike(post: Post) {
     if (!supabase || !session?.user) return;
@@ -1712,9 +1776,15 @@ export function App() {
                   ) : (
                     posts.map((post) => (
                       <article
-                        className="post-card glass"
+                        className={post.shared_post_id ? "post-card glass shared-post-card" : "post-card glass"}
                         key={post.id}
                       >
+                        {post.shared_post_id && (
+                          <>
+                            <div className="shared-by-label"><Share2 size={14} /><span>{post.profile?.display_name ?? "Someone"} shared this</span></div>
+                            {post.share_caption && <p className="share-caption">{post.share_caption}</p>}
+                          </>
+                        )}
                         <div className="post-head">
                           <button
                             className="avatar profile-link-button"
@@ -1784,9 +1854,23 @@ export function App() {
                           </div>
                         </div>
 
-                        <p className="post-content">
-                          {post.content}
-                        </p>
+                        {!post.shared_post_id ? (
+                          <p className="post-content">{post.content}</p>
+                        ) : (
+                          <div className="shared-original">
+                            <div className="shared-original-head">
+                              <div className="avatar small-avatar" style={post.shared_original?.profile?.avatar_url ? { backgroundImage: `url(${post.shared_original.profile.avatar_url})` } : undefined}>
+                                {!post.shared_original?.profile?.avatar_url && initials(post.shared_original?.profile?.display_name ?? "RP")}
+                              </div>
+                              <div>
+                                <strong>{post.shared_original?.profile?.display_name ?? "RP WORLD member"}</strong>
+                                <span className="post-meta">@{post.shared_original?.profile?.username ?? "member"} · {timeAgo(post.shared_original?.created_at ?? post.created_at)}</span>
+                              </div>
+                            </div>
+                            <p className="post-content">{post.shared_original?.content}</p>
+                            {post.shared_original?.media_url && <img className="post-media" src={post.shared_original.media_url} alt="" loading="lazy" />}
+                          </div>
+                        )}
 
                         <div className="post-actions">
                           <button
@@ -2617,6 +2701,30 @@ export function App() {
               ))}
             </div>
             <form className="message-form" onSubmit={sendMessage}><input value={messageDraft} onChange={(event) => setMessageDraft(event.target.value)} placeholder="Write a message…" maxLength={2000} autoFocus /><button type="submit" disabled={!messageDraft.trim()}>Send</button></form>
+          </section>
+        </div>
+      )}
+
+      {shareOpen && shareTarget && session && profile && (
+        <div className="sheet-backdrop" role="presentation" onClick={() => setShareOpen(false)}>
+          <section className="auth-sheet glass share-sheet" role="dialog" aria-modal="true" aria-labelledby="share-title" onClick={(event) => event.stopPropagation()}>
+            <div className="sheet-header"><div><p className="eyebrow">SHARE</p><h2 id="share-title">Share this post.</h2></div><button className="icon-button" type="button" aria-label="Close" onClick={() => setShareOpen(false)}><X size={18} /></button></div>
+            <div className="share-preview">
+              <div className="share-preview-author">
+                <div className="avatar small-avatar" style={shareTarget.profile?.avatar_url ? { backgroundImage: `url(${shareTarget.profile.avatar_url})` } : undefined}>{!shareTarget.profile?.avatar_url && initials(shareTarget.profile?.display_name ?? "RP")}</div>
+                <div><strong>{shareTarget.profile?.display_name ?? "RP WORLD member"}</strong><span>@{shareTarget.profile?.username ?? "member"}</span></div>
+              </div>
+              <p>{shareTarget.shared_original?.content ?? shareTarget.content}</p>
+              {(shareTarget.shared_original?.media_url ?? shareTarget.media_url) && <img src={shareTarget.shared_original?.media_url ?? shareTarget.media_url ?? ""} alt="" />}
+            </div>
+            <label className="share-caption-field">
+              <span>Add a caption <small>optional</small></span>
+              <div className="input-wrap textarea-wrap"><textarea value={shareCaption} onChange={(event) => setShareCaption(event.target.value)} placeholder="Say something about this post…" maxLength={2000} rows={4} /></div>
+            </label>
+            <div className="share-sheet-actions">
+              <button className="mode-switch" type="button" onClick={() => void sharePostExternally(shareTarget)}>Share outside RP WORLD</button>
+              <button className="primary-button full" type="button" disabled={shareBusy} onClick={() => void sharePostToFeed()}>{shareBusy ? "Sharing…" : "Share to RP WORLD"}</button>
+            </div>
           </section>
         </div>
       )}
