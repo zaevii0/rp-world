@@ -183,3 +183,71 @@
   outline: 2px solid color-mix(in srgb, var(--accent) 45%, transparent);
   outline-offset: 2px;
 }
+
+
+/* Repost metadata — clean iOS-style hierarchy and spacing. */
+.repost-label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 22px;
+  margin: 0 2px 12px;
+  padding: 0;
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 650;
+  line-height: 1.2;
+  letter-spacing: -.005em;
+}
+
+.repost-label svg {
+  flex: 0 0 auto;
+  width: 13px;
+  height: 13px;
+  stroke-width: 2;
+}
+
+.repost-label > span {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.repost-label > time {
+  display: inline-block;
+  margin-left: 1px;
+  color: inherit;
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1.2;
+  opacity: .48;
+  white-space: nowrap;
+}
+
+.repost-label > time::before {
+  content: "·";
+  display: inline-block;
+  margin-right: 7px;
+  opacity: .6;
+}
+
+@media (max-width: 560px) {
+  .repost-label {
+    gap: 6px;
+    min-height: 20px;
+    margin: 0 1px 10px;
+    font-size: 10.5px;
+  }
+
+  .repost-label svg {
+    width: 12px;
+    height: 12px;
+  }
+
+  .repost-label > time {
+    font-size: 9px;
+  }
+
+  .repost-label > time::before {
+    margin-right: 6px;
+  }
+}
