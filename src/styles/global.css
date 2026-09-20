@@ -579,7 +579,7 @@ h1 { margin:3px 0 0; font-size:17px; letter-spacing:-.03em; }
 }
 
 
-/* Theme selector — always expose the full palette */
+/* Theme selector — centered palette modal with a fully scrollable list */
 .theme-trigger {
   width:42px;
   height:36px;
@@ -615,36 +615,61 @@ h1 { margin:3px 0 0; font-size:17px; letter-spacing:-.03em; }
   transform:rotate(-7deg) scale(1.05);
   background:color-mix(in srgb,var(--accent-soft) 100%,transparent);
 }
+
+/* Keep the theme picker centered on every screen size. */
+.sheet-backdrop:has(.theme-sheet) {
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+}
+
 .theme-sheet {
+  width:min(100%,560px);
+  max-height:min(86dvh,760px);
+  margin:auto;
+  padding:22px;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
   flex:0 1 auto;
 }
+
 .theme-sheet .theme-grid {
   flex:1 1 auto;
   min-height:0;
-  max-height:calc(100dvh - 220px);
+  max-height:calc(min(86dvh,760px) - 185px);
   overflow-y:auto;
+  overflow-x:hidden;
   overscroll-behavior:contain;
   -webkit-overflow-scrolling:touch;
-  padding:2px 4px 6px 2px;
+  scrollbar-width:thin;
+  padding:2px 6px 8px 2px;
 }
+
+.theme-grid {
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+}
+
 .theme-card {
   min-height:78px;
+  padding:12px;
 }
+
 @media (max-width:560px) {
   .sheet-backdrop:has(.theme-sheet) {
-    align-items:center;
-    padding:16px 12px;
+    padding:14px 12px;
   }
 
   .theme-sheet {
     width:min(100%,420px);
-    max-height:calc(100dvh - 32px);
+    max-height:calc(100dvh - 28px);
     padding:18px;
     border-radius:28px;
   }
 
   .theme-sheet .theme-grid {
-    max-height:calc(100dvh - 210px);
+    max-height:calc(100dvh - 190px);
     grid-template-columns:1fr 1fr;
     gap:10px;
     padding:2px;
