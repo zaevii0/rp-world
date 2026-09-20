@@ -558,72 +558,85 @@ export function App() {
   async function createHighlight(event: FormEvent) {
     event.preventDefault();
 
-    if (
-      !supabase ||
-      !session?.user ||
-      !highlightTitle.trim()
-    ) {
+    if (!supabase || !session?.user) {
+      return;
+    }
+
+    const title = highlightTitle.trim();
+
+    if (!title) {
+      setProfileError("Please enter a title for the highlight.");
       return;
     }
 
     setHighlightBusy(true);
+    setProfileError("");
 
     let imageUrl = highlightImage.trim() || null;
 
-    if (highlightFile) {
-      const extension = highlightFile.name.split(".").pop()?.toLowerCase() || "jpg";
-      const filePath = `${session.user.id}/${crypto.randomUUID()}.${extension}`;
+    try {
+      if (highlightFile) {
+        const extension =
+          highlightFile.name.split(".").pop()?.toLowerCase() || "jpg";
+        const filePath = `${session.user.id}/${crypto.randomUUID()}.${extension}`;
 
-      const { error: uploadError } = await supabase.storage
-        .from("profile-highlights")
-        .upload(filePath, highlightFile, {
-          cacheControl: "3600",
-          contentType: highlightFile.type || "image/jpeg",
-          upsert: false,
-        });
+        const { error: uploadError } = await supabase.storage
+          .from("profile-highlights")
+          .upload(filePath, highlightFile, {
+            cacheControl: "3600",
+            contentType: highlightFile.type || "image/jpeg",
+            upsert: false,
+          });
 
-      if (uploadError) {
-        setHighlightBusy(false);
-        setProfileError(`Image upload failed: ${uploadError.message}`);
-        return;
+        if (uploadError) {
+          throw new Error(`Image upload failed: ${uploadError.message}`);
+        }
+
+        const { data: publicUrl } = supabase.storage
+          .from("profile-highlights")
+          .getPublicUrl(filePath);
+
+        imageUrl = publicUrl.publicUrl;
       }
 
-      const { data: publicUrl } = supabase.storage
-        .from("profile-highlights")
-        .getPublicUrl(filePath);
+      const { data, error: saveError } = await supabase
+        .from("profile_highlights")
+        .insert({
+          user_id: session.user.id,
+          title,
+          image_url: imageUrl,
+        })
+        .select("id, user_id, title, image_url, created_at")
+        .single();
 
-      imageUrl = publicUrl.publicUrl;
-    }
-
-    const { data, error: saveError } = await supabase
-      .from("profile_highlights")
-      .insert({
-        user_id: session.user.id,
-        title: highlightTitle.trim(),
-        image_url: imageUrl,
-      })
-      .select("id, user_id, title, image_url, created_at")
-      .single();
-
-    setHighlightBusy(false);
-
-    if (saveError || !data) {
       if (saveError) {
-        setProfileError(`Could not save highlight: ${saveError.message}`);
+        throw new Error(`Could not save highlight: ${saveError.message}`);
       }
-      return;
+
+      if (!data) {
+        throw new Error("Could not save highlight: no record was returned.");
+      }
+
+      setHighlights((current) => [
+        ...current,
+        data as Highlight,
+      ]);
+
+      setHighlightTitle("");
+      setHighlightImage("");
+      setHighlightFile(null);
+      setProfileError("");
+      setHighlightOpen(false);
+    } catch (highlightError) {
+      console.error("RP WORLD highlight save failed", highlightError);
+      setProfileError(
+        highlightError instanceof Error
+          ? highlightError.message
+          : "Could not save highlight. Please try again.",
+      );
+    } finally {
+      setHighlightBusy(false);
     }
-
-    setHighlights((current) => [
-      ...current,
-      data as Highlight,
-    ]);
-
-    setHighlightTitle("");
-    setHighlightImage("");
-    setHighlightFile(null);
-    setProfileError("");
-    setHighlightOpen(false);
   }
 
   async function createPost(event: FormEvent) {
@@ -2004,6 +2017,12 @@ export function App() {
                   />
                 </div>
               </label>
+
+              {profileError && (
+                <p className="form-message error">
+                  {profileError}
+                </p>
+              )}
 
               <button
                 className="primary-button full"
