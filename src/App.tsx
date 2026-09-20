@@ -3,6 +3,7 @@ import {
   Camera,
   Clock,
   Eye,
+  EyeOff,
   Heart,
   Home,
   Image,
@@ -134,6 +135,7 @@ export function App() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const [profileOpen, setProfileOpen] = useState(false);
   const [composerOpen, setComposerOpen] = useState(false);
@@ -2070,9 +2072,9 @@ export function App() {
                 <label>
                   <span>Password</span>
 
-                  <div className="input-wrap">
+                  <div className="input-wrap password-input-wrap">
                     <input
-                      type="password"
+                      type={showPassword ? "text" : "password"}
                       value={password}
                       onChange={(event) =>
                         setPassword(
@@ -2088,6 +2090,15 @@ export function App() {
                       minLength={6}
                       required
                     />
+                    <button
+                      className="password-toggle"
+                      type="button"
+                      aria-label={showPassword ? "Hide password" : "Show password"}
+                      title={showPassword ? "Hide password" : "Show password"}
+                      onClick={() => setShowPassword((visible) => !visible)}
+                    >
+                      {showPassword ? <EyeOff size={17} strokeWidth={2} /> : <Eye size={17} strokeWidth={2} />}
+                    </button>
                   </div>
                 </label>
 
