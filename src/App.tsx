@@ -830,7 +830,7 @@ export function App() {
   async function sharePost(post: Post) {
     const shareData = {
       title: post.profile?.display_name
-        ? ${post.profile.display_name} on RP WORLD`
+        ? `\${post.profile.display_name} on RP WORLD`
         : "RP WORLD post",
       text: post.content,
       url: window.location.href,
