@@ -976,13 +976,13 @@ export function App() {
           <h2>
             {session
               ? "Build your RP identity."
-              : "Your RP world. Your identity. Your aesthetic."}
+              : "Your RP world. Your identity. Your unique aesthetic."}
           </h2>
 
           <p className="hero-copy">
             {session
               ? "One account, one RP identity, and a profile that belongs to you."
-              : "A social world for role players, communities, stories, creators, and entertainment."}
+              : "A vibrant social universe for role players, creative communities, storytellers, and entertainment enthusiasts."}
           </p>
 
           {session ? (
