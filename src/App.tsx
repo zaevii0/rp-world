@@ -2028,7 +2028,7 @@ export function App() {
           aria-label="RP WORLD home"
         >
           <span className="brand-mark">
-            <Sparkles size={16} />
+            <img src="/rp-world-mark.svg" alt="" aria-hidden="true" />
           </span>
 
           <span>
@@ -2101,7 +2101,7 @@ export function App() {
       {!session || !profile ? (
         <main className="hero">
           <div className="hero-icon glass">
-            <Sparkles size={28} />
+            <img src="/rp-world-mark.svg" alt="" aria-hidden="true" />
           </div>
 
           <p className="eyebrow">
