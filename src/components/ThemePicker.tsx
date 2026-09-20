@@ -1,4 +1,5 @@
 import { useState, type CSSProperties } from "react";
+import { createPortal } from "react-dom";
 import { Check, Paintbrush, X } from "lucide-react";
 import { themes, type ThemeId } from "../types/theme";
 
@@ -29,9 +30,10 @@ export function ThemePicker({ theme, onThemeChange }: ThemePickerProps) {
         </span>
       </button>
 
-      {open && (
-        <div className="sheet-backdrop" role="presentation" onClick={() => setOpen(false)}>
-          <section
+      {open &&
+        createPortal(
+          <div className="sheet-backdrop" role="presentation" onClick={() => setOpen(false)}>
+            <section
             className="theme-sheet glass"
             role="dialog"
             aria-modal="true"
@@ -80,9 +82,10 @@ export function ThemePicker({ theme, onThemeChange }: ThemePickerProps) {
                 </button>
               ))}
             </div>
-          </section>
-        </div>
-      )}
+            </section>
+          </div>,
+          document.body,
+        )}
     </>
   );
 }
