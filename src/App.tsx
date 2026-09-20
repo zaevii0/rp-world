@@ -742,23 +742,44 @@ export function App() {
       return;
     }
 
-    const { data: target } = await supabase.from("profiles").select("*").eq("id", userId).maybeSingle();
+    setView("public");
+    setViewAs(true);
+    setPublicProfile(null);
+    setPublicProfilePosts([]);
+    setPublicHighlights([]);
+    setFollowingPublicProfile(false);
+    setFollowedByPublicProfile(false);
+    setPublicProfileFriend(false);
+
+    const client = supabase;
+    const currentUserId = session.user.id;
+
+    const profilePromise = client.from("profiles").select("*").eq("id", userId).maybeSingle();
+    const postsPromise = client.from("posts")
+      .select("id, author_id, content, media_url, created_at, post_likes(count), post_comments(count)")
+      .eq("author_id", userId).order("created_at", { ascending: false }).limit(50);
+    const highlightsPromise = client.from("profile_highlights")
+      .select("id, user_id, title, image_url, created_at").eq("user_id", userId).order("created_at", { ascending: true });
+    const followPromise = client.from("user_follows")
+      .select("follower_id")
+      .or(`and(follower_id.eq.${currentUserId},following_id.eq.${userId}),and(follower_id.eq.${userId},following_id.eq.${currentUserId})`);
+
+    const [{ data: target }, { data: targetPosts }, { data: targetHighlights }, { data: followRows }] =
+      await Promise.all([profilePromise, postsPromise, highlightsPromise, followPromise]);
+
     if (!target) return;
 
     const targetProfile = target as Profile;
-    const { data: targetPosts } = await supabase
-      .from("posts")
-      .select("id, author_id, content, media_url, created_at, post_likes(count), post_comments(count)")
-      .eq("author_id", userId).order("created_at", { ascending: false }).limit(50);
-
     const rows = (targetPosts ?? []) as Array<Post & { post_likes?: { count: number }[]; post_comments?: { count: number }[] }>;
     const postIds = rows.map((row) => row.id);
+
     const { data: myLikes } = postIds.length
-      ? await supabase.from("post_likes").select("post_id, created_at").eq("user_id", session.user.id).in("post_id", postIds)
+      ? await client.from("post_likes").select("post_id, created_at").eq("user_id", currentUserId).in("post_id", postIds)
       : { data: [] as { post_id: string; created_at: string }[] };
 
     const likedSet = new Set((myLikes ?? []).map((item) => item.post_id));
     const likedAtMap = new Map((myLikes ?? []).map((item) => [item.post_id, item.created_at]));
+
     setPublicProfilePosts(rows.map((row) => ({
       id: row.id, author_id: row.author_id, content: row.content, media_url: row.media_url,
       created_at: row.created_at, profile: targetProfile, likes: row.post_likes?.[0]?.count ?? 0,
@@ -766,22 +787,17 @@ export function App() {
       reposts: 0, reposted: false,
     })));
 
-    const { data: targetHighlights } = await supabase.from("profile_highlights")
-      .select("id, user_id, title, image_url, created_at").eq("user_id", userId).order("created_at", { ascending: true });
     setPublicHighlights((targetHighlights ?? []) as Highlight[]);
 
-    const { data: myFollow } = await supabase.from("user_follows").select("follower_id")
-      .eq("follower_id", session.user.id).eq("following_id", userId).maybeSingle();
-    const { data: reverseFollow } = await supabase.from("user_follows").select("follower_id")
-      .eq("follower_id", userId).eq("following_id", session.user.id).maybeSingle();
-
-    setFollowingPublicProfile(Boolean(myFollow));
-    setFollowedByPublicProfile(Boolean(reverseFollow));
-    setPublicProfileFriend(Boolean(myFollow && reverseFollow));
+    const follows = followRows ?? [];
+    setFollowingPublicProfile(follows.some((row) => row.follower_id === currentUserId));
+    setFollowedByPublicProfile(follows.some((row) => row.follower_id === userId));
+    setPublicProfileFriend(
+      follows.some((row) => row.follower_id === currentUserId) &&
+      follows.some((row) => row.follower_id === userId),
+    );
     setPublicProfile(targetProfile);
-    await loadProfileStats(userId);
-    setView("public");
-    setViewAs(false);
+    void loadProfileStats(userId);
   }
 
   async function toggleFollowPublicProfile() {
