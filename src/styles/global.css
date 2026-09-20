@@ -1520,3 +1520,26 @@ h1 { margin:3px 0 0; font-size:17px; letter-spacing:-.03em; }
   border-color: color-mix(in srgb, #000 12%, transparent) !important;
   box-shadow: 0 12px 30px color-mix(in srgb, #000 14%, transparent);
 }
+
+
+/* Public profile navigation and scrollable highlights */
+.highlights-row.view-as {
+  justify-content: flex-start;
+  overflow-x: auto;
+  overflow-y: hidden;
+  flex-wrap: nowrap;
+  width: 100%;
+  max-width: 100%;
+  padding: 4px 2px 8px;
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
+}
+.highlights-row.view-as .highlight-card { scroll-snap-align: start; }
+.public-back-nav { display: grid; }
+@media (max-width: 560px) {
+  .highlights-row.view-as { justify-content: flex-start; padding-inline: 1px; }
+  .bottom-nav:has(.public-back-nav) { grid-template-columns: 1fr 1fr .72fr 1fr 1fr 1fr; width: calc(100% - 12px); }
+}
+@media (min-width: 561px) {
+  .bottom-nav:has(.public-back-nav) { grid-template-columns: 1fr 1fr .72fr 1fr 1fr 1fr; }
+}
