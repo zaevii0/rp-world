@@ -204,16 +204,32 @@ export function App() {
       setProfileBusy(false);
       return;
     }
-    const { data, error: saveError } = await supabase.from("profiles").upsert(
-      { id: session.user.id, username: cleanUsername, display_name: cleanDisplayName, bio: cleanBio },
-      { onConflict: "id" },
-    ).select("*").single();
+    const profilePayload = {
+      id: session.user.id,
+      username: cleanUsername,
+      display_name: cleanDisplayName,
+      bio: cleanBio,
+    };
+
+    const result = profile
+      ? await supabase.from("profiles").update(profilePayload).eq("id", session.user.id).select("*").single()
+      : await supabase.from("profiles").insert(profilePayload).select("*").single();
+
     setProfileBusy(false);
-    if (saveError) {
-      setProfileError(saveError.code === "23505" ? "That username is already taken." : "We could not save your profile.");
+    if (result.error) {
+      if (result.error.code === "23505") {
+        setProfileError("That username is already taken.");
+      } else {
+        console.error("RP WORLD profile save failed", result.error);
+        setProfileError(
+          result.error.message
+            ? `We could not save your profile: ${result.error.message}`
+            : "We could not save your profile. Please try again.",
+        );
+      }
       return;
     }
-    setProfile(data as Profile);
+    setProfile(result.data as Profile);
     setProfileOpen(false);
   }
 
