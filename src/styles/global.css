@@ -97,8 +97,10 @@ h1 { margin:3px 0 0; font-size:17px; letter-spacing:-.03em; }
 .brand-button small { font-size:8px; letter-spacing:.14em; opacity:.5; font-weight:700; }
 .brand-button strong { font-size:15px; letter-spacing:-.03em; }
 .brand-mark { width:32px; height:32px; display:grid; place-items:center; padding:4px; overflow:hidden; border-radius:11px; color:var(--accent); background:var(--accent-soft); }
-.brand-mark img { width:100%; height:100%; display:block; object-fit:contain; }
-.hero-icon img { width:46px; height:46px; display:block; object-fit:contain; }
+.brand-mark img { width:100%; height:100%; display:block; object-fit:contain; filter:none; }
+.hero-icon img { width:46px; height:46px; display:block; object-fit:contain; filter:none; }
+.app.light .brand-mark img,
+.app.light .hero-icon img { filter:invert(1); }
 .social-shell { width:min(100%,720px); margin:28px auto 110px; }
 .page-heading { display:flex; align-items:center; justify-content:space-between; margin:0 2px 16px; }
 .page-heading h2 { margin:4px 0 0; font-size:28px; letter-spacing:-.045em; }
