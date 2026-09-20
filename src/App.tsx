@@ -2353,7 +2353,7 @@ export function App() {
                                 {!post.profile?.avatar_url && initials(post.profile?.display_name ?? "R")}
                               </div>
                               <div>
-                                <strong>{post.profile?.display_name ?? "RP WORLD member"}</strong>
+                                <strong>{post.profile?.display_name ?? "RP WORLD member"}{post.profile?.username === "zaevii" && <span className="verified-badge" aria-label="Verified">✓</span>}</strong>
                                 <span className="post-meta">
                                   @{post.profile?.username ?? "member"} ·{" "}
                                   <button
@@ -2421,7 +2421,7 @@ export function App() {
                   <div className="profile-main">
                     <div className="profile-avatar-wrap"><div className="profile-avatar avatar" style={publicProfile.avatar_url ? { backgroundImage: `url(${publicProfile.avatar_url})` } : undefined}>{!publicProfile.avatar_url && initials(publicProfile.display_name)}</div></div>
                     <div className="profile-identity">
-                      <div className="profile-name-row"><div><h2>{publicProfile.display_name}</h2><span>@{publicProfile.username}</span></div></div>
+                      <div className="profile-name-row"><div><h2>{publicProfile.display_name}{publicProfile.username === "zaevii" && <span className="verified-badge" aria-label="Verified">✓</span>}</h2><span>@{publicProfile.username}</span></div></div>
                       <p className="profile-bio">{publicProfile.bio || "No bio yet. Tell the world who you are."}</p>
                       <div className="profile-actions profile-social-actions">
                         <button className="profile-action-button follow-button" type="button" onClick={() => void toggleFollowPublicProfile()}><UserPlus size={14} />{followingPublicProfile ? "Following" : "Follow"}</button>
@@ -2468,7 +2468,7 @@ export function App() {
                   {publicProfilePosts.length === 0 ? <div className="empty-state glass"><Image size={22} /><strong>No posts yet.</strong><span>This user's published posts will appear here.</span></div> : (
                     <div className="feed-list">{publicProfilePosts.map((post) => (
                       <article className="post-card glass" key={post.id}>
-                        <div className="post-head"><div className="avatar" style={post.profile?.avatar_url ? { backgroundImage: `url(${post.profile.avatar_url})` } : undefined}>{!post.profile?.avatar_url && initials(post.profile?.display_name ?? "RP")}</div><div><strong>{post.profile?.display_name}</strong><span className="post-meta">@{post.profile?.username} · {timeAgo(post.created_at)}</span></div></div>
+                        <div className="post-head"><div className="avatar" style={post.profile?.avatar_url ? { backgroundImage: `url(${post.profile.avatar_url})` } : undefined}>{!post.profile?.avatar_url && initials(post.profile?.display_name ?? "RP")}</div><div><strong>{post.profile?.display_name}{post.profile?.username === "zaevii" && <span className="verified-badge" aria-label="Verified">✓</span>}</strong><span className="post-meta">@{post.profile?.username} · {timeAgo(post.created_at)}</span></div></div>
                         <p className="post-content">{post.content}</p>
                         <div className="post-actions">
                           <button className={post.liked ? "post-action liked" : "post-action"} type="button" onClick={() => void toggleLike(post)}><Heart size={17} fill={post.liked ? "currentColor" : "none"} />{post.likes}</button>
