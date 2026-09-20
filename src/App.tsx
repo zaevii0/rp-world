@@ -49,6 +49,7 @@ type Post = {
   liked_at: string | null;
   comments: number;
   reposts: number;
+  shares: number;
   reposted: boolean;
   reposted_at?: string | null;
   shared_post_id?: string | null;
@@ -408,6 +409,20 @@ export function App() {
 
     const postIds = rows.map((row) => row.id);
 
+    const { data: shareRows } = postIds.length
+      ? await supabase
+          .from("posts")
+          .select("shared_post_id")
+          .in("shared_post_id", postIds)
+      : { data: [] as { shared_post_id: string | null }[] };
+
+    const shareCounts = new Map<string, number>();
+    (shareRows ?? []).forEach((row) => {
+      if (row.shared_post_id) {
+        shareCounts.set(row.shared_post_id, (shareCounts.get(row.shared_post_id) ?? 0) + 1);
+      }
+    });
+
     const { data: myLikes } = postIds.length
       ? await supabase
           .from("post_likes")
@@ -438,6 +453,7 @@ export function App() {
         comments: row.post_comments?.[0]?.count ?? 0,
         reposts: 0,
         reposted: false,
+        shares: shareCounts.get(row.id) ?? 0,
         shared_post_id: row.shared_post_id ?? null,
         share_caption: row.share_caption ?? null,
         shared_original: row.shared_post_id ? sharedMap.get(row.shared_post_id) ?? null : null,
