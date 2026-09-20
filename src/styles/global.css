@@ -44,7 +44,7 @@ h1 { margin:3px 0 0; font-size:17px; letter-spacing:-.03em; }
 .status { width:fit-content; margin:28px auto 0; padding:10px 14px; display:flex; align-items:center; gap:8px; border-radius:999px; font-size:12px; font-weight:650; }
 .status-dot { width:7px; height:7px; border-radius:50%; background:var(--accent); box-shadow:0 0 10px color-mix(in srgb,var(--accent) 70%,transparent); }
 .sheet-backdrop { position:fixed; inset:0; z-index:50; display:flex; align-items:flex-end; justify-content:center; padding:16px; background:rgba(0,0,0,.32); backdrop-filter:blur(10px); }
-.theme-sheet,.auth-sheet,.profile-sheet { width:min(100%,520px); padding:20px; border-radius:30px; animation:sheet-in 220ms ease-out; }
+.theme-sheet,.auth-sheet,.profile-sheet { width:min(100%,520px); max-height:calc(100dvh - 32px); overflow-y:auto; overscroll-behavior:contain; padding:20px; border-radius:30px; animation:sheet-in 220ms ease-out; }
 .sheet-header { display:flex; align-items:flex-start; justify-content:space-between; gap:20px; }
 .sheet-header h2 { margin:4px 0 0; font-size:28px; letter-spacing:-.04em; }
 .sheet-copy { margin:12px 0 20px; opacity:.62; line-height:1.5; font-size:14px; }
