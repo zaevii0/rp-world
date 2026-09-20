@@ -1,5 +1,5 @@
 import { useState, type CSSProperties } from "react";
-import { Check, Palette, X } from "lucide-react";
+import { Check, Paintbrush, X } from "lucide-react";
 import { themes, type ThemeId } from "../types/theme";
 
 interface ThemePickerProps {
@@ -24,12 +24,9 @@ export function ThemePicker({ theme, onThemeChange }: ThemePickerProps) {
         aria-expanded={open}
         onClick={() => setOpen(true)}
       >
-        <span
-          className="theme-trigger-swatch"
-          style={{ background: themes.find((item) => item.id === theme)?.accent }}
-          aria-hidden="true"
-        />
-        <Palette size={16} aria-hidden="true" />
+        <span className="theme-trigger-icon" aria-hidden="true">
+          <Paintbrush size={17} strokeWidth={2.15} />
+        </span>
       </button>
 
       {open && (
