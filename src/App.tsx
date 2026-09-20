@@ -1547,7 +1547,7 @@ export function App() {
                     )}
                   </div>
 
-                  <div className="highlights-row">
+                  <div className={viewAs ? "highlights-row view-as" : "highlights-row"}>
                     {!viewAs && (
                       <button
                         className={highlightStyle === "portrait" ? "highlight-card add-highlight highlight-card-portrait" : "highlight-card add-highlight highlight-card-circle"}
