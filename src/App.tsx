@@ -847,7 +847,10 @@ export function App() {
   async function loadComments(postId: string) {
     if (!supabase || !session?.user) return;
 
-    const { data, error: loadError } = await supabase
+    let data: unknown[] | null = null;
+    let loadError: { message?: string } | null = null;
+
+    const nestedResult = await supabase
       .from("post_comments")
       .select(
         "id, post_id, author_id, content, created_at, parent_id",
@@ -855,7 +858,34 @@ export function App() {
       .eq("post_id", postId)
       .order("created_at", { ascending: true });
 
-    if (loadError) return;
+    data = nestedResult.data as unknown[] | null;
+    loadError = nestedResult.error;
+
+    // Keep existing comments visible even if the database has not
+    // received the nested-reply migration yet.
+    if (loadError) {
+      const legacyResult = await supabase
+        .from("post_comments")
+        .select(
+          "id, post_id, author_id, content, created_at",
+        )
+        .eq("post_id", postId)
+        .order("created_at", { ascending: true });
+
+      if (!legacyResult.error) {
+        data = (legacyResult.data ?? []).map((row) => ({
+          ...row,
+          parent_id: null,
+        }));
+        loadError = null;
+      }
+    }
+
+    if (loadError) {
+      console.error("RP WORLD comments could not be loaded", loadError);
+      setFeedError(loadError.message || "Comments could not be loaded.");
+      return;
+    }
 
     const rows = (data ?? []) as Comment[];
 
@@ -913,23 +943,59 @@ export function App() {
 
     setCommentBusy(postId);
 
-    const { data, error: saveError } = await supabase
+    const parentId =
+      replyTo?.postId === postId ? replyTo.commentId : null;
+
+    let { data, error: saveError } = await supabase
       .from("post_comments")
-       .insert({
+      .insert({
         post_id: postId,
         author_id: session.user.id,
         content,
-        parent_id:
-          replyTo?.postId === postId ? replyTo.commentId : null,
+        parent_id: parentId,
       })
       .select(
         "id, post_id, author_id, content, created_at, parent_id",
       )
       .single();
 
+    // Gracefully support databases that still have the original
+    // comment schema. Top-level comments can still be posted while
+    // nested replies require the parent_id migration.
+    if (saveError && !parentId) {
+      const legacyInsert = await supabase
+        .from("post_comments")
+        .insert({
+          post_id: postId,
+          author_id: session.user.id,
+          content,
+        })
+        .select(
+          "id, post_id, author_id, content, created_at",
+        )
+        .single();
+
+      if (!legacyInsert.error && legacyInsert.data) {
+        data = {
+          ...legacyInsert.data,
+          parent_id: null,
+        } as typeof data;
+        saveError = null;
+      }
+    }
+
     setCommentBusy(null);
 
-    if (saveError || !data) return;
+    if (saveError || !data) {
+      console.error("RP WORLD comment could not be posted", saveError);
+      setFeedError(
+        saveError?.message ||
+          (parentId
+            ? "This reply could not be posted. Please make sure the nested-reply database migration is applied."
+            : "This comment could not be posted. Please try again."),
+      );
+      return;
+    }
 
     const newComment = {
       ...(data as Comment),
@@ -949,6 +1015,7 @@ export function App() {
       [postId]: "",
     }));
     setReplyTo(null);
+    setFeedError("");
 
     setPosts((current) =>
       current.map((item) =>
