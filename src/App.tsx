@@ -123,6 +123,8 @@ export function App() {
 
   const [posts, setPosts] = useState<Post[]>([]);
   const [profilePosts, setProfilePosts] = useState<Post[]>([]);
+  const [profileReposts, setProfileReposts] = useState<Post[]>([]);
+  const [profileSection, setProfileSection] = useState<"posts" | "reposts">("posts");
   const [highlights, setHighlights] = useState<Highlight[]>([]);
   const [highlightOpen, setHighlightOpen] = useState(false);
   const [highlightTitle, setHighlightTitle] = useState("");
@@ -304,6 +306,7 @@ export function App() {
   useEffect(() => {
     if (view === "profile" && session?.user && profile) {
       void loadProfilePosts();
+      void loadProfileReposts();
       void loadHighlights();
     }
   }, [view, session, profile]);
@@ -655,6 +658,83 @@ export function App() {
     );
   }
 
+  async function loadProfileReposts() {
+    if (!supabase || !session?.user) return;
+
+    const { data: repostRows, error: repostError } = await supabase
+      .from("post_reposts")
+      .select("post_id, created_at")
+      .eq("user_id", session.user.id)
+      .order("created_at", { ascending: false })
+      .limit(50);
+
+    if (repostError) {
+      setProfileReposts([]);
+      return;
+    }
+
+    const reposts = (repostRows ?? []) as Array<{ post_id: string; created_at: string }>;
+    const postIds = reposts.map((row) => row.post_id);
+
+    if (!postIds.length) {
+      setProfileReposts([]);
+      return;
+    }
+
+    const { data: postRows } = await supabase
+      .from("posts")
+      .select("id, author_id, content, media_url, created_at, post_likes(count), post_comments(count)")
+      .in("id", postIds);
+
+    const rows = (postRows ?? []) as Array<Post & {
+      post_likes?: { count: number }[];
+      post_comments?: { count: number }[];
+    }>;
+
+    const authorIds = [...new Set(rows.map((row) => row.author_id))];
+    const { data: authors } = authorIds.length
+      ? await supabase.from("profiles").select("*").in("id", authorIds)
+      : { data: [] as Profile[] };
+
+    const profileMap = new Map(
+      (authors ?? []).map((item) => [item.id, item as Profile]),
+    );
+
+    const { data: myLikes } = await supabase
+      .from("post_likes")
+      .select("post_id, created_at")
+      .eq("user_id", session.user.id)
+      .in("post_id", postIds);
+
+    const likedSet = new Set((myLikes ?? []).map((item) => item.post_id));
+    const likedAtMap = new Map((myLikes ?? []).map((item) => [item.post_id, item.created_at]));
+    const postMap = new Map(rows.map((row) => [row.id, row]));
+
+    setProfileReposts(
+      reposts
+        .map((repost) => {
+          const row = postMap.get(repost.post_id);
+          if (!row) return null;
+
+          return {
+            id: row.id,
+            author_id: row.author_id,
+            content: row.content,
+            media_url: row.media_url,
+            created_at: row.created_at,
+            profile: profileMap.get(row.author_id),
+            likes: row.post_likes?.[0]?.count ?? 0,
+            liked: likedSet.has(row.id),
+            liked_at: likedAtMap.get(row.id) ?? null,
+            comments: row.post_comments?.[0]?.count ?? 0,
+            reposts: 1,
+            reposted: true,
+          } satisfies Post;
+        })
+        .filter((post): post is Post => Boolean(post)),
+    );
+  }
+
   async function loadPublicProfile(userId: string) {
     if (!supabase || !session?.user || userId === session.user.id) {
       setView("profile");
@@ -894,6 +974,7 @@ export function App() {
         ? { ...item, reposted: true, reposts: item.reposted ? item.reposts : item.reposts + 1 }
         : item
     ));
+    await loadProfileReposts();
     setPublicProfilePosts((current) => current.map((item) =>
       item.id === post.id
         ? { ...item, reposted: true, reposts: item.reposted ? item.reposts : item.reposts + 1 }
@@ -1358,6 +1439,7 @@ export function App() {
     setMessageDraft("");
     setPosts([]);
     setProfilePosts([]);
+    setProfileReposts([]);
     setHighlights([]);
     setView("home");
     setViewAs(false);
@@ -2059,17 +2141,32 @@ export function App() {
                 </div>
 
                 <div className="profile-section profile-posts">
-                  <div className="section-heading">
-                    <div>
-                      <p className="eyebrow">
-                        {viewAs ? "PUBLIC PROFILE" : "YOUR ACTIVITY"}
-                      </p>
-
-                      <h3>Posts</h3>
-                    </div>
+                  <div className="profile-content-tabs" role="tablist" aria-label="Profile content">
+                    <button
+                      className={profileSection === "posts" ? "profile-content-tab active" : "profile-content-tab"}
+                      type="button"
+                      role="tab"
+                      aria-selected={profileSection === "posts"}
+                      onClick={() => setProfileSection("posts")}
+                    >
+                      <Image size={14} />
+                      Posts
+                    </button>
+                    <button
+                      className={profileSection === "reposts" ? "profile-content-tab active" : "profile-content-tab"}
+                      type="button"
+                      role="tab"
+                      aria-selected={profileSection === "reposts"}
+                      onClick={() => setProfileSection("reposts")}
+                    >
+                      <Repeat2 size={14} />
+                      Reposts
+                      {profileReposts.length > 0 && <span>{profileReposts.length}</span>}
+                    </button>
                   </div>
 
-                  {profilePosts.length === 0 ? (
+                  {profileSection === "posts" ? (
+                  profilePosts.length === 0 ? (
                     <div className="empty-state glass">
                       <Image size={22} />
 
@@ -2201,6 +2298,59 @@ export function App() {
                         ),
                       )}
                     </div>
+                  )}
+                  ) : (
+                    profileReposts.length === 0 ? (
+                      <div className="empty-state glass">
+                        <Repeat2 size={22} />
+                        <strong>No reposts yet.</strong>
+                        <span>Posts you repost will appear here in your Reposts section.</span>
+                      </div>
+                    ) : (
+                      <div className="feed-list">
+                        {profileReposts.map((post) => (
+                          <article className="post-card glass" key={`repost-${post.id}`}>
+                            <div className="repost-label">
+                              <Repeat2 size={14} />
+                              <span>You reposted this</span>
+                            </div>
+                            <div className="post-head">
+                              <button
+                                className="avatar profile-link-button"
+                                type="button"
+                                onClick={() => void loadPublicProfile(post.author_id)}
+                                aria-label={`Open ${post.profile?.display_name ?? "member"} profile`}
+                                style={post.profile?.avatar_url ? { backgroundImage: `url(${post.profile.avatar_url})` } : undefined}
+                              >
+                                {!post.profile?.avatar_url && initials(post.profile?.display_name ?? "RP")}
+                              </button>
+                              <div>
+                                <button className="profile-name-link" type="button" onClick={() => void loadPublicProfile(post.author_id)}>
+                                  {post.profile?.display_name ?? "RP WORLD member"}
+                                </button>
+                                <span className="post-meta">@{post.profile?.username ?? "member"} · {timeAgo(post.created_at)}</span>
+                              </div>
+                            </div>
+                            <p className="post-content">{post.content}</p>
+                            <div className="post-actions">
+                              <button className={post.liked ? "post-action liked" : "post-action"} type="button" onClick={() => void toggleLike(post)}>
+                                <Heart size={17} fill={post.liked ? "currentColor" : "none"} />
+                                {post.likes}
+                              </button>
+                              <button className="post-action" type="button" onClick={() => void toggleComments(post.id)}>
+                                <MessageCircle size={17} /> {post.comments || "Reply"}
+                              </button>
+                              <button className="post-action reposted" type="button" disabled>
+                                <Repeat2 size={17} /> Reposted
+                              </button>
+                              <button className="post-action" type="button" onClick={() => void sharePost(post)}>
+                                <Share2 size={17} /> Share
+                              </button>
+                            </div>
+                          </article>
+                        ))}
+                      </div>
+                    )
                   )}
                 </div>
               </section>
