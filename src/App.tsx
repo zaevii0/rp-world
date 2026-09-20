@@ -3388,12 +3388,10 @@ export function App() {
           <button
             className="nav-create"
             type="button"
-            aria-label="Create post"
-            onClick={() =>
-              setComposerOpen(true)
-            }
+            aria-label="Messages"
+            onClick={() => void openMessageInbox()}
           >
-            <Plus size={22} />
+            <MessageCircle size={22} />
           </button>
 
           <button
