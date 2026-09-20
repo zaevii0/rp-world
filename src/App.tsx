@@ -15,6 +15,7 @@ import {
   MessageCircle,
   Share2,
   Repeat2,
+  Video,
   Moon,
   Pencil,
   Plus,
@@ -40,6 +41,7 @@ type Post = {
   author_id: string;
   content: string;
   media_url: string | null;
+  media_type?: string | null;
   created_at: string;
   profile?: Profile;
   likes: number;
@@ -54,6 +56,7 @@ type Post = {
   shared_original?: {
     content: string;
     media_url: string | null;
+    media_type?: string | null;
     created_at: string;
     profile?: Profile;
   } | null;
@@ -167,6 +170,10 @@ export function App() {
   const [coverFile, setCoverFile] = useState<File | null>(null);
 
   const [postText, setPostText] = useState("");
+  const [postMediaFile, setPostMediaFile] = useState<File | null>(null);
+  const [expandedPosts, setExpandedPosts] = useState<Record<string, boolean>>({});
+  const [editPostMediaFile, setEditPostMediaFile] = useState<File | null>(null);
+  const [editPostMediaRemove, setEditPostMediaRemove] = useState(false);
   const [editPostOpen, setEditPostOpen] = useState(false);
   const [editPostTarget, setEditPostTarget] = useState<Post | null>(null);
   const [editPostText, setEditPostText] = useState("");
@@ -342,7 +349,7 @@ export function App() {
     const { data, error: loadError } = await supabase
       .from("posts")
       .select(
-        "id, author_id, content, media_url, created_at, shared_post_id, share_caption, post_likes(count), post_comments(count)",
+        "id, author_id, content, media_url, media_type, created_at, shared_post_id, share_caption, post_likes(count), post_comments(count)",
       )
       .order("created_at", { ascending: false })
       .limit(30);
@@ -369,9 +376,9 @@ export function App() {
     const { data: sharedRows } = sharedPostIds.length
       ? await supabase
           .from("posts")
-          .select("id, content, media_url, created_at, author_id")
+          .select("id, content, media_url, media_type, created_at, author_id")
           .in("id", sharedPostIds)
-      : { data: [] as Array<{ id: string; content: string; media_url: string | null; created_at: string; author_id: string }> };
+      : { data: [] as Array<{ id: string; content: string; media_url: string | null; media_type?: string | null; created_at: string; author_id: string }> };
 
     const sharedAuthorIds = [...new Set((sharedRows ?? []).map((row) => row.author_id))];
     const { data: sharedProfiles } = sharedAuthorIds.length
@@ -387,6 +394,7 @@ export function App() {
         {
           content: row.content,
           media_url: row.media_url,
+          media_type: row.media_type ?? null,
           created_at: row.created_at,
           profile: sharedProfileMap.get(row.author_id),
         },
@@ -420,6 +428,7 @@ export function App() {
         author_id: row.author_id,
         content: row.content,
         media_url: row.media_url,
+        media_type: row.media_type ?? null,
         created_at: row.created_at,
         profile: profileMap.get(row.author_id),
         likes: row.post_likes?.[0]?.count ?? 0,
@@ -447,6 +456,88 @@ export function App() {
       ? `Welcome, ${profile.display_name}.`
       : "Your RP world.";
   }, [profile, publicProfile, view]);
+
+
+  const POST_PREVIEW_LENGTH = 280;
+
+  function renderExpandablePostContent(content: string, key: string) {
+    const isLong = content.length > POST_PREVIEW_LENGTH;
+    const expanded = expandedPosts[key] ?? false;
+    const visibleContent = isLong && !expanded
+      ? content.slice(0, POST_PREVIEW_LENGTH).trimEnd()
+      : content;
+
+    return (
+      <div className="post-content-wrap">
+        <p className="post-content">
+          {visibleContent}
+          {isLong && !expanded ? "…" : ""}
+        </p>
+        {isLong && (
+          <button
+            className="post-see-more"
+            type="button"
+            onClick={() => setExpandedPosts((current) => ({ ...current, [key]: !expanded }))}
+            aria-expanded={expanded}
+          >
+            {expanded ? "See less" : "See more"}
+          </button>
+        )}
+      </div>
+    );
+  }
+
+  function renderPostMedia(mediaUrl: string | null | undefined, mediaType?: string | null) {
+    if (!mediaUrl) return null;
+    if (mediaType?.startsWith("video/")) {
+      return (
+        <video
+          className="post-media post-video"
+          src={mediaUrl}
+          controls
+          playsInline
+          preload="metadata"
+        />
+      );
+    }
+    return <img className="post-media" src={mediaUrl} alt="" loading="lazy" />;
+  }
+
+  function validatePostMedia(file: File) {
+    if (!file.type.startsWith("image/") && !file.type.startsWith("video/")) {
+      return "Please choose an image or video file.";
+    }
+    const maxBytes = file.type.startsWith("video/")
+      ? 50 * 1024 * 1024
+      : 10 * 1024 * 1024;
+    if (file.size > maxBytes) {
+      return file.type.startsWith("video/")
+        ? "Videos must be 50 MB or smaller."
+        : "Images must be 10 MB or smaller.";
+    }
+    return null;
+  }
+
+  async function uploadPostMedia(file: File) {
+    if (!supabase || !session?.user) {
+      throw new Error("You must be signed in to upload media.");
+    }
+    const extension =
+      file.name.split(".").pop()?.toLowerCase() ||
+      (file.type.startsWith("video/") ? "mp4" : "jpg");
+    const filePath = `${session.user.id}/post-${crypto.randomUUID()}.${extension}`;
+    const { error: uploadError } = await supabase.storage
+      .from("post-media")
+      .upload(filePath, file, {
+        cacheControl: "3600",
+        contentType: file.type,
+        upsert: false,
+      });
+    if (uploadError) throw uploadError;
+    return supabase.storage
+      .from("post-media")
+      .getPublicUrl(filePath).data.publicUrl;
+  }
 
   function resetAuthMessages() {
     setError("");
@@ -667,7 +758,7 @@ export function App() {
     const { data, error: loadError } = await supabase
       .from("posts")
       .select(
-        "id, author_id, content, media_url, created_at, post_likes(count), post_comments(count)",
+        "id, author_id, content, media_url, media_type, created_at, post_likes(count), post_comments(count)",
       )
       .eq("author_id", session.user.id)
       .order("created_at", { ascending: false })
@@ -705,6 +796,7 @@ export function App() {
         author_id: row.author_id,
         content: row.content,
         media_url: row.media_url,
+        media_type: row.media_type ?? null,
         created_at: row.created_at,
         profile: profile ?? undefined,
         likes: row.post_likes?.[0]?.count ?? 0,
@@ -743,7 +835,7 @@ export function App() {
     const { data: postRows, error: postsError } = await supabase
       .from("posts")
       .select(
-        "id, author_id, content, media_url, created_at, post_likes(count), post_comments(count)",
+        "id, author_id, content, media_url, media_type, created_at, post_likes(count), post_comments(count)",
       )
       .in("id", postIds);
 
@@ -796,6 +888,7 @@ export function App() {
           author_id: row.author_id,
           content: row.content,
           media_url: row.media_url,
+          media_type: row.media_type ?? null,
           created_at: row.created_at,
           profile: profileMap.get(row.author_id),
           likes: row.post_likes?.[0]?.count ?? 0,
@@ -822,7 +915,7 @@ export function App() {
     const targetProfile = target as Profile;
     const { data: targetPosts } = await supabase
       .from("posts")
-      .select("id, author_id, content, media_url, created_at, post_likes(count), post_comments(count)")
+      .select("id, author_id, content, media_url, media_type, created_at, post_likes(count), post_comments(count)")
       .eq("author_id", userId).order("created_at", { ascending: false }).limit(50);
 
     const rows = (targetPosts ?? []) as Array<Post & { post_likes?: { count: number }[]; post_comments?: { count: number }[] }>;
@@ -1060,38 +1153,45 @@ export function App() {
   async function createPost(event: FormEvent) {
     event.preventDefault();
 
-    if (
-      !supabase ||
-      !session?.user ||
-      !postText.trim()
-    ) {
-      return;
+    if (!supabase || !session?.user || (!postText.trim() && !postMediaFile)) return;
+
+    if (postMediaFile) {
+      const mediaError = validatePostMedia(postMediaFile);
+      if (mediaError) {
+        setFeedError(mediaError);
+        return;
+      }
     }
 
     setPostBusy(true);
     setFeedError("");
 
-    const { error: saveError } = await supabase
-      .from("posts")
-      .insert({
+    try {
+      const mediaUrl = postMediaFile ? await uploadPostMedia(postMediaFile) : null;
+      const mediaType = postMediaFile?.type || null;
+
+      const { error: saveError } = await supabase.from("posts").insert({
         author_id: session.user.id,
         content: postText.trim(),
+        media_url: mediaUrl,
+        media_type: mediaType,
       });
 
-    setPostBusy(false);
+      if (saveError) throw saveError;
 
-    if (saveError) {
-      setFeedError("We could not publish that post.");
-      return;
-    }
-
-    setPostText("");
-    setComposerOpen(false);
-
-    await loadFeed();
-
-    if (view === "profile") {
-      await loadProfilePosts();
+      setPostText("");
+      setPostMediaFile(null);
+      setComposerOpen(false);
+      await loadFeed();
+      if (view === "profile") await loadProfilePosts();
+    } catch (saveError) {
+      setFeedError(
+        saveError instanceof Error
+          ? saveError.message
+          : "We could not publish that post.",
+      );
+    } finally {
+      setPostBusy(false);
     }
   }
 
@@ -1099,6 +1199,8 @@ export function App() {
     if (!session?.user || post.author_id !== session.user.id || post.shared_post_id) return;
     setEditPostTarget(post);
     setEditPostText(post.content);
+    setEditPostMediaFile(null);
+    setEditPostMediaRemove(false);
     setFeedError("");
     setEditPostOpen(true);
   }
@@ -1106,24 +1208,78 @@ export function App() {
   async function saveEditedPost(event: FormEvent) {
     event.preventDefault();
     if (!supabase || !session?.user || !editPostTarget || editPostBusy) return;
+
     const content = editPostText.trim();
-    if (!content) return;
-    setEditPostBusy(true);
-    const { data, error: updateError } = await supabase.from("posts").update({ content }).eq("id", editPostTarget.id).eq("author_id", session.user.id).select("id, content").single();
-    if (updateError || !data) {
-      setEditPostBusy(false);
-      setFeedError(updateError?.message || "We could not update that post.");
+    if (!content && !editPostTarget.media_url && !editPostMediaFile) {
+      setFeedError("Add some text, a photo, or a video before saving.");
       return;
     }
-    const updatePost = (items: Post[]) => items.map((item) => item.id === editPostTarget.id ? { ...item, content: data.content } : item);
-    setPosts(updatePost);
-    setProfilePosts(updatePost);
-    setPublicProfilePosts(updatePost);
-    setEditPostBusy(false);
-    setEditPostOpen(false);
-    setEditPostTarget(null);
-    setEditPostText("");
-    setMessage("Post updated.");
+
+    if (editPostMediaFile) {
+      const mediaError = validatePostMedia(editPostMediaFile);
+      if (mediaError) {
+        setFeedError(mediaError);
+        return;
+      }
+    }
+
+    setEditPostBusy(true);
+    setFeedError("");
+
+    try {
+      let mediaUrl = editPostTarget.media_url;
+      let mediaType = editPostTarget.media_type ?? (mediaUrl ? "image/*" : null);
+
+      if (editPostMediaRemove) {
+        mediaUrl = null;
+        mediaType = null;
+      } else if (editPostMediaFile) {
+        mediaUrl = await uploadPostMedia(editPostMediaFile);
+        mediaType = editPostMediaFile.type;
+      }
+
+      const { data, error: updateError } = await supabase
+        .from("posts")
+        .update({ content, media_url: mediaUrl, media_type: mediaType })
+        .eq("id", editPostTarget.id)
+        .eq("author_id", session.user.id)
+        .select("id, content, media_url, media_type")
+        .single();
+
+      if (updateError || !data) {
+        throw new Error(updateError?.message || "We could not update that post.");
+      }
+
+      const updatePost = (items: Post[]) =>
+        items.map((item) =>
+          item.id === editPostTarget.id
+            ? {
+                ...item,
+                content: data.content,
+                media_url: data.media_url,
+                media_type: data.media_type,
+              }
+            : item,
+        );
+
+      setPosts(updatePost);
+      setProfilePosts(updatePost);
+      setPublicProfilePosts(updatePost);
+      setEditPostOpen(false);
+      setEditPostTarget(null);
+      setEditPostText("");
+      setEditPostMediaFile(null);
+      setEditPostMediaRemove(false);
+      setMessage("Post updated.");
+    } catch (updateError) {
+      setFeedError(
+        updateError instanceof Error
+          ? updateError.message
+          : "We could not update that post.",
+      );
+    } finally {
+      setEditPostBusy(false);
+    }
   }
 
   async function loadComments(postId: string) {
@@ -1460,10 +1616,11 @@ export function App() {
         author_id: session.user.id,
         content: caption || "Shared a post",
         media_url: shareTarget.media_url,
+        media_type: shareTarget.media_type ?? null,
         shared_post_id: shareTarget.shared_post_id ?? shareTarget.id,
         share_caption: caption || null,
       })
-      .select("id, author_id, content, media_url, created_at, shared_post_id, share_caption")
+      .select("id, author_id, content, media_url, media_type, created_at, shared_post_id, share_caption")
       .single();
     setShareBusy(false);
     if (shareError || !data) {
@@ -1472,7 +1629,7 @@ export function App() {
     }
     const sharedOriginal = shareTarget.shared_post_id
       ? shareTarget.shared_original
-      : { content: shareTarget.content, media_url: shareTarget.media_url, created_at: shareTarget.created_at, profile: shareTarget.profile };
+      : { content: shareTarget.content, media_url: shareTarget.media_url, media_type, created_at: shareTarget.created_at, profile: shareTarget.profile };
     const sharedPost: Post = {
       id: data.id, author_id: data.author_id, content: data.content, media_url: data.media_url,
       created_at: data.created_at, profile: profile ?? undefined, likes: 0, liked: false,
@@ -1890,7 +2047,7 @@ export function App() {
                         </div>
 
                         {!post.shared_post_id ? (
-                          <p className="post-content">{post.content}</p>
+                          {renderExpandablePostContent(post.content, post.id)}
                         ) : (
                           <div className="shared-original">
                             <div className="shared-original-head">
@@ -1902,8 +2059,8 @@ export function App() {
                                 <span className="post-meta">@{post.shared_original?.profile?.username ?? "member"} · {timeAgo(post.shared_original?.created_at ?? post.created_at)}</span>
                               </div>
                             </div>
-                            <p className="post-content">{post.shared_original?.content}</p>
-                            {post.shared_original?.media_url && <img className="post-media" src={post.shared_original.media_url} alt="" loading="lazy" />}
+                            {renderExpandablePostContent(post.shared_original?.content ?? "", `${post.id}-shared`)}
+                            {renderPostMedia(post.shared_original?.media_url, post.shared_original?.media_type)}
                           </div>
                         )}
 
@@ -2506,11 +2663,9 @@ export function App() {
                               </div>
                             </div>
 
-                            <p className="post-content">{post.content}</p>
+                            {renderExpandablePostContent(post.content, post.id)}
 
-                            {post.media_url && (
-                              <img className="post-media" src={post.media_url} alt="" loading="lazy" />
-                            )}
+                            {renderPostMedia(post.media_url, post.media_type)}
 
                             <div className="post-actions">
                               <button
@@ -2594,7 +2749,7 @@ export function App() {
                     <div className="feed-list">{publicProfilePosts.map((post) => (
                       <article className="post-card glass" key={post.id}>
                         <div className="post-head"><div className="avatar" style={post.profile?.avatar_url ? { backgroundImage: `url(${post.profile.avatar_url})` } : undefined}>{!post.profile?.avatar_url && initials(post.profile?.display_name ?? "RP")}</div><div><strong>{post.profile?.display_name}{post.profile?.username === "zaevii" && <span className="verified-badge" aria-label="Verified">✓</span>}</strong><span className="post-meta">@{post.profile?.username} · {timeAgo(post.created_at)}</span></div></div>
-                        <p className="post-content">{post.content}</p>
+                        {renderExpandablePostContent(post.content, post.id)}
                         <div className="post-actions">
                           <button className={post.liked ? "post-action liked" : "post-action"} type="button" onClick={() => void toggleLike(post)}><Heart size={17} fill={post.liked ? "currentColor" : "none"} />{post.likes}</button>
                           <button className="post-action" type="button" onClick={() => void toggleComments(post.id)}><MessageCircle size={17} />{post.comments || "Reply"}</button>
@@ -2763,7 +2918,7 @@ export function App() {
                 <div><strong>{shareTarget.profile?.display_name ?? "RP WORLD member"}</strong><span>@{shareTarget.profile?.username ?? "member"}</span></div>
               </div>
               <p>{shareTarget.shared_original?.content ?? shareTarget.content}</p>
-              {(shareTarget.shared_original?.media_url ?? shareTarget.media_url) && <img src={shareTarget.shared_original?.media_url ?? shareTarget.media_url ?? ""} alt="" />}
+              {renderPostMedia(shareTarget.shared_original?.media_url ?? shareTarget.media_url, shareTarget.shared_original?.media_type ?? shareTarget.media_type)}
             </div>
             <label className="share-caption-field">
               <span>Add a caption <small>optional</small></span>
@@ -2786,8 +2941,52 @@ export function App() {
             </div>
             <p className="sheet-copy">Edit your text and save when you're ready. Your post date and engagement stay unchanged.</p>
             <form className="auth-form" onSubmit={saveEditedPost}>
-              <div className="input-wrap textarea-wrap"><textarea value={editPostText} onChange={(event) => setEditPostText(event.target.value)} placeholder="Edit your post…" maxLength={2000} rows={7} autoFocus required /></div>
-              <div className="composer-footer"><span>{editPostText.length}/2000</span><button className="primary-button" type="submit" disabled={editPostBusy || !editPostText.trim()}>{editPostBusy ? "Saving…" : "Save changes"}</button></div>
+              <div className="input-wrap textarea-wrap"><textarea value={editPostText} onChange={(event) => setEditPostText(event.target.value)} placeholder="Edit your post…" maxLength={2000} rows={7} autoFocus /></div>
+
+              {editPostTarget.media_url && !editPostMediaRemove && (
+                <div className="post-media-selected current">
+                  <span>Current {editPostTarget.media_type?.startsWith("video/") ? "video" : "photo"}</span>
+                  <button type="button" className="post-media-remove" onClick={() => setEditPostMediaRemove(true)} aria-label="Remove current media"><X size={14} /></button>
+                </div>
+              )}
+
+              {editPostMediaRemove && (
+                <div className="post-media-selected">
+                  <span>Media will be removed</span>
+                  <button type="button" className="post-media-remove" onClick={() => setEditPostMediaRemove(false)} aria-label="Keep current media"><X size={14} /></button>
+                </div>
+              )}
+
+              <label className="post-media-picker">
+                <span className="post-media-picker-label"><Image size={16} /> {editPostTarget.media_url ? "Replace photo/video" : "Add photo or video"}</span>
+                <input
+                  type="file"
+                  accept="image/*,video/*"
+                  onChange={(event) => {
+                    const file = event.target.files?.[0] ?? null;
+                    if (file) {
+                      const mediaError = validatePostMedia(file);
+                      if (mediaError) {
+                        setFeedError(mediaError);
+                        event.currentTarget.value = "";
+                        return;
+                      }
+                    }
+                    setFeedError("");
+                    setEditPostMediaFile(file);
+                    if (file) setEditPostMediaRemove(false);
+                  }}
+                />
+              </label>
+
+              {editPostMediaFile && (
+                <div className="post-media-selected">
+                  <span>New {editPostMediaFile.type.startsWith("video/") ? "video" : "photo"} · {editPostMediaFile.name}</span>
+                  <button type="button" className="post-media-remove" onClick={() => setEditPostMediaFile(null)} aria-label="Remove selected media"><X size={14} /></button>
+                </div>
+              )}
+
+              <div className="composer-footer"><span>{editPostText.length}/2000</span><button className="primary-button" type="submit" disabled={editPostBusy || (!editPostText.trim() && !editPostMediaFile && (!editPostTarget.media_url || editPostMediaRemove))}>{editPostBusy ? "Saving…" : "Save changes"}</button></div>
             </form>
           </section>
         </div>
@@ -2843,18 +3042,41 @@ export function App() {
               <div className="input-wrap textarea-wrap">
                 <textarea
                   value={postText}
-                  onChange={(event) =>
-                    setPostText(
-                      event.target.value,
-                    )
-                  }
+                  onChange={(event) => setPostText(event.target.value)}
                   placeholder="What's happening in your world?"
                   maxLength={2000}
                   rows={7}
                   autoFocus
-                  required
                 />
               </div>
+
+              <label className="post-media-picker">
+                <span className="post-media-picker-label"><Image size={16} /> Add photo or video</span>
+                <input
+                  type="file"
+                  accept="image/*,video/*"
+                  onChange={(event) => {
+                    const file = event.target.files?.[0] ?? null;
+                    if (file) {
+                      const mediaError = validatePostMedia(file);
+                      if (mediaError) {
+                        setFeedError(mediaError);
+                        event.currentTarget.value = "";
+                        return;
+                      }
+                    }
+                    setFeedError("");
+                    setPostMediaFile(file);
+                  }}
+                />
+              </label>
+
+              {postMediaFile && (
+                <div className="post-media-selected">
+                  <span>{postMediaFile.type.startsWith("video/") ? "Video" : "Photo"} · {postMediaFile.name}</span>
+                  <button type="button" className="post-media-remove" onClick={() => setPostMediaFile(null)} aria-label="Remove selected media"><X size={14} /></button>
+                </div>
+              )}
 
               <div className="composer-footer">
                 <span>
@@ -2866,7 +3088,7 @@ export function App() {
                   type="submit"
                   disabled={
                     postBusy ||
-                    !postText.trim()
+                    (!postText.trim() && !postMediaFile)
                   }
                 >
                   {postBusy
