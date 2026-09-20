@@ -15,6 +15,7 @@ import {
   MessageCircle,
   Share2,
   Repeat2,
+  Bookmark,
   Moon,
   Pencil,
   Plus,
@@ -186,6 +187,7 @@ export function App() {
   const [shareTarget, setShareTarget] = useState<Post | null>(null);
   const [shareCaption, setShareCaption] = useState("");
   const [shareBusy, setShareBusy] = useState(false);
+  const [savedPostIds, setSavedPostIds] = useState<Set<string>>(new Set());
 
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -1646,6 +1648,15 @@ export function App() {
     setMessage("Post shared to your feed.");
   }
 
+  function toggleSavedPost(post: Post) {
+    setSavedPostIds((current) => {
+      const next = new Set(current);
+      if (next.has(post.id)) next.delete(post.id); else next.add(post.id);
+      return next;
+    });
+    setMessage(savedPostIds.has(post.id) ? "Removed from saved." : "Post saved.");
+  }
+
   async function sharePostExternally(post: Post) {
     const original = post.shared_original ?? post;
     const shareText = post.share_caption?.trim() ? post.share_caption.trim() + "\n\n" + original.content : original.content;
@@ -2124,7 +2135,7 @@ export function App() {
                             title={post.reposted ? "Reposted" : "Repost"}
                           >
                             <Repeat2 size={17} />
-                            {post.reposts || "Repost"}
+                            {post.reposts || 0}
                           </button>
 
                           <button
@@ -2760,8 +2771,9 @@ export function App() {
                         <div className="post-actions">
                           <button className={post.liked ? "post-action liked" : "post-action"} type="button" onClick={() => void toggleLike(post)}><Heart size={17} fill={post.liked ? "currentColor" : "none"} />{post.likes}</button>
                           <button className="post-action" type="button" onClick={() => void toggleComments(post.id)}><MessageCircle size={17} />{post.comments || "Reply"}</button>
-                          <button className={post.reposted ? "post-action reposted" : "post-action"} type="button" onClick={() => void repostPost(post)} disabled={repostBusy === post.id}><Repeat2 size={17} />{post.reposts || "Repost"}</button>
-                          <button className="post-action" type="button" onClick={() => void sharePost(post)}><Share2 size={17} />Share</button>
+                          <button className={post.reposted ? "post-action reposted" : "post-action"} type="button" onClick={() => void repostPost(post)} disabled={repostBusy === post.id}><Repeat2 size={17} />{post.reposts || 0}</button>
+                          <button className="post-action" type="button" onClick={() => void sharePost(post)} aria-label="Share" title="Share"><Share2 size={17} />{post.shares || 0}</button>
+                           <button className={savedPostIds.has(post.id) ? "post-action active" : "post-action"} type="button" onClick={() => toggleSavedPost(post)} aria-label={savedPostIds.has(post.id) ? "Saved" : "Save"} title={savedPostIds.has(post.id) ? "Saved" : "Save"}><Bookmark size={17} fill={savedPostIds.has(post.id) ? "currentColor" : "none"} /></button>
                         </div>
                       </article>
                     ))}</div>
