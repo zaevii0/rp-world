@@ -533,3 +533,49 @@ h1 { margin:3px 0 0; font-size:17px; letter-spacing:-.03em; }
   .highlight-card-portrait strong { left:7px; right:7px; bottom:8px; }
   .highlight-card-portrait .highlight-image { width:88px; height:164px; }
 }
+\n\n/* Theme selector — always expose the full palette */
+.theme-trigger {
+  width:42px;
+  height:36px;
+  padding:0 9px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  border:0;
+  border-radius:999px;
+  color:inherit;
+  cursor:pointer;
+}
+.theme-trigger:hover,
+.theme-trigger:focus-visible {
+  transform:translateY(-1px);
+  outline:none;
+}
+.theme-trigger-swatch {
+  width:17px;
+  height:17px;
+  flex:0 0 17px;
+  border-radius:50%;
+  box-shadow:0 0 0 2px rgba(255,255,255,.16),0 0 14px color-mix(in srgb,var(--accent) 35%,transparent);
+}
+.theme-sheet {
+  flex:0 1 auto;
+}
+.theme-sheet .theme-grid {
+  flex:1 1 auto;
+  min-height:0;
+  max-height:calc(100dvh - 220px);
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch;
+  padding:2px 4px 6px 2px;
+}
+.theme-card {
+  min-height:78px;
+}
+@media (max-width:560px) {
+  .theme-sheet .theme-grid {
+    max-height:calc(100dvh - 205px);
+  }
+}
