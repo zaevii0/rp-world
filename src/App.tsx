@@ -2181,7 +2181,7 @@ export function App() {
                     </button>
                   </div>
 
-                  {profileSection === "posts" ? (
+                  {profileSection === "posts" && (
                   profilePosts.length === 0 ? (
                     <div className="empty-state glass">
                       <Image size={22} />
@@ -2314,7 +2314,9 @@ export function App() {
                         ),
                       )}
                     </div>
-                  ) : (
+                  )}
+
+                  {profileSection === "reposts" && (
                     profileReposts.length === 0 ? (
                       <div className="empty-state glass">
                         <Repeat2 size={22} />
