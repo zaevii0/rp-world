@@ -251,3 +251,52 @@
     margin-right: 6px;
   }
 }
+
+
+/* Verified badge — compact social-platform style. */
+.verified-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 15px;
+  height: 15px;
+  margin-left: 5px;
+  border-radius: 50%;
+  background: #1877f2;
+  color: #fff;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", sans-serif;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
+  vertical-align: 2px;
+  box-shadow: 0 2px 6px rgba(24,119,242,.24);
+}
+
+.post-head .verified-badge {
+  width: 14px;
+  height: 14px;
+  margin-left: 4px;
+  font-size: 9px;
+}
+
+.profile-name-row .verified-badge {
+  width: 17px;
+  height: 17px;
+  margin-left: 6px;
+  font-size: 11px;
+  vertical-align: 2px;
+}
+
+@media (max-width: 560px) {
+  .verified-badge {
+    width: 14px;
+    height: 14px;
+    font-size: 9px;
+  }
+
+  .profile-name-row .verified-badge {
+    width: 16px;
+    height: 16px;
+    font-size: 10px;
+  }
+}
