@@ -2286,7 +2286,7 @@ export function App() {
                   RP WORLD FEED
                 </p>
 
-                <h2>{title}</h2>
+                <h2 className={view === "home" ? `greeting-title greeting-${Math.min(3, Math.max(1, Math.ceil(title.length / 24)))}` : undefined}>{title}</h2>
               </div>
 
               <div className="page-heading-actions">
