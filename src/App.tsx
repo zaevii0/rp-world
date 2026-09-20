@@ -687,6 +687,7 @@ export function App() {
       id: row.id, author_id: row.author_id, content: row.content, media_url: row.media_url,
       created_at: row.created_at, profile: targetProfile, likes: row.post_likes?.[0]?.count ?? 0,
       liked: likedSet.has(row.id), liked_at: likedAtMap.get(row.id) ?? null, comments: row.post_comments?.[0]?.count ?? 0,
+      reposts: 0, reposted: false,
     })));
 
     const { data: targetHighlights } = await supabase.from("profile_highlights")
