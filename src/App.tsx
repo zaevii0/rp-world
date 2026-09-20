@@ -1436,9 +1436,11 @@ export function App() {
                             @{profile.username}
                           </span>
                         </div>
+                      </div>
 
-                        {!viewAs && (
-                          <div className="profile-actions">
+                      <div className="profile-actions profile-social-actions">
+                        {!viewAs ? (
+                          <>
                             <button
                               className="profile-action-button"
                               type="button"
@@ -1456,18 +1458,40 @@ export function App() {
                               <Eye size={14} />
                               View as
                             </button>
-                          </div>
-                        )}
+                          </>
+                        ) : (
+                          <>
+                            <button
+                              className="profile-action-button"
+                              type="button"
+                              onClick={() =>
+                                setMessage("Follow is ready for the public profile.")
+                              }
+                            >
+                              <UserPlus size={14} />
+                              Follow
+                            </button>
 
-                        {viewAs && (
-                          <button
-                            className="profile-action-button"
-                            type="button"
-                            onClick={() => setViewAs(false)}
-                          >
-                            <ArrowLeft size={14} />
-                            Back
-                          </button>
+                            <button
+                              className="profile-action-button"
+                              type="button"
+                              onClick={() =>
+                                setMessage("Messaging will open here once direct messaging is connected.")
+                              }
+                            >
+                              <MessageCircle size={14} />
+                              Message
+                            </button>
+
+                            <button
+                              className="profile-action-button"
+                              type="button"
+                              onClick={() => setViewAs(false)}
+                            >
+                              <ArrowLeft size={14} />
+                              Back
+                            </button>
+                          </>
                         )}
                       </div>
 
