@@ -1544,7 +1544,7 @@ export function App() {
                         ) : (
                           <>
                             <button
-                              className="profile-action-button"
+                              className="profile-action-button follow-button"
                               type="button"
                               onClick={() =>
                                 setMessage("Follow is ready for the public profile.")
