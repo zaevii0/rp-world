@@ -45,6 +45,8 @@ type Post = {
   comments: number;
 };
 
+type HighlightStyle = "circle" | "portrait";
+
 type Highlight = {
   id: string;
   user_id: string;
@@ -120,6 +122,7 @@ export function App() {
   const [highlightFile, setHighlightFile] = useState<File | null>(null);
   const [highlightBusy, setHighlightBusy] = useState(false);
   const [activeHighlight, setActiveHighlight] = useState<Highlight | null>(null);
+  const [highlightStyle, setHighlightStyle] = useState<HighlightStyle>("circle");
 
   const [view, setView] = useState<
     "home" | "discover" | "profile" | "menu"
@@ -223,6 +226,7 @@ export function App() {
         setBio("");
         setAvatarUrl("");
         setCoverUrl("");
+        setHighlightStyle("circle");
         setProfileOpen(true);
       } else {
         setUsername(data.username);
@@ -230,6 +234,7 @@ export function App() {
         setBio(data.bio ?? "");
         setAvatarUrl(data.avatar_url ?? "");
         setCoverUrl(data.cover_url ?? "");
+        setHighlightStyle(data.highlight_style === "portrait" ? "portrait" : "circle");
       }
     }
 
@@ -470,6 +475,7 @@ export function App() {
       avatar_url: uploadedAvatarUrl,
       cover_url: uploadedCoverUrl,
       theme_id: theme,
+      highlight_style: highlightStyle,
     };
 
     const result = profile
@@ -1564,7 +1570,7 @@ export function App() {
                   <div className="highlights-row">
                     {!viewAs && (
                       <button
-                        className="highlight-card add-highlight glass"
+                        className={highlightStyle === "portrait" ? "highlight-card add-highlight glass highlight-card-portrait" : "highlight-card add-highlight glass highlight-card-circle"}
                         type="button"
                         onClick={() =>
                           setHighlightOpen(true)
@@ -1580,7 +1586,7 @@ export function App() {
 
                     {highlights.map((item) => (
                       <button
-                        className="highlight-card"
+                        className={highlightStyle === "portrait" ? "highlight-card highlight-card-portrait" : "highlight-card highlight-card-circle"}
                         key={item.id}
                         type="button"
                         onClick={() => setActiveHighlight(item)}
@@ -2396,6 +2402,23 @@ export function App() {
                   />
                 </div>
               </label>
+
+              <div className="highlight-style-field">
+                <div className="highlight-style-label">
+                  <span>Highlight style</span>
+                  <small>Choose how your highlights appear on your profile.</small>
+                </div>
+                <div className="highlight-style-options" role="radiogroup" aria-label="Highlight style">
+                  <button className={highlightStyle === "circle" ? "highlight-style-option active" : "highlight-style-option"} type="button" role="radio" aria-checked={highlightStyle === "circle"} onClick={() => setHighlightStyle("circle")}>
+                    <span className="style-preview style-preview-circle"><Sparkles size={15} /></span>
+                    <span><strong>Circle</strong><small>Instagram-style</small></span>
+                  </button>
+                  <button className={highlightStyle === "portrait" ? "highlight-style-option active" : "highlight-style-option"} type="button" role="radio" aria-checked={highlightStyle === "portrait"} onClick={() => setHighlightStyle("portrait")}>
+                    <span className="style-preview style-preview-portrait"><Sparkles size={15} /></span>
+                    <span><strong>Portrait</strong><small>Facebook-style</small></span>
+                  </button>
+                </div>
+              </div>
 
               <label>
                 <span>
