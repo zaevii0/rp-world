@@ -966,6 +966,73 @@ h1 { margin:3px 0 0; font-size:17px; letter-spacing:-.03em; }
   gap: 12px;
   padding: 18px;
 }
+.message-inbox-sheet {
+  grid-template-rows: auto minmax(0,1fr);
+}
+.message-inbox-list {
+  min-height: 240px;
+  overflow-y: auto;
+  display: grid;
+  gap: 8px;
+  align-content: start;
+}
+.message-conversation {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 40px minmax(0,1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  border: 1px solid transparent;
+  border-radius: 18px;
+  color: inherit;
+  background: rgba(127,127,127,.06);
+  text-align: left;
+  cursor: pointer;
+}
+.message-conversation:hover,
+.message-conversation:focus-visible {
+  border-color: color-mix(in srgb,var(--accent) 24%,transparent);
+  background: var(--accent-soft);
+  outline: none;
+}
+.message-conversation-copy {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+.message-conversation-copy strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+}
+.message-conversation-copy small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 9px;
+  opacity: .45;
+}
+.message-conversation-copy > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-top: 3px;
+  font-size: 10px;
+  opacity: .62;
+}
+.message-conversation time {
+  align-self: start;
+  padding-top: 3px;
+  font-size: 8px;
+  opacity: .42;
+  white-space: nowrap;
+}
+.message-empty-state {
+  min-height: 260px;
+  margin: 0;
+}
 .message-list {
   min-height: 240px;
   overflow-y: auto;
