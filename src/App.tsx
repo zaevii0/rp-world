@@ -2900,7 +2900,7 @@ export function App() {
                             )}
                             {post.tagged_profiles?.length ? (
                               <div className="post-tag-label"><Tag size={12} /> {post.tagged_profiles.map((item) => `@${item.username}`).join(", ")}</div>
-                            )}
+                            ) : null}
                             <div className="post-actions">
                               {!post.shared_post_id && post.author_id === session?.user.id && (
                                 <button className="post-action" type="button" onClick={() => openEditPost(post)} aria-label="Edit post">
