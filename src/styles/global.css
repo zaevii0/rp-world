@@ -959,12 +959,14 @@ h1 { margin:3px 0 0; font-size:17px; letter-spacing:-.03em; }
 }
 .message-sheet {
   width: min(100%, 520px);
+  height: min(82dvh, 700px);
   max-height: min(82dvh, 700px);
   margin: auto;
   display: grid;
   grid-template-rows: auto minmax(0,1fr) auto;
   gap: 12px;
   padding: 18px;
+  overflow: hidden;
 }
 .message-inbox-sheet {
   grid-template-rows: auto minmax(0,1fr);
@@ -1109,10 +1111,31 @@ h1 { margin:3px 0 0; font-size:17px; letter-spacing:-.03em; }
   }
   .message-sheet {
     width: 100%;
+    height: 100dvh;
     max-height: 100dvh;
-    min-height: 100dvh;
+    min-height: 0;
+    margin: 0;
     border-radius: 0;
-    padding: 16px;
+    padding: max(16px, env(safe-area-inset-top)) 16px max(12px, env(safe-area-inset-bottom));
+  }
+
+  .message-list {
+    min-height: 0;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .message-form {
+    position: sticky;
+    bottom: 0;
+    padding-top: 4px;
+    padding-bottom: max(2px, env(safe-area-inset-bottom));
+    background: inherit;
+  }
+
+  .message-form input {
+    min-height: 40px;
+    font-size: 16px;
   }
 }
 
