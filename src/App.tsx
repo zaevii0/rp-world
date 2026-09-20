@@ -830,7 +830,7 @@ export function App() {
   async function sharePost(post: Post) {
     const shareData = {
       title: post.profile?.display_name
-        ? `\${post.profile.display_name} on RP WORLD`
+        ? `${post.profile.display_name} on RP WORLD`
         : "RP WORLD post",
       text: post.content,
       url: window.location.href,
@@ -842,10 +842,15 @@ export function App() {
         return;
       }
 
-      await navigator.clipboard.writeText(
-        ${post.content}\n\n${window.location.href}`,
-      );
-      setMessage("Post link copied to clipboard.");
+      if (navigator.clipboard) {
+        await navigator.clipboard.writeText(
+          `${post.content}\n\n${window.location.href}`,
+        );
+        setMessage("Post link copied to clipboard.");
+        return;
+      }
+
+      setMessage("Sharing is not available in this browser.");
     } catch (shareError) {
       if (
         shareError instanceof DOMException &&
@@ -857,6 +862,7 @@ export function App() {
       setMessage("Could not share this post right now.");
     }
   }
+
 
   async function toggleLike(post: Post) {
     if (!supabase || !session?.user) return;
