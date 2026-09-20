@@ -38,6 +38,7 @@ import { ThemePicker } from "./components/ThemePicker";
 import { supabase, supabaseConfigured } from "./lib/supabase";
 import { themes, type Appearance, type ThemeId } from "./types/theme";
 import type { Profile } from "./types/profile";
+import { SuggestionsPage } from "./components/SuggestionsPage";
 
 function RPWorldMark() {
   return (
@@ -55,12 +56,12 @@ const APPEARANCE_KEY = "rpw-appearance";
 const VIEW_KEY = "rpw-current-view";
 const PUBLIC_PROFILE_KEY = "rpw-current-public-profile";
 
-type AppView = "home" | "discover" | "profile" | "public" | "menu";
+type AppView = "home" | "discover" | "profile" | "public" | "menu" | "suggestions";
 
 function readStoredView(): AppView {
   try {
     const saved = sessionStorage.getItem(VIEW_KEY);
-    return saved === "home" || saved === "discover" || saved === "profile" || saved === "public" || saved === "menu"
+    return saved === "home" || saved === "discover" || saved === "profile" || saved === "public" || saved === "menu" || saved === "suggestions"
       ? saved
       : "home";
   } catch {
@@ -687,6 +688,7 @@ export function App() {
     if (view === "profile") return "Your profile";
     if (view === "public") return publicProfile?.display_name ?? "Profile";
     if (view === "menu") return "RP WORLD";
+    if (view === "suggestions") return "Suggestions";
 
     return profile
       ? getElegantGreeting(profile.display_name)
@@ -3307,8 +3309,28 @@ export function App() {
               </section>
             )}
 
+            {view === "suggestions" && session && profile && (
+              <SuggestionsPage session={session} />
+            )}
+
             {view === "menu" && (
               <div className="menu-card glass">
+                <div className="menu-progress-notice">
+                  <span className="menu-progress-icon" aria-hidden="true">🚧</span>
+                  <div>
+                    <strong>RP WORLD is still in progress.</strong>
+                    <span>Some features may be added, changed, or improved as the app continues to grow.</span>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  className="menu-feature-button"
+                  onClick={() => setView("suggestions")}
+                >
+                  <Sparkles size={18} />
+                  <span>Suggestions</span>
+                </button>
                 <button
                   type="button"
                   onClick={() =>
