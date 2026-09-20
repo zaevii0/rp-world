@@ -1453,12 +1453,50 @@ h1 { margin:3px 0 0; font-size:17px; letter-spacing:-.03em; }
 }
 
 
-/* Apple/iOS typography + compact profile statistics */
+/* Apple/iOS typography — native system type across the entire app */
 :root {
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
   font-synthesis: none;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+html,
+body,
+button,
+input,
+textarea,
+select,
+option,
+::placeholder {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
+}
+
+button,
+input,
+textarea,
+select {
+  font-synthesis: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+strong,
+b,
+.brand-button strong,
+.page-heading h2,
+.profile-name-row h2,
+.sheet-header h2,
+.hero h2 {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+  font-synthesis: none;
+  -webkit-font-smoothing: antialiased;
 }
 
 .profile-stats strong {
@@ -1486,7 +1524,6 @@ h1 { margin:3px 0 0; font-size:17px; letter-spacing:-.03em; }
     font-size: 7.5px;
   }
 }
-
 
 /* Exact timestamp popover — theme-safe iOS contrast. */
 .timestamp-popover {
