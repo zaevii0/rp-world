@@ -1,6 +1,7 @@
 import {
   ArrowLeft,
   Camera,
+  ShieldCheck,
   Clock,
   Eye,
   EyeOff,
@@ -39,6 +40,7 @@ import { supabase, supabaseConfigured } from "./lib/supabase";
 import { themes, type Appearance, type ThemeId } from "./types/theme";
 import type { Profile } from "./types/profile";
 import { SuggestionsPage } from "./components/SuggestionsPage";
+import { AdminPanelPage } from "./components/AdminPanelPage";
 
 function RPWorldMark() {
   return (
@@ -56,12 +58,12 @@ const APPEARANCE_KEY = "rpw-appearance";
 const VIEW_KEY = "rpw-current-view";
 const PUBLIC_PROFILE_KEY = "rpw-current-public-profile";
 
-type AppView = "home" | "discover" | "profile" | "public" | "menu" | "suggestions";
+type AppView = "home" | "discover" | "profile" | "public" | "menu" | "suggestions" | "admin";
 
 function readStoredView(): AppView {
   try {
     const saved = sessionStorage.getItem(VIEW_KEY);
-    return saved === "home" || saved === "discover" || saved === "profile" || saved === "public" || saved === "menu" || saved === "suggestions"
+    return saved === "home" || saved === "discover" || saved === "profile" || saved === "public" || saved === "menu" || saved === "suggestions" || saved === "admin"
       ? saved
       : "home";
   } catch {
@@ -217,6 +219,7 @@ export function App() {
 
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const [posts, setPosts] = useState<Post[]>([]);
   const [profilePosts, setProfilePosts] = useState<Post[]>([]);
@@ -431,6 +434,25 @@ export function App() {
 
     void loadProfile();
 
+    return () => {
+      active = false;
+    };
+  }, [session]);
+
+  useEffect(() => {
+    let active = true;
+
+    async function checkAdmin() {
+      if (!supabase || !session?.user) {
+        if (active) setIsAdmin(false);
+        return;
+      }
+
+      const { data, error: adminError } = await supabase.rpc("is_admin");
+      if (active) setIsAdmin(!adminError && data === true);
+    }
+
+    void checkAdmin();
     return () => {
       active = false;
     };
@@ -3313,6 +3335,10 @@ export function App() {
               <SuggestionsPage session={session} />
             )}
 
+            {view === "admin" && session && profile && isAdmin && (
+              <AdminPanelPage />
+            )}
+
             {view === "menu" && (
               <div className="menu-card glass">
                 <div className="menu-progress-notice">
@@ -3331,6 +3357,17 @@ export function App() {
                   <Sparkles size={18} />
                   <span>Suggestions</span>
                 </button>
+
+                {isAdmin && (
+                  <button
+                    type="button"
+                    className="menu-feature-button admin-menu-button"
+                    onClick={() => setView("admin")}
+                  >
+                    <ShieldCheck size={18} />
+                    <span>Admin Panel</span>
+                  </button>
+                )}
                 <button
                   type="button"
                   onClick={() =>
