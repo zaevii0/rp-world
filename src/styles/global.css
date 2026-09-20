@@ -979,3 +979,256 @@ h1 { margin:3px 0 0; font-size:17px; letter-spacing:-.03em; }
   color: var(--muted);
   line-height: 1.5;
 }
+
+
+/* Profile UX refinement — balanced hierarchy, spacing and type scale */
+.profile-hero {
+  border-radius: 28px;
+}
+
+.profile-cover {
+  height: 176px;
+}
+
+.profile-main {
+  padding: 0 24px 24px;
+}
+
+.profile-avatar-wrap {
+  margin-top: -56px;
+}
+
+.profile-avatar {
+  width: 120px;
+  height: 120px;
+  border-width: 4px;
+}
+
+.profile-identity {
+  padding-top: 13px;
+}
+
+.profile-name-row h2 {
+  font-size: 24px;
+  line-height: 1.12;
+  font-weight: 750;
+}
+
+.profile-name-row > div > span {
+  margin-top: 4px;
+  font-size: 12px;
+}
+
+.profile-bio {
+  max-width: 500px;
+  margin: 11px auto 13px;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.profile-social-actions {
+  margin-bottom: 2px;
+}
+
+.profile-meta {
+  margin-top: 9px;
+  gap: 6px;
+}
+
+.profile-meta span {
+  padding: 5px 8px;
+  font-size: 9px;
+}
+
+/* Counts belong in a dedicated, quiet statistics row. */
+.profile-stats {
+  width: min(100%, 440px);
+  margin: 14px auto 0;
+  border-top: 1px solid rgba(127,127,127,.13);
+  border-bottom: 1px solid rgba(127,127,127,.13);
+}
+
+.profile-stats > div {
+  min-height: 62px;
+  padding: 8px 6px;
+  gap: 3px;
+}
+
+.profile-stats strong {
+  font-size: 16px;
+  line-height: 1;
+  font-weight: 750;
+  letter-spacing: -.02em;
+}
+
+.profile-stats span {
+  font-size: 9px;
+  line-height: 1.2;
+  opacity: .48;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+}
+
+.profile-section {
+  gap: 10px;
+}
+
+.section-heading {
+  margin-bottom: 1px;
+}
+
+.section-heading h3 {
+  font-size: 19px;
+}
+
+/* Highlights: compact enough for mobile, large enough to read. */
+.highlights-row {
+  gap: 13px;
+  padding: 3px 2px 7px;
+  align-items:flex-start;
+}
+
+.highlight-card,
+.highlight-card strong {
+  width: 78px;
+}
+
+.highlight-card {
+  flex: 0 0 78px;
+  min-height: 104px;
+  grid-template-rows: 78px auto;
+  gap: 7px;
+}
+
+.highlight-image {
+  width: 78px;
+  height: 78px;
+  border-width: 3px;
+}
+
+.highlight-card strong {
+  font-size: 10px;
+  line-height: 1.2;
+}
+
+.add-highlight > span {
+  width: 78px;
+  height: 78px;
+}
+
+.highlight-card-portrait {
+  width: 82px;
+  flex-basis: 82px;
+  min-height: 130px;
+  grid-template-rows: 130px;
+}
+
+.highlight-card-portrait .highlight-image {
+  width: 82px;
+  height: 130px;
+  border-radius: 13px;
+}
+
+.highlight-card-portrait strong {
+  width: 100%;
+  font-size: 10px;
+}
+
+@media (max-width: 560px) {
+  .profile-cover {
+    height: 142px;
+  }
+
+  .profile-main {
+    padding: 0 14px 18px;
+  }
+
+  .profile-avatar-wrap {
+    margin-top: -48px;
+  }
+
+  .profile-avatar {
+    width: 104px;
+    height: 104px;
+    border-width: 3px;
+  }
+
+  .profile-identity {
+    padding-top: 10px;
+  }
+
+  .profile-name-row h2 {
+    font-size: 20px;
+  }
+
+  .profile-name-row > div > span {
+    font-size: 11px;
+  }
+
+  .profile-bio {
+    margin: 9px auto 11px;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  .profile-meta {
+    margin-top: 7px;
+  }
+
+  .profile-meta span {
+    font-size: 8.5px;
+    padding: 5px 7px;
+  }
+
+  .profile-stats {
+    width: 100%;
+    margin-top: 12px;
+  }
+
+  .profile-stats > div {
+    min-height: 56px;
+    padding: 7px 4px;
+  }
+
+  .profile-stats strong {
+    font-size: 15px;
+  }
+
+  .profile-stats span {
+    font-size: 8px;
+  }
+
+  .highlights-row {
+    gap: 11px;
+  }
+
+  .highlight-card,
+  .highlight-card strong,
+  .highlight-image,
+  .add-highlight > span {
+    width: 72px;
+  }
+
+  .highlight-card {
+    flex-basis: 72px;
+    min-height: 98px;
+    grid-template-rows: 72px auto;
+  }
+
+  .highlight-image,
+  .add-highlight > span {
+    height: 72px;
+  }
+
+  .highlight-card-portrait {
+    width: 80px;
+    flex-basis: 80px;
+    min-height: 128px;
+    grid-template-rows: 128px;
+  }
+
+  .highlight-card-portrait .highlight-image {
+    width: 80px;
+    height: 128px;
+  }
+}
