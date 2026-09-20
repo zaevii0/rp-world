@@ -3332,14 +3332,14 @@ export function App() {
               <button className="icon-button" type="button" aria-label="Close" onClick={() => setPostActionTarget(null)} disabled={postActionBusy}><X size={18} /></button>
             </div>
             <div className="post-action-menu">
-              <button type="button" onClick={() => { const target = postActionTarget; setPostActionTarget(null); openEditPost(target); }}>
-                <Pencil size={18} /><span>Edit post</span>
-              </button>
               <button type="button" onClick={() => void managePostAction("pin")} disabled={postActionBusy}>
                 <Pin size={18} /><span>{postActionTarget.pinned_at ? "Unpin post" : "Pin post"}</span>
               </button>
               <button type="button" onClick={() => void openTagPost(postActionTarget)}>
                 <Tag size={18} /><span>Tag</span>
+              </button>
+              <button type="button" onClick={() => { const target = postActionTarget; setPostActionTarget(null); openEditPost(target); }}>
+                <Pencil size={18} /><span>Edit post</span>
               </button>
               <button type="button" onClick={() => void managePostAction("archive")} disabled={postActionBusy}>
                 <Archive size={18} /><span>Move to archive</span>
