@@ -449,7 +449,11 @@ export function App() {
       }
 
       const { data, error: adminError } = await supabase.rpc("is_admin");
-      if (active) setIsAdmin(!adminError && data === true);
+      const allowed = !adminError && data === true;
+      if (active) {
+        setIsAdmin(allowed);
+        if (!allowed && view === "admin") setView("menu");
+      }
     }
 
     void checkAdmin();
