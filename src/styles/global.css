@@ -522,12 +522,14 @@ h1 { margin:3px 0 0; font-size:17px; letter-spacing:-.03em; }
 .style-preview-circle { border-radius:50%; border:2px solid color-mix(in srgb,var(--accent) 42%,rgba(127,127,127,.2)); }
 .style-preview-portrait { border-radius:10px; border:1px solid color-mix(in srgb,var(--accent) 35%,rgba(127,127,127,.2)); }
 .highlight-card-circle .highlight-image { border-radius:50%; }
-.highlight-card-portrait { width:104px; flex-basis:104px; min-height:192px; grid-template-rows:185px auto; gap:7px; }
-.highlight-card-portrait strong { width:104px; }
-.highlight-card-portrait .highlight-image { width:104px; height:185px; aspect-ratio:9 / 16; border-radius:13px; border:1px solid color-mix(in srgb,var(--accent) 35%,rgba(127,127,127,.18)); padding:0; box-shadow:0 5px 18px rgba(0,0,0,.12); }
-.highlight-card-portrait .add-highlight > span { border-radius:13px; aspect-ratio:9 / 16; }
+.highlight-card-portrait { width:98px; flex-basis:98px; min-height:189px; grid-template-rows:182px auto; gap:7px; }
+.highlight-card-portrait strong { width:98px; }
+.highlight-card-portrait .highlight-image { width:98px; height:182px; aspect-ratio:49 / 91; border-radius:13px; border:1px solid rgba(127,127,127,.18); padding:0; box-shadow:0 5px 18px rgba(0,0,0,.12); }
+.highlight-card-portrait:hover .highlight-image,
+.highlight-card-portrait:focus-visible .highlight-image { border-color:rgba(127,127,127,.18); box-shadow:0 8px 22px rgba(0,0,0,.12); outline:none; }
+.highlight-card-portrait .add-highlight > span { border-radius:13px; aspect-ratio:49 / 91; }
 @media (max-width:560px) {
-  .highlight-card-portrait { width:92px; flex-basis:92px; min-height:171px; grid-template-rows:164px auto; }
-  .highlight-card-portrait strong { width:92px; }
-  .highlight-card-portrait .highlight-image { width:92px; height:164px; }
+  .highlight-card-portrait { width:88px; flex-basis:88px; min-height:171px; grid-template-rows:164px auto; }
+  .highlight-card-portrait strong { width:88px; }
+  .highlight-card-portrait .highlight-image { width:88px; height:164px; }
 }
