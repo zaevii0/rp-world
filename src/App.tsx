@@ -3,7 +3,6 @@ import {
   Camera,
   Clock,
   Eye,
-  EyeOff,
   Heart,
   Home,
   Image,
@@ -135,7 +134,6 @@ export function App() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
 
   const [profileOpen, setProfileOpen] = useState(false);
   const [composerOpen, setComposerOpen] = useState(false);
@@ -388,25 +386,6 @@ export function App() {
 
       setAuthOpen(false);
       setPassword("");
-    }
-  }
-
-  async function handleGoogleAuth() {
-    if (!supabase) return;
-
-    setBusy(true);
-    resetAuthMessages();
-
-    const { error: googleError } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: window.location.origin,
-      },
-    });
-
-    if (googleError) {
-      setBusy(false);
-      setError(googleError.message);
     }
   }
 
@@ -2020,31 +1999,6 @@ export function App() {
               </div>
             ) : (
               <>
-                <div className="social-auth">
-                <button
-                  className="google-auth-button"
-                  type="button"
-                  onClick={handleGoogleAuth}
-                  disabled={busy}
-                >
-                  <svg
-                    className="google-auth-icon"
-                    viewBox="0 0 24 24"
-                    aria-hidden="true"
-                  >
-                    <path fill="#4285F4" d="M21.35 12.23c0-.72-.06-1.42-.18-2.09H12v3.96h5.24a4.48 4.48 0 0 1-1.94 2.94v2.45h3.14c1.84-1.69 2.91-4.18 2.91-7.26Z"/>
-                    <path fill="#34A853" d="M12 21.75c2.63 0 4.84-.87 6.45-2.36l-3.14-2.45c-.87.58-1.98.93-3.31.93-2.54 0-4.69-1.72-5.46-4.03H3.3v2.53A9.74 9.74 0 0 0 12 21.75Z"/>
-                    <path fill="#FBBC05" d="M6.54 13.84a5.85 5.85 0 0 1 0-3.68V7.63H3.3a9.76 9.76 0 0 0 0 8.74l3.24-2.53Z"/>
-                    <path fill="#EA4335" d="M12 6.13c1.43 0 2.72.49 3.73 1.45l2.8-2.8C16.84 3.14 14.63 2.25 12 2.25a9.74 9.74 0 0 0-8.7 5.38l3.24 2.53C7.31 7.85 9.46 6.13 12 6.13Z"/>
-                  </svg>
-                  <span>Continue with Google</span>
-                </button>
-
-                <div className="social-auth-divider">
-                  <span>or</span>
-                </div>
-              </div>
-
               <form
                 className="auth-form"
                 onSubmit={handleAuth}
@@ -2073,9 +2027,8 @@ export function App() {
                 <label>
                   <span>Password</span>
 
-                  <div className="input-wrap password-input-wrap">
-                    <input
-                      type={showPassword ? "text" : "password"}
+                  <div className="input-wrap">
+<input
                       value={password}
                       onChange={(event) =>
                         setPassword(
@@ -2090,17 +2043,7 @@ export function App() {
                       }
                       minLength={6}
                       required
-                    />
-                    <button
-                      className="password-toggle"
-                      type="button"
-                      aria-label={showPassword ? "Hide password" : "Show password"}
-                      title={showPassword ? "Hide password" : "Show password"}
-                      onClick={() => setShowPassword((visible) => !visible)}
-                    >
-                      {showPassword ? <EyeOff size={17} strokeWidth={2} /> : <Eye size={17} strokeWidth={2} />}
-                    </button>
-                  </div>
+                    />                  </div>
                 </label>
 
                 {error && (
