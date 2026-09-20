@@ -15,7 +15,6 @@ import {
   MessageCircle,
   Share2,
   Repeat2,
-  Video,
   Moon,
   Pencil,
   Plus,
@@ -2563,9 +2562,8 @@ export function App() {
                               </div>
                             </div>
 
-                            <p className="post-content">
-                              {post.content}
-                            </p>
+                            {renderExpandablePostContent(post.content, post.id)}
+                            {renderPostMedia(post.media_url, post.media_type)}
 
                             <div className="post-actions">
                               {!post.shared_post_id && post.author_id === session?.user.id && (
