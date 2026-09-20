@@ -3,7 +3,6 @@ import {
   Heart,
   Home,
   Image,
-  Link as LinkIcon,
   LogIn,
   LogOut,
   Mail,
@@ -107,6 +106,7 @@ export function App() {
   const [highlightOpen, setHighlightOpen] = useState(false);
   const [highlightTitle, setHighlightTitle] = useState("");
   const [highlightImage, setHighlightImage] = useState("");
+  const [highlightFile, setHighlightFile] = useState<File | null>(null);
   const [highlightBusy, setHighlightBusy] = useState(false);
 
   const [view, setView] = useState<
@@ -517,19 +517,51 @@ export function App() {
 
     setHighlightBusy(true);
 
+    let imageUrl = highlightImage.trim() || null;
+
+    if (highlightFile) {
+      const extension = highlightFile.name.split(".").pop()?.toLowerCase() || "jpg";
+      const filePath = `${session.user.id}/${crypto.randomUUID()}.${extension}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("profile-highlights")
+        .upload(filePath, highlightFile, {
+          cacheControl: "3600",
+          contentType: highlightFile.type || "image/jpeg",
+          upsert: false,
+        });
+
+      if (uploadError) {
+        setHighlightBusy(false);
+        setProfileError(`Image upload failed: ${uploadError.message}`);
+        return;
+      }
+
+      const { data: publicUrl } = supabase.storage
+        .from("profile-highlights")
+        .getPublicUrl(filePath);
+
+      imageUrl = publicUrl.publicUrl;
+    }
+
     const { data, error: saveError } = await supabase
       .from("profile_highlights")
       .insert({
         user_id: session.user.id,
         title: highlightTitle.trim(),
-        image_url: highlightImage.trim() || null,
+        image_url: imageUrl,
       })
       .select("id, user_id, title, image_url, created_at")
       .single();
 
     setHighlightBusy(false);
 
-    if (saveError || !data) return;
+    if (saveError || !data) {
+      if (saveError) {
+        setProfileError(`Could not save highlight: ${saveError.message}`);
+      }
+      return;
+    }
 
     setHighlights((current) => [
       ...current,
@@ -538,6 +570,8 @@ export function App() {
 
     setHighlightTitle("");
     setHighlightImage("");
+    setHighlightFile(null);
+    setProfileError("");
     setHighlightOpen(false);
   }
 
@@ -1890,10 +1924,9 @@ export function App() {
             </div>
 
             <p className="sheet-copy">
-              Create a highlight for your
-              profile. You can add an image URL
-              now; image uploads can be connected
-              to Supabase Storage next.
+              Create a highlight for your profile.
+              Choose a photo from your device and
+              give the moment a short title.
             </p>
 
             <form
@@ -1920,21 +1953,21 @@ export function App() {
 
               <label>
                 <span>
-                  Image URL{" "}
+                  Photo{" "}
                   <small>optional</small>
                 </span>
 
                 <div className="input-wrap">
-                  <LinkIcon size={15} />
+                  <Image size={15} />
 
                   <input
-                    value={highlightImage}
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,image/gif"
                     onChange={(event) =>
-                      setHighlightImage(
-                        event.target.value,
+                      setHighlightFile(
+                        event.target.files?.[0] ?? null,
                       )
                     }
-                    placeholder="https://…"
                   />
                 </div>
               </label>
