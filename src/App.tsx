@@ -2182,138 +2182,79 @@ export function App() {
                   </div>
 
                   {profileSection === "posts" && (
-                  profilePosts.length === 0 ? (
-                    <div className="empty-state glass">
-                      <Image size={22} />
-
-                      <strong>
-                        No posts yet.
-                      </strong>
-
-                      <span>
-                        Your published posts will
-                        appear here.
-                      </span>
-
-                      {!viewAs && (
-                        <button
-                          className="primary-button"
-                          type="button"
-                          onClick={() =>
-                            setComposerOpen(true)
-                          }
-                        >
-                          Create a post
-                        </button>
+                    <>
+                      {profilePosts.length === 0 && (
+                        <div className="empty-state glass">
+                          <Image size={22} />
+                          <strong>No posts yet.</strong>
+                          <span>Your published posts will appear here.</span>
+                          {!viewAs && (
+                            <button className="primary-button" type="button" onClick={() => setComposerOpen(true)}>
+                              Create a post
+                            </button>
+                          )}
+                        </div>
                       )}
-                    </div>
-                  ) : (
-                    <div className="feed-list">
-                      {profilePosts.map(
-                        (post) => (
-                          <article
-                            className="post-card glass"
-                            key={post.id}
-                          >
-                            <div className="post-head">
-                              <div
-                                className="avatar"
-                                style={
-                                  profile.avatar_url
-                                    ? {
-                                        backgroundImage: `url(${profile.avatar_url})`,
-                                      }
-                                    : undefined
-                                }
-                              >
-                                {!profile.avatar_url &&
-                                  initials(
-                                    profile.display_name,
+
+                      {profilePosts.length > 0 && (
+                        <div className="feed-list">
+                          {profilePosts.map((post) => (
+                            <article className="post-card glass" key={post.id}>
+                              <div className="post-head">
+                                <div
+                                  className="avatar"
+                                  style={profile.avatar_url ? { backgroundImage: `url(${profile.avatar_url})` } : undefined}
+                                >
+                                  {!profile.avatar_url && initials(profile.display_name)}
+                                </div>
+                                <div>
+                                  <strong>{profile.display_name}</strong>
+                                  <span className="post-meta">
+                                    @{profile.username} ·{" "}
+                                    <button
+                                      className="timestamp-button"
+                                      type="button"
+                                      onClick={() => setOpenTimestamp(openTimestamp === post.id ? null : post.id)}
+                                      title="Show exact date and time"
+                                    >
+                                      <Clock size={11} />
+                                      {timeAgo(post.created_at)}
+                                    </button>
+                                  </span>
+                                  {openTimestamp === post.id && (
+                                    <div className="timestamp-popover">
+                                      <strong>Posted</strong>
+                                      <span>{exactTime(post.created_at)}</span>
+                                      {post.liked && post.liked_at && (
+                                        <>
+                                          <strong>Liked by you</strong>
+                                          <span>{exactTime(post.liked_at)}</span>
+                                        </>
+                                      )}
+                                    </div>
                                   )}
+                                </div>
                               </div>
-
-                              <div>
-                                <strong>
-                                  {
-                                    profile.display_name
-                                  }
-                                </strong>
-
-                                <span className="post-meta">
-                                  @
-                                  {
-                                    profile.username
-                                  }{" "}
-                                  ·{" "}
-                                  <button
-                                    className="timestamp-button"
-                                    type="button"
-                                    onClick={() =>
-                                      setOpenTimestamp(
-                                        openTimestamp === post.id ? null : post.id,
-                                      )
-                                    }
-                                    title="Show exact date and time"
-                                  >
-                                    <Clock size={11} />
-                                    {timeAgo(post.created_at)}
-                                  </button>
+                              <p className="post-content">{post.content}</p>
+                              <div className="post-actions">
+                                <button
+                                  className={post.liked ? "post-action liked" : "post-action"}
+                                  type="button"
+                                  onClick={() => void toggleLike(post)}
+                                >
+                                  <Heart size={17} fill={post.liked ? "currentColor" : "none"} />
+                                  {post.likes}
+                                </button>
+                                <span className="post-action">
+                                  <MessageCircle size={17} />
+                                  {post.comments}
                                 </span>
-                                {openTimestamp === post.id && (
-                                  <div className="timestamp-popover">
-                                    <strong>Posted</strong>
-                                    <span>{exactTime(post.created_at)}</span>
-                                    {post.liked && post.liked_at && (
-                                      <>
-                                        <strong>Liked by you</strong>
-                                        <span>{exactTime(post.liked_at)}</span>
-                                      </>
-                                    )}
-                                  </div>
-                                )}
                               </div>
-                            </div>
-
-                            <p className="post-content">
-                              {post.content}
-                            </p>
-
-                            <div className="post-actions">
-                              <button
-                                className={
-                                  post.liked
-                                    ? "post-action liked"
-                                    : "post-action"
-                                }
-                                type="button"
-                                onClick={() =>
-                                  void toggleLike(
-                                    post,
-                                  )
-                                }
-                              >
-                                <Heart
-                                  size={17}
-                                  fill={
-                                    post.liked
-                                      ? "currentColor"
-                                      : "none"
-                                  }
-                                />
-                                {post.likes}
-                              </button>
-
-                              <span className="post-action">
-                                <MessageCircle
-                                  size={17}
-                                />
-                                {post.comments}
-                              </span>
-                            </div>
-                          </article>
-                        ),
+                            </article>
+                          ))}
+                        </div>
                       )}
-                    </div>
+                    </>
                   )}
 
                   {profileSection === "reposts" && (
