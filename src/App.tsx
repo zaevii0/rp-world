@@ -380,8 +380,6 @@ export function App() {
         comments: row.post_comments?.[0]?.count ?? 0,
         reposts: 0,
         reposted: false,
-        reposts: 0,
-        reposted: false,
       })),
     );
   }
@@ -651,8 +649,6 @@ export function App() {
         liked: likedSet.has(row.id),
         liked_at: likedAtMap.get(row.id) ?? null,
         comments: row.post_comments?.[0]?.count ?? 0,
-        reposts: 0,
-        reposted: false,
         reposts: 0,
         reposted: false,
       })),
