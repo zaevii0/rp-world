@@ -2184,16 +2184,21 @@ export function App() {
                   <Search size={17} />
                 </button>
 
-                {viewAs && (
+                {(view === "public" || viewAs) && (
                   <button
                     className="glass circle-button"
                     type="button"
                     onClick={() => {
-                      setViewAs(false);
-                      setView("profile");
+                      if (view === "public") {
+                        setView("discover");
+                        setPublicProfile(null);
+                      } else {
+                        setViewAs(false);
+                        setView("profile");
+                      }
                     }}
-                    aria-label="Back to your profile"
-                    title="Back to your profile"
+                    aria-label="Back"
+                    title="Back"
                   >
                     <ArrowLeft size={17} />
                   </button>
@@ -3167,13 +3172,6 @@ export function App() {
             <Search size={19} />
             <span>Discover</span>
           </button>
-
-          {view === "public" && (
-            <button className="nav-item public-back-nav" type="button" aria-label="Back" title="Back" onClick={() => { setView("discover"); setPublicProfile(null); setViewAs(false); }}>
-              <ArrowLeft size={19} />
-              <span>Back</span>
-            </button>
-          )}
 
           <button
             className="nav-create"
