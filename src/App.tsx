@@ -41,6 +41,21 @@ import type { Profile } from "./types/profile";
 
 const THEME_KEY = "rpw-theme";
 const APPEARANCE_KEY = "rpw-appearance";
+const VIEW_KEY = "rpw-current-view";
+const PUBLIC_PROFILE_KEY = "rpw-current-public-profile";
+
+type AppView = "home" | "discover" | "profile" | "public" | "menu";
+
+function readStoredView(): AppView {
+  try {
+    const saved = sessionStorage.getItem(VIEW_KEY);
+    return saved === "home" || saved === "discover" || saved === "profile" || saved === "public" || saved === "menu"
+      ? saved
+      : "home";
+  } catch {
+    return "home";
+  }
+}
 
 type Post = {
   id: string;
@@ -158,9 +173,7 @@ export function App() {
   const [activePostMedia, setActivePostMedia] = useState<{ url: string; type: "image" | "video" } | null>(null);
   const [highlightStyle, setHighlightStyle] = useState<HighlightStyle>("circle");
 
-  const [view, setView] = useState<
-    "home" | "discover" | "profile" | "public" | "menu"
-  >("home");
+  const [view, setView] = useState<AppView>(readStoredView);
 
   const [authOpen, setAuthOpen] = useState(false);
   const [authMode, setAuthMode] =
@@ -265,6 +278,30 @@ export function App() {
     localStorage.setItem(APPEARANCE_KEY, appearance);
     document.documentElement.dataset.appearance = appearance;
   }, [appearance]);
+
+  // Preserve the current SPA page across a browser/app refresh. This uses
+  // sessionStorage intentionally: a refresh restores the page, while a new
+  // browsing session starts cleanly at Home.
+  useEffect(() => {
+    try {
+      sessionStorage.setItem(VIEW_KEY, view);
+      if (view !== "public") sessionStorage.removeItem(PUBLIC_PROFILE_KEY);
+    } catch {
+      // Storage can be unavailable in privacy-restricted environments.
+    }
+  }, [view]);
+
+  // Public profiles need their target id restored before their data can be fetched.
+  useEffect(() => {
+    if (view !== "public" || publicProfile || !session?.user || !supabase) return;
+
+    try {
+      const userId = sessionStorage.getItem(PUBLIC_PROFILE_KEY);
+      if (userId) void loadPublicProfile(userId);
+    } catch {
+      // Ignore unavailable session storage; normal navigation still works.
+    }
+  }, [view, publicProfile, session]);
 
   useEffect(() => {
     if (!supabase) return;
@@ -1108,6 +1145,11 @@ export function App() {
     setFollowedByPublicProfile(Boolean(reverseFollow));
     setPublicProfileFriend(Boolean(myFollow && reverseFollow));
     setPublicProfile(targetProfile);
+    try {
+      sessionStorage.setItem(PUBLIC_PROFILE_KEY, userId);
+    } catch {
+      // Ignore unavailable session storage; the current view still works.
+    }
     await loadProfileStats(userId);
     setView("public");
     setViewAs(false);
@@ -2025,6 +2067,12 @@ export function App() {
     setProfileSection("posts");
     setHighlights([]);
     setView("home");
+    try {
+      sessionStorage.removeItem(VIEW_KEY);
+      sessionStorage.removeItem(PUBLIC_PROFILE_KEY);
+    } catch {
+      // Ignore unavailable session storage.
+    }
     setViewAs(false);
     setProfileOpen(false);
   }
