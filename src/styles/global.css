@@ -1597,6 +1597,12 @@ b,
   min-width: 0;
   padding-right: 40px;
 }
+.post-head > .avatar {
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+  padding-right: 0;
+}
 .post-more-button {
   position: absolute;
   top: -3px;
