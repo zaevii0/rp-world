@@ -18,6 +18,15 @@ type Post = {
   profile?: Profile;
   likes: number;
   liked: boolean;
+  comments: number;
+};
+type Comment = {
+  id: string;
+  post_id: string;
+  author_id: string;
+  content: string;
+  created_at: string;
+  profile?: Profile;
 };
 
 function readTheme(): ThemeId {
@@ -66,6 +75,10 @@ export function App() {
   const [error, setError] = useState("");
   const [profileError, setProfileError] = useState("");
   const [feedError, setFeedError] = useState("");
+  const [openComments, setOpenComments] = useState<string | null>(null);
+  const [commentsByPost, setCommentsByPost] = useState<Record<string, Comment[]>>({});
+  const [commentDrafts, setCommentDrafts] = useState<Record<string, string>>({});
+  const [commentBusy, setCommentBusy] = useState<string | null>(null);
 
   useEffect(() => {
     localStorage.setItem(THEME_KEY, theme);
@@ -123,7 +136,7 @@ export function App() {
     setFeedError("");
     const { data, error: loadError } = await supabase
       .from("posts")
-      .select("id, author_id, content, media_url, created_at, post_likes(count)")
+      .select("id, author_id, content, media_url, created_at, post_likes(count), post_comments(count)")
       .order("created_at", { ascending: false })
       .limit(30);
     if (loadError) {
@@ -153,6 +166,7 @@ export function App() {
       profile: profileMap.get(row.author_id),
       likes: row.post_likes?.[0]?.count ?? 0,
       liked: likedSet.has(row.id),
+      comments: row.post_comments?.[0]?.count ?? 0,
     })));
   }
 
@@ -253,6 +267,61 @@ export function App() {
     await loadFeed();
   }
 
+  async function loadComments(postId: string) {
+    if (!supabase || !session?.user) return;
+    const { data, error: loadError } = await supabase
+      .from("post_comments")
+      .select("id, post_id, author_id, content, created_at")
+      .eq("post_id", postId)
+      .order("created_at", { ascending: true });
+
+    if (loadError) return;
+    const rows = (data ?? []) as Comment[];
+    const authorIds = [...new Set(rows.map((row) => row.author_id))];
+    const { data: profiles } = authorIds.length
+      ? await supabase.from("profiles").select("*").in("id", authorIds)
+      : { data: [] as Profile[] };
+    const profileMap = new Map((profiles ?? []).map((item) => [item.id, item as Profile]));
+    setCommentsByPost((current) => ({
+      ...current,
+      [postId]: rows.map((row) => ({ ...row, profile: profileMap.get(row.author_id) })),
+    }));
+  }
+
+  async function toggleComments(postId: string) {
+    const next = openComments === postId ? null : postId;
+    setOpenComments(next);
+    if (next && !commentsByPost[postId]) await loadComments(postId);
+  }
+
+  async function createComment(event: FormEvent, postId: string) {
+    event.preventDefault();
+    if (!supabase || !session?.user) return;
+    const content = (commentDrafts[postId] ?? "").trim();
+    if (!content) return;
+    setCommentBusy(postId);
+    const { data, error: saveError } = await supabase
+      .from("post_comments")
+      .insert({ post_id: postId, author_id: session.user.id, content })
+      .select("id, post_id, author_id, content, created_at")
+      .single();
+    setCommentBusy(null);
+    if (saveError || !data) return;
+
+    const newComment = {
+      ...(data as Comment),
+      profile,
+    };
+    setCommentsByPost((current) => ({
+      ...current,
+      [postId]: [...(current[postId] ?? []), newComment],
+    }));
+    setCommentDrafts((current) => ({ ...current, [postId]: "" }));
+    setPosts((current) => current.map((item) =>
+      item.id === postId ? { ...item, comments: item.comments + 1 } : item
+    ));
+  }
+
   async function toggleLike(post: Post) {
     if (!supabase || !session?.user) return;
     setPosts((current) => current.map((item) => item.id === post.id
@@ -336,8 +405,37 @@ export function App() {
                       <p className="post-content">{post.content}</p>
                       <div className="post-actions">
                         <button className={post.liked ? "post-action liked" : "post-action"} type="button" onClick={() => void toggleLike(post)}><Heart size={17} fill={post.liked ? "currentColor" : "none"} />{post.likes}</button>
-                        <button className="post-action" type="button"><MessageCircle size={17} /> Reply</button>
+                        <button className={openComments === post.id ? "post-action active" : "post-action"} type="button" onClick={() => void toggleComments(post.id)}><MessageCircle size={17} /> {post.comments || "Reply"}</button>
                       </div>
+                      {openComments === post.id && (
+                        <div className="comments-panel">
+                          <div className="comments-list">
+                            {(commentsByPost[post.id] ?? []).length === 0 ? (
+                              <span className="comments-empty">No replies yet. Start the conversation.</span>
+                            ) : (
+                              (commentsByPost[post.id] ?? []).map((comment) => (
+                                <div className="comment-row" key={comment.id}>
+                                  <span className="avatar small-avatar">{initials(comment.profile?.display_name ?? "RP")}</span>
+                                  <div><strong>{comment.profile?.display_name ?? "RP WORLD member"}</strong><p>{comment.content}</p></div>
+                                </div>
+                              ))
+                            )}
+                          </div>
+                          <form className="comment-form" onSubmit={(event) => void createComment(event, post.id)}>
+                            <span className="avatar small-avatar">{initials(profile.display_name)}</span>
+                            <input
+                              value={commentDrafts[post.id] ?? ""}
+                              onChange={(event) => setCommentDrafts((current) => ({ ...current, [post.id]: event.target.value }))}
+                              placeholder="Write a reply…"
+                              maxLength={500}
+                              aria-label="Write a reply"
+                            />
+                            <button type="submit" disabled={commentBusy === post.id || !(commentDrafts[post.id] ?? "").trim()} aria-label="Send reply">
+                              {commentBusy === post.id ? "…" : "Send"}
+                            </button>
+                          </form>
+                        </div>
+                      )}
                     </article>
                   ))}
                 </div>
