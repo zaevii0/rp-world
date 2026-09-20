@@ -618,3 +618,15 @@ h1 { margin:3px 0 0; font-size:17px; letter-spacing:-.03em; }
     height:27px;
   }
 }
+
+
+/* Center public-view highlights when the row is short */
+.highlights-row.view-as {
+  justify-content: center;
+}
+
+@media (max-width:560px) {
+  .highlights-row.view-as {
+    justify-content: center;
+  }
+}
