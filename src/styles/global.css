@@ -618,9 +618,41 @@ h1 { margin:3px 0 0; font-size:17px; letter-spacing:-.03em; }
 
 /* Keep the theme picker centered on every screen size. */
 .sheet-backdrop:has(.theme-sheet) {
+  position:fixed;
+  inset:0;
+  width:100vw;
+  height:100dvh;
   align-items:center;
   justify-content:center;
   padding:20px;
+  box-sizing:border-box;
+}
+
+/* Center the theme picker against the actual mobile viewport, not the page content. */
+@media (max-width:560px) {
+  .sheet-backdrop:has(.theme-sheet) {
+    position:fixed !important;
+    inset:0 !important;
+    width:100vw !important;
+    height:100dvh !important;
+    min-height:100dvh !important;
+    padding:12px !important;
+    display:flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+  }
+
+  .sheet-backdrop:has(.theme-sheet) .theme-sheet {
+    position:relative;
+    top:auto;
+    left:auto;
+    right:auto;
+    bottom:auto;
+    margin:0 !important;
+    transform:none !important;
+    width:min(100%,420px);
+    max-height:calc(100dvh - 24px);
+  }
 }
 
 .theme-sheet {
