@@ -2770,6 +2770,22 @@ export function App() {
         </div>
       )}
 
+      {editPostOpen && editPostTarget && session && profile && (
+        <div className="sheet-backdrop" role="presentation" onClick={() => setEditPostOpen(false)}>
+          <section className="auth-sheet glass edit-post-sheet" role="dialog" aria-modal="true" aria-labelledby="edit-post-title" onClick={(event) => event.stopPropagation()}>
+            <div className="sheet-header">
+              <div><p className="eyebrow">EDIT POST</p><h2 id="edit-post-title">Update your post.</h2></div>
+              <button className="icon-button" type="button" aria-label="Close" onClick={() => setEditPostOpen(false)}><X size={18} /></button>
+            </div>
+            <p className="sheet-copy">Edit your text and save when you're ready. Your post date and engagement stay unchanged.</p>
+            <form className="auth-form" onSubmit={saveEditedPost}>
+              <div className="input-wrap textarea-wrap"><textarea value={editPostText} onChange={(event) => setEditPostText(event.target.value)} placeholder="Edit your post…" maxLength={2000} rows={7} autoFocus required /></div>
+              <div className="composer-footer"><span>{editPostText.length}/2000</span><button className="primary-button" type="submit" disabled={editPostBusy || !editPostText.trim()}>{editPostBusy ? "Saving…" : "Save changes"}</button></div>
+            </form>
+          </section>
+        </div>
+      )}
+
       {composerOpen && session && profile && (
         <div
           className="sheet-backdrop"
