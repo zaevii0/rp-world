@@ -12,6 +12,7 @@ import {
   MapPin,
   Menu,
   MessageCircle,
+  Share2,
   Moon,
   Pencil,
   Plus,
@@ -61,6 +62,7 @@ type Comment = {
   author_id: string;
   content: string;
   created_at: string;
+  parent_id: string | null;
   profile?: Profile;
 };
 
@@ -165,6 +167,7 @@ export function App() {
     Record<string, string>
   >({});
   const [commentBusy, setCommentBusy] = useState<string | null>(null);
+  const [replyTo, setReplyTo] = useState<{ postId: string; commentId: string } | null>(null);
   const [openTimestamp, setOpenTimestamp] = useState<string | null>(null);
   const [viewAs, setViewAs] = useState(false);
 
@@ -712,7 +715,7 @@ export function App() {
     const { data, error: loadError } = await supabase
       .from("post_comments")
       .select(
-        "id, post_id, author_id, content, created_at",
+        "id, post_id, author_id, content, created_at, parent_id",
       )
       .eq("post_id", postId)
       .order("created_at", { ascending: true });
@@ -777,13 +780,15 @@ export function App() {
 
     const { data, error: saveError } = await supabase
       .from("post_comments")
-      .insert({
+       .insert({
         post_id: postId,
         author_id: session.user.id,
         content,
+        parent_id:
+          replyTo?.postId === postId ? replyTo.commentId : null,
       })
       .select(
-        "id, post_id, author_id, content, created_at",
+        "id, post_id, author_id, content, created_at, parent_id",
       )
       .single();
 
@@ -808,6 +813,7 @@ export function App() {
       ...current,
       [postId]: "",
     }));
+    setReplyTo(null);
 
     setPosts((current) =>
       current.map((item) =>
@@ -819,6 +825,37 @@ export function App() {
           : item,
       ),
     );
+  }
+
+  async function sharePost(post: Post) {
+    const shareData = {
+      title: post.profile?.display_name
+        ? ${post.profile.display_name} on RP WORLD`
+        : "RP WORLD post",
+      text: post.content,
+      url: window.location.href,
+    };
+
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+        return;
+      }
+
+      await navigator.clipboard.writeText(
+        ${post.content}\n\n${window.location.href}`,
+      );
+      setMessage("Post link copied to clipboard.");
+    } catch (shareError) {
+      if (
+        shareError instanceof DOMException &&
+        shareError.name === "AbortError"
+      ) {
+        return;
+      }
+
+      setMessage("Could not share this post right now.");
+    }
   }
 
   async function toggleLike(post: Post) {
@@ -1224,6 +1261,15 @@ export function App() {
                             />{" "}
                             {post.comments || "Reply"}
                           </button>
+
+                          <button
+                            className="post-action"
+                            type="button"
+                            onClick={() => void sharePost(post)}
+                          >
+                            <Share2 size={17} />
+                            Share
+                          </button>
                         </div>
 
                         {openComments ===
@@ -1248,7 +1294,7 @@ export function App() {
                                 ).map(
                                   (comment) => (
                                     <div
-                                      className="comment-row"
+                                      className={`comment-row${replyTo?.commentId === comment.id ? " reply-target" : ""}`}
                                       key={
                                         comment.id
                                       }
@@ -1297,6 +1343,22 @@ export function App() {
                                             comment.content
                                           }
                                         </p>
+
+                                        <div className="comment-actions">
+                                          <button
+                                            className="comment-action"
+                                            type="button"
+                                            onClick={() => {
+                                              setReplyTo({
+                                                postId: post.id,
+                                                commentId: comment.id,
+                                              });
+                                              setOpenComments(post.id);
+                                            }}
+                                          >
+                                            Reply
+                                          </button>
+                                        </div>
                                         {openTimestamp === comment.id && (
                                           <div className="timestamp-popover comment-time">
                                             <strong>Posted</strong>
@@ -1349,7 +1411,7 @@ export function App() {
                                     }),
                                   )
                                 }
-                                placeholder="Write a reply…"
+                                placeholder={replyTo?.postId === post.id ? "Write a reply to this comment…" : "Write a reply…"}
                                 maxLength={500}
                                 aria-label="Write a reply"
                               />
