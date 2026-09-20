@@ -8,7 +8,7 @@
   "display_override": ["window-controls-overlay", "standalone"],
   "orientation": "portrait-primary",
   "background_color": "#050505",
-  "theme_color": "#050505",
+  "theme_color": "transparent",
   "icons": [
     {
       "src": "/rp-world-icon.svg",
