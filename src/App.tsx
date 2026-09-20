@@ -155,6 +155,7 @@ export function App() {
   const [highlightFile, setHighlightFile] = useState<File | null>(null);
   const [highlightBusy, setHighlightBusy] = useState(false);
   const [activeHighlight, setActiveHighlight] = useState<Highlight | null>(null);
+  const [activePostMedia, setActivePostMedia] = useState<{ url: string; type: "image" | "video" } | null>(null);
   const [highlightStyle, setHighlightStyle] = useState<HighlightStyle>("circle");
 
   const [view, setView] = useState<
@@ -622,18 +623,28 @@ export function App() {
 
   function renderPostMedia(mediaUrl: string | null | undefined, mediaType?: string | null) {
     if (!mediaUrl) return null;
-    if (mediaType?.startsWith("video/")) {
-      return (
-        <video
-          className="post-media post-video"
-          src={mediaUrl}
-          controls
-          playsInline
-          preload="metadata"
-        />
-      );
-    }
-    return <img className="post-media" src={mediaUrl} alt="" loading="lazy" />;
+    const isVideo = mediaType?.startsWith("video/") ?? false;
+    return (
+      <button
+        className="post-media-button"
+        type="button"
+        onClick={() => setActivePostMedia({ url: mediaUrl, type: isVideo ? "video" : "image" })}
+        aria-label={isVideo ? "Open video" : "Open image"}
+      >
+        {isVideo ? (
+          <video
+            className="post-media post-video"
+            src={mediaUrl}
+            controls
+            playsInline
+            preload="metadata"
+            onClick={(event) => event.stopPropagation()}
+          />
+        ) : (
+          <img className="post-media" src={mediaUrl} alt="" loading="lazy" />
+        )}
+      </button>
+    );
   }
 
   function validatePostMedia(file: File) {
@@ -3776,6 +3787,44 @@ export function App() {
                   : "Add highlight"}
               </button>
             </form>
+          </section>
+        </div>
+      )}
+
+      {activePostMedia && (
+        <div
+          className="post-media-viewer"
+          role="presentation"
+          onClick={() => setActivePostMedia(null)}
+        >
+          <section
+            className="post-media-viewer-card"
+            role="dialog"
+            aria-modal="true"
+            aria-label={activePostMedia.type === "video" ? "Video viewer" : "Image viewer"}
+            onClick={(event) => event.stopPropagation()}
+          >
+            <button
+              className="post-media-viewer-close"
+              type="button"
+              aria-label="Close media"
+              onClick={() => setActivePostMedia(null)}
+            >
+              <X size={20} />
+            </button>
+            <div className="post-media-viewer-content">
+              {activePostMedia.type === "video" ? (
+                <video
+                  src={activePostMedia.url}
+                  controls
+                  autoPlay
+                  playsInline
+                  preload="metadata"
+                />
+              ) : (
+                <img src={activePostMedia.url} alt="Post media" />
+              )}
+            </div>
           </section>
         </div>
       )}
