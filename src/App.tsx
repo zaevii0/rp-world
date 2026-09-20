@@ -305,6 +305,13 @@ export function App() {
   const [publicProfileFriend, setPublicProfileFriend] = useState(false);
   const [discoverProfiles, setDiscoverProfiles] = useState<Profile[]>([]);
   const [activeConversation, setActiveConversation] = useState<string | null>(null);
+  const [messageInboxOpen, setMessageInboxOpen] = useState(false);
+  const [messageConversations, setMessageConversations] = useState<Array<{
+    id: string;
+    otherProfile: Profile;
+    lastMessage: string;
+    lastMessageAt: string;
+  }>>([]);
   const [messagesByConversation, setMessagesByConversation] = useState<Record<string, Array<{ id: string; sender_id: string; content: string; created_at: string }>>>({});
   const [messageDraft, setMessageDraft] = useState("");
   const [messageNoticeOpen, setMessageNoticeOpen] = useState(false);
@@ -1241,30 +1248,109 @@ export function App() {
     setDiscoverProfiles((data ?? []) as Profile[]);
   }
 
+  async function loadMessageInbox() {
+    if (!supabase || !session?.user) return;
+    const { data: conversations, error: conversationError } = await supabase
+      .from("conversations")
+      .select("id, user_low, user_high, created_at")
+      .or(`user_low.eq.${session.user.id},user_high.eq.${session.user.id}`)
+      .order("created_at", { ascending: false });
+
+    if (conversationError || !conversations?.length) {
+      setMessageConversations([]);
+      return;
+    }
+
+    const conversationIds = conversations.map((item) => item.id);
+    const otherIds = [...new Set(conversations.map((item) =>
+      item.user_low === session.user.id ? item.user_high : item.user_low
+    ))];
+
+    const [{ data: otherProfiles }, { data: messageRows }] = await Promise.all([
+      supabase.from("profiles").select("*").in("id", otherIds),
+      supabase.from("messages")
+        .select("id, conversation_id, sender_id, content, created_at")
+        .in("conversation_id", conversationIds)
+        .order("created_at", { ascending: false }),
+    ]);
+
+    const profileMap = new Map((otherProfiles ?? []).map((item) => [item.id, item as Profile]));
+    const latestByConversation = new Map<string, { content: string; created_at: string }>();
+
+    for (const item of messageRows ?? []) {
+      if (!latestByConversation.has(item.conversation_id)) {
+        latestByConversation.set(item.conversation_id, {
+          content: item.content,
+          created_at: item.created_at,
+        });
+      }
+    }
+
+    setMessageConversations(
+      conversations
+        .map((conversation) => {
+          const otherId = conversation.user_low === session.user.id
+            ? conversation.user_high
+            : conversation.user_low;
+          const otherProfile = profileMap.get(otherId);
+          const latest = latestByConversation.get(conversation.id);
+          return otherProfile
+            ? {
+                id: conversation.id,
+                otherProfile,
+                lastMessage: latest?.content ?? "No messages yet.",
+                lastMessageAt: latest?.created_at ?? conversation.created_at,
+              }
+            : null;
+        })
+        .filter((item): item is NonNullable<typeof item> => Boolean(item)),
+    );
+  }
+
+  async function openMessageInbox() {
+    setMessageInboxOpen(true);
+    await loadMessageInbox();
+  }
+
   async function openMessageConversation() {
     if (!supabase || !session?.user || !publicProfile || !publicProfileFriend) return;
     let low = session.user.id, high = publicProfile.id;
     if (low > high) [low, high] = [high, low];
 
-    const { data } = await supabase.from("conversations").select("id, user_low, user_high")
+    const { data, error: lookupError } = await supabase.from("conversations")
+      .select("id, user_low, user_high")
       .eq("user_low", low).eq("user_high", high).maybeSingle();
+    if (lookupError) return;
+
     let conversation = data;
     if (!conversation) {
-      const { data: created } = await supabase.from("conversations")
-        .insert({ user_low: low, user_high: high }).select("id, user_low, user_high").single();
+      const { data: created, error: createError } = await supabase.from("conversations")
+        .insert({ user_low: low, user_high: high })
+        .select("id, user_low, user_high")
+        .single();
+      if (createError || !created) return;
       conversation = created;
     }
-    if (!conversation) return;
+
+    setMessageInboxOpen(false);
     setActiveConversation(conversation.id);
     await loadConversationMessages(conversation.id);
-    await loadDiscoverProfiles();
+  }
+
+  async function openConversationById(conversationId: string) {
+    setMessageInboxOpen(false);
+    setActiveConversation(conversationId);
+    await loadConversationMessages(conversationId);
   }
 
   async function loadConversationMessages(conversationId: string) {
     if (!supabase || !session?.user) return;
     const { data } = await supabase.from("messages").select("id, sender_id, content, created_at")
       .eq("conversation_id", conversationId).order("created_at", { ascending: true });
-    setMessagesByConversation((current) => ({ ...current, [conversationId]: (data ?? []) as Array<{ id: string; sender_id: string; content: string; created_at: string }> }));
+    setMessagesByConversation((current) => ({
+      ...current,
+      [conversationId]: (data ?? []) as Array<{ id: string; sender_id: string; content: string; created_at: string }>,
+    }));
   }
 
   async function sendMessage(event: FormEvent) {
@@ -1280,6 +1366,7 @@ export function App() {
       [activeConversation]: [...(current[activeConversation] ?? []), data as { id: string; sender_id: string; content: string; created_at: string }],
     }));
     setMessageDraft("");
+    void loadMessageInbox();
   }
 
   async function loadHighlights() {
@@ -3234,6 +3321,14 @@ export function App() {
 
                 <button
                   type="button"
+                  onClick={() => void openMessageInbox()}
+                >
+                  <MessageCircle size={18} />
+                  Messages
+                </button>
+
+                <button
+                  type="button"
                   onClick={() =>
                     setView("discover")
                   }
@@ -3329,6 +3424,48 @@ export function App() {
             <span>Menu</span>
           </button>
         </nav>
+      )}
+
+      {messageInboxOpen && (
+        <div className="sheet-backdrop" role="presentation" onClick={() => setMessageInboxOpen(false)}>
+          <section className="message-sheet glass message-inbox-sheet" role="dialog" aria-modal="true" aria-labelledby="message-inbox-title" onClick={(event) => event.stopPropagation()}>
+            <div className="sheet-header">
+              <div><p className="eyebrow">RP WORLD</p><h2 id="message-inbox-title">Messages</h2></div>
+              <button className="icon-button" type="button" aria-label="Close messages" onClick={() => setMessageInboxOpen(false)}><X size={18} /></button>
+            </div>
+            <div className="message-inbox-list">
+              {messageConversations.length === 0 ? (
+                <div className="empty-state message-empty-state">
+                  <MessageCircle size={22} />
+                  <strong>No conversations yet.</strong>
+                  <span>Become friends with another RP WORLD member, then use Message on their profile.</span>
+                </div>
+              ) : (
+                messageConversations.map((conversation) => (
+                  <button
+                    className="message-conversation"
+                    key={conversation.id}
+                    type="button"
+                    onClick={() => void openConversationById(conversation.id)}
+                  >
+                    <span
+                      className="avatar"
+                      style={conversation.otherProfile.avatar_url ? { backgroundImage: `url(${conversation.otherProfile.avatar_url})` } : undefined}
+                    >
+                      {!conversation.otherProfile.avatar_url && initials(conversation.otherProfile.display_name)}
+                    </span>
+                    <span className="message-conversation-copy">
+                      <strong>{conversation.otherProfile.display_name}</strong>
+                      <small>@{conversation.otherProfile.username}</small>
+                      <span>{conversation.lastMessage}</span>
+                    </span>
+                    <time>{timeAgo(conversation.lastMessageAt)}</time>
+                  </button>
+                ))
+              )}
+            </div>
+          </section>
+        </div>
       )}
 
       {messageNoticeOpen && (
