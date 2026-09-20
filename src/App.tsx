@@ -14,6 +14,7 @@ import {
   Menu,
   MessageCircle,
   Share2,
+  Repeat2,
   Moon,
   Pencil,
   Plus,
@@ -45,6 +46,8 @@ type Post = {
   liked: boolean;
   liked_at: string | null;
   comments: number;
+  reposts: number;
+  reposted: boolean;
 };
 
 type HighlightStyle = "circle" | "portrait";
@@ -157,6 +160,7 @@ export function App() {
   const [busy, setBusy] = useState(false);
   const [profileBusy, setProfileBusy] = useState(false);
   const [postBusy, setPostBusy] = useState(false);
+  const [repostBusy, setRepostBusy] = useState<string | null>(null);
 
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -374,6 +378,8 @@ export function App() {
         liked: likedSet.has(row.id),
         liked_at: likedAtMap.get(row.id) ?? null,
         comments: row.post_comments?.[0]?.count ?? 0,
+        reposts: 0,
+        reposted: false,
       })),
     );
   }
@@ -643,6 +649,8 @@ export function App() {
         liked: likedSet.has(row.id),
         liked_at: likedAtMap.get(row.id) ?? null,
         comments: row.post_comments?.[0]?.count ?? 0,
+        reposts: 0,
+        reposted: false,
       })),
     );
   }
@@ -858,6 +866,40 @@ export function App() {
     } finally {
       setHighlightBusy(false);
     }
+  }
+
+  async function repostPost(post: Post) {
+    if (!supabase || !session?.user || repostBusy === post.id) return;
+
+    setRepostBusy(post.id);
+    const { error: repostError } = await supabase.from("post_reposts").insert({
+      post_id: post.id,
+      user_id: session.user.id,
+    });
+
+    if (repostError && repostError.code !== "23505") {
+      setFeedError("Could not repost this post. Please try again.");
+      setRepostBusy(null);
+      return;
+    }
+
+    setPosts((current) => current.map((item) =>
+      item.id === post.id
+        ? { ...item, reposted: true, reposts: item.reposted ? item.reposts : item.reposts + 1 }
+        : item
+    ));
+    setProfilePosts((current) => current.map((item) =>
+      item.id === post.id
+        ? { ...item, reposted: true, reposts: item.reposted ? item.reposts : item.reposts + 1 }
+        : item
+    ));
+    setPublicProfilePosts((current) => current.map((item) =>
+      item.id === post.id
+        ? { ...item, reposted: true, reposts: item.reposted ? item.reposts : item.reposts + 1 }
+        : item
+    ));
+
+    setRepostBusy(null);
   }
 
   async function createPost(event: FormEvent) {
@@ -1670,6 +1712,17 @@ export function App() {
                             {post.comments || "Reply"}
                           </button>
 
+                                          <button
+                            className={post.reposted ? "post-action reposted" : "post-action"}
+                            type="button"
+                            onClick={() => void repostPost(post)}
+                            disabled={repostBusy === post.id}
+                            title={post.reposted ? "Reposted" : "Repost"}
+                          >
+                            <Repeat2 size={17} />
+                            {post.reposts || "Repost"}
+                          </button>
+
                           <button
                             className="post-action"
                             type="button"
@@ -2218,6 +2271,7 @@ export function App() {
                         <div className="post-actions">
                           <button className={post.liked ? "post-action liked" : "post-action"} type="button" onClick={() => void toggleLike(post)}><Heart size={17} fill={post.liked ? "currentColor" : "none"} />{post.likes}</button>
                           <button className="post-action" type="button" onClick={() => void toggleComments(post.id)}><MessageCircle size={17} />{post.comments || "Reply"}</button>
+                          <button className={post.reposted ? "post-action reposted" : "post-action"} type="button" onClick={() => void repostPost(post)} disabled={repostBusy === post.id}><Repeat2 size={17} />{post.reposts || "Repost"}</button>
                           <button className="post-action" type="button" onClick={() => void sharePost(post)}><Share2 size={17} />Share</button>
                         </div>
                       </article>
