@@ -281,9 +281,14 @@ h1 { margin:3px 0 0; font-size:17px; letter-spacing:-.03em; }
 .profile-actions {
   display:flex;
   align-items:center;
-  gap:6px;
+  gap:7px;
   flex-wrap:wrap;
-  justify-content:flex-end;
+  justify-content:center;
+}
+
+.profile-social-actions {
+  width:100%;
+  margin-top:10px;
 }
 
 .profile-action-button {
