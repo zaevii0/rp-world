@@ -206,7 +206,6 @@ export function App() {
   const [tagSearch, setTagSearch] = useState("");
   const [tagBusy, setTagBusy] = useState(false);
   const [postActionBusy, setPostActionBusy] = useState(false);
-  const [postTagsById, setPostTagsById] = useState<Record<string, Profile[]>>({});
 
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -340,6 +339,27 @@ export function App() {
       setPosts([]);
     }
   }, [session, profile]);
+
+  useEffect(() => {
+    if (!tagPostTarget || !session?.user || !supabase) {
+      setTagProfiles([]);
+      return;
+    }
+
+    let active = true;
+    void supabase
+      .from("profiles")
+      .select("*")
+      .neq("id", session.user.id)
+      .limit(100)
+      .then(({ data }) => {
+        if (active) setTagProfiles((data ?? []) as Profile[]);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [tagPostTarget, session]);
 
   useEffect(() => {
     if (view === "discover" && session?.user && profile) {
@@ -1843,12 +1863,14 @@ export function App() {
     }
   }
 
-  function openTagPost(post: Post) {
+  async function openTagPost(post: Post) {
     if (!session?.user || post.author_id !== session.user.id || post.shared_post_id) return;
     setPostActionTarget(null);
-    setTagPostTarget(post);
+    const tagMap = await loadPostTags([post.id]);
+    const taggedProfiles = tagMap.get(post.id) ?? [];
+    setTagPostTarget({ ...post, tagged_profiles: taggedProfiles });
     setTagSearch("");
-    setTaggedUserIds(new Set((post.tagged_profiles ?? []).map((item) => item.id)));
+    setTaggedUserIds(new Set(taggedProfiles.map((item) => item.id)));
   }
 
   async function savePostTags() {
@@ -1881,7 +1903,6 @@ export function App() {
 
     const tagMap = await loadPostTags([tagPostTarget.id]);
     const taggedProfiles = tagMap.get(tagPostTarget.id) ?? [];
-    setPostTagsById((current) => ({ ...current, [tagPostTarget.id]: taggedProfiles }));
     setPosts((current) => current.map((item) => item.id === tagPostTarget.id ? { ...item, tagged_profiles: taggedProfiles } : item));
     setProfilePosts((current) => current.map((item) => item.id === tagPostTarget.id ? { ...item, tagged_profiles: taggedProfiles } : item));
     setTagBusy(false);
@@ -3307,7 +3328,7 @@ export function App() {
               <button type="button" onClick={() => void managePostAction("pin")} disabled={postActionBusy}>
                 <Pin size={18} /><span>{postActionTarget.pinned_at ? "Unpin post" : "Pin post"}</span>
               </button>
-              <button type="button" onClick={() => openTagPost(postActionTarget)}>
+              <button type="button" onClick={() => void openTagPost(postActionTarget)}>
                 <Tag size={18} /><span>Tag</span>
               </button>
               <button type="button" onClick={() => void managePostAction("archive")} disabled={postActionBusy}>
