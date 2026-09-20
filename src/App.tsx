@@ -66,7 +66,7 @@ type Comment = {
   parent_id: string | null;
   profile?: Profile;
   reactionCount: number;
-  reacted: boolean;
+  reactionType: string | null;
 };
 
 function readTheme(): ThemeId {
@@ -173,6 +173,7 @@ export function App() {
   const [commentBusy, setCommentBusy] = useState<string | null>(null);
   const [replyTo, setReplyTo] = useState<{ postId: string; commentId: string } | null>(null);
   const [commentReactionBusy, setCommentReactionBusy] = useState<string | null>(null);
+  const [openReactionPicker, setOpenReactionPicker] = useState<string | null>(null);
   const [openTimestamp, setOpenTimestamp] = useState<string | null>(null);
   const [viewAs, setViewAs] = useState(false);
   const [publicProfile, setPublicProfile] = useState<Profile | null>(null);
@@ -187,6 +188,23 @@ export function App() {
   const [messageDraft, setMessageDraft] = useState("");
   const [messageNoticeOpen, setMessageNoticeOpen] = useState(false);
   const [profileStats, setProfileStats] = useState({ followers: 0, likes: 0 });
+
+  const commentReactionOptions = [
+    { type: "like", emoji: "👍", label: "Like" },
+    { type: "love", emoji: "❤️", label: "Love" },
+    { type: "haha", emoji: "😂", label: "Haha" },
+    { type: "wow", emoji: "😮", label: "Wow" },
+    { type: "sad", emoji: "😢", label: "Sad" },
+    { type: "angry", emoji: "😡", label: "Angry" },
+    { type: "care", emoji: "🥰", label: "Care" },
+    { type: "fire", emoji: "🔥", label: "Fire" },
+    { type: "laugh", emoji: "🤣", label: "Laugh" },
+    { type: "celebrate", emoji: "🎉", label: "Celebrate" },
+  ];
+
+  function reactionEmoji(type: string | null) {
+    return commentReactionOptions.find((reaction) => reaction.type === type)?.emoji ?? "👍";
+  }
 
   useEffect(() => {
     localStorage.setItem(THEME_KEY, theme);
@@ -929,16 +947,16 @@ export function App() {
     const { data: reactions } = commentIds.length
       ? await supabase
           .from("comment_reactions")
-          .select("comment_id, user_id")
+          .select("comment_id, user_id, reaction_type")
           .in("comment_id", commentIds)
-      : { data: [] as { comment_id: string; user_id: string }[] };
+      : { data: [] as { comment_id: string; user_id: string; reaction_type: string }[] };
 
-    const reactionRows = (reactions ?? []) as { comment_id: string; user_id: string }[];
+    const reactionRows = (reactions ?? []) as { comment_id: string; user_id: string; reaction_type: string }[];
     const reactionCounts = new Map<string, number>();
-    const reactedIds = new Set<string>();
+    const reactionTypes = new Map<string, string>();
     reactionRows.forEach((reaction) => {
       reactionCounts.set(reaction.comment_id, (reactionCounts.get(reaction.comment_id) ?? 0) + 1);
-      if (reaction.user_id === session.user.id) reactedIds.add(reaction.comment_id);
+      if (reaction.user_id === session.user.id) reactionTypes.set(reaction.comment_id, reaction.reaction_type);
     });
 
     const authorIds = [
@@ -964,7 +982,7 @@ export function App() {
       [postId]: rows.map((row) => ({
         ...row,
         reactionCount: reactionCounts.get(row.id) ?? 0,
-        reacted: reactedIds.has(row.id),
+        reactionType: reactionTypes.get(row.id) ?? null,
         profile: profileMap.get(row.author_id),
       })),
     }));
@@ -1054,7 +1072,7 @@ export function App() {
     const newComment = {
       ...(data as Comment),
       reactionCount: 0,
-      reacted: false,
+      reactionType: null,
       profile: profile ?? undefined,
     };
 
@@ -1085,11 +1103,15 @@ export function App() {
     );
   }
 
-  async function toggleCommentReaction(postId: string, comment: Comment) {
+  async function setCommentReaction(postId: string, comment: Comment, reactionType: string) {
     if (!supabase || !session?.user || commentReactionBusy === comment.id) return;
 
     setCommentReactionBusy(comment.id);
-    const nextReacted = !comment.reacted;
+    setOpenReactionPicker(null);
+
+    const previousType = comment.reactionType;
+    const nextType = previousType === reactionType ? null : reactionType;
+    const countDelta = previousType ? 0 : nextType ? 1 : -1;
 
     setCommentsByPost((current) => ({
       ...current,
@@ -1097,42 +1119,36 @@ export function App() {
         item.id === comment.id
           ? {
               ...item,
-              reacted: nextReacted,
-              reactionCount: item.reactionCount + (nextReacted ? 1 : -1),
+              reactionType: nextType,
+              reactionCount: Math.max(0, item.reactionCount + countDelta),
             }
           : item,
       ),
     }));
 
-    const result = nextReacted
-      ? await supabase.from("comment_reactions").insert({
+    const result = previousType
+      ? nextType
+        ? await supabase.from("comment_reactions").update({ reaction_type: nextType }).eq("comment_id", comment.id).eq("user_id", session.user.id)
+        : await supabase.from("comment_reactions").delete().eq("comment_id", comment.id).eq("user_id", session.user.id)
+      : await supabase.from("comment_reactions").insert({
           comment_id: comment.id,
           user_id: session.user.id,
-          reaction_type: "like",
-        })
-      : await supabase
-          .from("comment_reactions")
-          .delete()
-          .eq("comment_id", comment.id)
-          .eq("user_id", session.user.id);
+          reaction_type: nextType,
+        });
+
+    setCommentReactionBusy(null);
 
     if (result.error) {
       setCommentsByPost((current) => ({
         ...current,
         [postId]: (current[postId] ?? []).map((item) =>
           item.id === comment.id
-            ? {
-                ...item,
-                reacted: comment.reacted,
-                reactionCount: comment.reactionCount,
-              }
+            ? { ...item, reactionType: previousType, reactionCount: comment.reactionCount }
             : item,
         ),
       }));
       setFeedError("Could not update the reaction. Please try again.");
     }
-
-    setCommentReactionBusy(null);
   }
 
   function renderCommentTree(postId: string, comments: Comment[], parentId: string | null, depth = 0): ReactNode[] {
@@ -1154,16 +1170,38 @@ export function App() {
             </div>
             <p>{comment.content}</p>
             <div className="comment-actions">
-              <button
-                className={comment.reacted ? "comment-action reaction-active" : "comment-action"}
-                type="button"
-                onClick={() => void toggleCommentReaction(postId, comment)}
-                disabled={commentReactionBusy === comment.id}
-                aria-label={comment.reacted ? "Unlike comment" : "Like comment"}
-              >
-                <Heart size={12} fill={comment.reacted ? "currentColor" : "none"} />
-                {comment.reactionCount > 0 ? comment.reactionCount : "Like"}
-              </button>
+              <div className="comment-reaction-wrap">
+                <button
+                  className={comment.reactionType ? "comment-action reaction-active" : "comment-action"}
+                  type="button"
+                  onClick={() => setOpenReactionPicker(openReactionPicker === comment.id ? null : comment.id)}
+                  disabled={commentReactionBusy === comment.id}
+                  aria-label={comment.reactionType ? "Change reaction" : "Choose reaction"}
+                  aria-expanded={openReactionPicker === comment.id}
+                >
+                  <span className="comment-reaction-emoji">{reactionEmoji(comment.reactionType)}</span>
+                  {comment.reactionCount > 0 ? comment.reactionCount : "Like"}
+                </button>
+
+                {openReactionPicker === comment.id && (
+                  <div className="comment-reaction-picker" role="menu" aria-label="Choose a reaction">
+                    {commentReactionOptions.map((reaction) => (
+                      <button
+                        key={reaction.type}
+                        className={comment.reactionType === reaction.type ? "comment-reaction-option active" : "comment-reaction-option"}
+                        type="button"
+                        role="menuitem"
+                        title={reaction.label}
+                        aria-label={reaction.label}
+                        onClick={() => void setCommentReaction(postId, comment, reaction.type)}
+                      >
+                        <span>{reaction.emoji}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
               <button className="comment-action" type="button" onClick={() => { setReplyTo({ postId, commentId: comment.id }); setOpenComments(postId); }}>
                 Reply
               </button>
