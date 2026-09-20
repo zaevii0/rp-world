@@ -16,6 +16,12 @@ import {
   Share2,
   Repeat2,
   Bookmark,
+  MoreVertical,
+  Pin,
+  Tag,
+  Archive,
+  Trash2,
+  Link2,
   Moon,
   Pencil,
   Plus,
@@ -52,6 +58,10 @@ type Post = {
   shares: number;
   reposted: boolean;
   reposted_at?: string | null;
+  pinned_at?: string | null;
+  archived_at?: string | null;
+  trashed_at?: string | null;
+  tagged_profiles?: Profile[];
   shared_post_id?: string | null;
   share_caption?: string | null;
   shared_original?: {
@@ -189,6 +199,14 @@ export function App() {
   const [shareCaption, setShareCaption] = useState("");
   const [shareBusy, setShareBusy] = useState(false);
   const [savedPostIds, setSavedPostIds] = useState<Set<string>>(new Set());
+  const [postActionTarget, setPostActionTarget] = useState<Post | null>(null);
+  const [tagPostTarget, setTagPostTarget] = useState<Post | null>(null);
+  const [tagProfiles, setTagProfiles] = useState<Profile[]>([]);
+  const [taggedUserIds, setTaggedUserIds] = useState<Set<string>>(new Set());
+  const [tagSearch, setTagSearch] = useState("");
+  const [tagBusy, setTagBusy] = useState(false);
+  const [postActionBusy, setPostActionBusy] = useState(false);
+  const [postTagsById, setPostTagsById] = useState<Record<string, Profile[]>>({});
 
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -343,6 +361,71 @@ export function App() {
     }
   }, [session, profile]);
 
+  async function loadPostTags(postIds: string[]) {
+    if (!supabase || !postIds.length) return new Map<string, Profile[]>();
+
+    const { data: tagRows, error: tagError } = await supabase
+      .from("post_tags")
+      .select("post_id, user_id")
+      .in("post_id", postIds);
+
+    if (tagError || !tagRows?.length) return new Map<string, Profile[]>();
+
+    const userIds = [...new Set(tagRows.map((row) => row.user_id))];
+    const { data: taggedProfiles } = await supabase
+      .from("profiles")
+      .select("*")
+      .in("id", userIds);
+
+    const profileMap = new Map(
+      (taggedProfiles ?? []).map((item) => [item.id, item as Profile]),
+    );
+    const map = new Map<string, Profile[]>();
+
+    tagRows.forEach((row) => {
+      const tagged = profileMap.get(row.user_id);
+      if (!tagged) return;
+      map.set(row.post_id, [...(map.get(row.post_id) ?? []), tagged]);
+    });
+
+    return map;
+  }
+
+  async function cleanupExpiredTrash() {
+    if (!supabase || !session?.user) return;
+
+    const cutoff = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+    const { data: expired } = await supabase
+      .from("posts")
+      .select("id, media_url")
+      .eq("author_id", session.user.id)
+      .not("trashed_at", "is", null)
+      .lt("trashed_at", cutoff);
+
+    if (!expired?.length) return;
+
+    const mediaPaths = expired
+      .map((post) => post.media_url)
+      .filter((url): url is string => Boolean(url))
+      .map((url) => {
+        const marker = "/storage/v1/object/public/post-media/";
+        const index = url.indexOf(marker);
+        return index >= 0 ? decodeURIComponent(url.slice(index + marker.length)) : null;
+      })
+      .filter((path): path is string => Boolean(path));
+
+    if (mediaPaths.length) {
+      await supabase.storage.from("post-media").remove(mediaPaths);
+    }
+
+    await supabase
+      .from("posts")
+      .delete()
+      .eq("author_id", session.user.id)
+      .not("trashed_at", "is", null)
+      .lt("trashed_at", cutoff);
+  }
+
   async function loadFeed() {
     if (!supabase || !session?.user) return;
 
@@ -351,8 +434,11 @@ export function App() {
     const { data, error: loadError } = await supabase
       .from("posts")
       .select(
-        "id, author_id, content, media_url, media_type, created_at, shared_post_id, share_caption, post_likes(count), post_comments(count)",
+        "id, author_id, content, media_url, media_type, created_at, pinned_at, archived_at, trashed_at, shared_post_id, share_caption, post_likes(count), post_comments(count)",
       )
+      .is("archived_at", null)
+      .is("trashed_at", null)
+      .order("pinned_at", { ascending: false, nullsFirst: false })
       .order("created_at", { ascending: false })
       .limit(30);
 
@@ -408,6 +494,7 @@ export function App() {
     );
 
     const postIds = rows.map((row) => row.id);
+    const tagMap = await loadPostTags(postIds);
 
     const { data: shareRows } = postIds.length
       ? await supabase
@@ -454,12 +541,22 @@ export function App() {
         reposts: 0,
         reposted: false,
         shares: shareCounts.get(row.id) ?? 0,
+        pinned_at: row.pinned_at ?? null,
+        archived_at: row.archived_at ?? null,
+        trashed_at: row.trashed_at ?? null,
+        tagged_profiles: tagMap.get(row.id) ?? [],
         shared_post_id: row.shared_post_id ?? null,
         share_caption: row.share_caption ?? null,
         shared_original: row.shared_post_id ? sharedMap.get(row.shared_post_id) ?? null : null,
       })),
     );
   }
+
+  useEffect(() => {
+    if (session?.user && profile) {
+      void cleanupExpiredTrash();
+    }
+  }, [session, profile]);
 
   const isDark = appearance !== "light";
 
@@ -775,9 +872,12 @@ export function App() {
     const { data, error: loadError } = await supabase
       .from("posts")
       .select(
-        "id, author_id, content, media_url, media_type, created_at, post_likes(count), post_comments(count)",
+        "id, author_id, content, media_url, media_type, created_at, pinned_at, archived_at, trashed_at, post_likes(count), post_comments(count)",
       )
       .eq("author_id", session.user.id)
+      .is("archived_at", null)
+      .is("trashed_at", null)
+      .order("pinned_at", { ascending: false, nullsFirst: false })
       .order("created_at", { ascending: false })
       .limit(50);
 
@@ -822,6 +922,9 @@ export function App() {
         comments: row.post_comments?.[0]?.count ?? 0,
         reposts: 0,
         shares: 0,
+        pinned_at: row.pinned_at ?? null,
+        archived_at: row.archived_at ?? null,
+        trashed_at: row.trashed_at ?? null,
         reposted: false,
       })),
     );
@@ -853,7 +956,7 @@ export function App() {
     const { data: postRows, error: postsError } = await supabase
       .from("posts")
       .select(
-        "id, author_id, content, media_url, media_type, created_at, post_likes(count), post_comments(count)",
+        "id, author_id, content, media_url, media_type, created_at, pinned_at, archived_at, trashed_at, post_likes(count), post_comments(count)",
       )
       .in("id", postIds);
 
@@ -934,8 +1037,8 @@ export function App() {
     const targetProfile = target as Profile;
     const { data: targetPosts } = await supabase
       .from("posts")
-      .select("id, author_id, content, media_url, media_type, created_at, post_likes(count), post_comments(count)")
-      .eq("author_id", userId).order("created_at", { ascending: false }).limit(50);
+      .select("id, author_id, content, media_url, media_type, created_at, pinned_at, archived_at, trashed_at, post_likes(count), post_comments(count)")
+      .eq("author_id", userId).is("archived_at", null).is("trashed_at", null).order("pinned_at", { ascending: false, nullsFirst: false }).order("created_at", { ascending: false }).limit(50);
 
     const rows = (targetPosts ?? []) as Array<Post & { post_likes?: { count: number }[]; post_comments?: { count: number }[] }>;
     const postIds = rows.map((row) => row.id);
@@ -949,7 +1052,7 @@ export function App() {
       id: row.id, author_id: row.author_id, content: row.content, media_url: row.media_url,
       media_type: row.media_type ?? null, created_at: row.created_at, profile: targetProfile, likes: row.post_likes?.[0]?.count ?? 0,
       liked: likedSet.has(row.id), liked_at: likedAtMap.get(row.id) ?? null, comments: row.post_comments?.[0]?.count ?? 0,
-      reposts: 0, shares: 0, reposted: false,
+      reposts: 0, shares: 0, pinned_at: row.pinned_at ?? null, archived_at: row.archived_at ?? null, trashed_at: row.trashed_at ?? null, reposted: false,
     })));
 
     const { data: targetHighlights } = await supabase.from("profile_highlights")
@@ -1666,6 +1769,135 @@ export function App() {
     setMessage("Post shared to your feed.");
   }
 
+  async function managePostAction(action: "pin" | "archive" | "trash" | "copy") {
+    const post = postActionTarget;
+    if (!supabase || !session?.user || !post || post.author_id !== session.user.id || post.shared_post_id) return;
+
+    if (action === "copy") {
+      const url = new URL(window.location.href);
+      url.hash = `post-${post.id}`;
+      try {
+        await navigator.clipboard.writeText(url.toString());
+        setMessage("Post link copied.");
+      } catch {
+        setMessage("Could not copy the post link.");
+      }
+      setPostActionTarget(null);
+      return;
+    }
+
+    setPostActionBusy(true);
+    const payload =
+      action === "pin"
+        ? {
+            pinned_at: post.pinned_at ? null : new Date().toISOString(),
+          }
+        : action === "archive"
+          ? {
+              archived_at: new Date().toISOString(),
+              trashed_at: null,
+              pinned_at: null,
+            }
+          : {
+              trashed_at: new Date().toISOString(),
+              archived_at: null,
+              pinned_at: null,
+            };
+
+    const { data, error: updateError } = await supabase
+      .from("posts")
+      .update(payload)
+      .eq("id", post.id)
+      .eq("author_id", session.user.id)
+      .select("id, pinned_at, archived_at, trashed_at")
+      .single();
+
+    setPostActionBusy(false);
+
+    if (updateError || !data) {
+      setMessage(updateError?.message || "Could not update this post.");
+      return;
+    }
+
+    const patchPost = (item: Post): Post =>
+      item.id === post.id
+        ? {
+            ...item,
+            pinned_at: data.pinned_at ?? null,
+            archived_at: data.archived_at ?? null,
+            trashed_at: data.trashed_at ?? null,
+          }
+        : item;
+
+    const removeFromVisible = action === "archive" || action === "trash";
+    setPosts((current) => current.map(patchPost).filter((item) => !item.archived_at && !item.trashed_at));
+    setProfilePosts((current) => current.map(patchPost).filter((item) => !item.archived_at && !item.trashed_at));
+    setProfileReposts((current) => current.map(patchPost).filter((item) => !item.archived_at && !item.trashed_at));
+
+    setPostActionTarget(null);
+
+    if (action === "pin") {
+      setMessage(post.pinned_at ? "Post unpinned." : "Post pinned to your profile.");
+    } else if (removeFromVisible) {
+      setMessage(action === "archive" ? "Post moved to archive." : "Post moved to trash. It will be permanently deleted after 30 days.");
+    }
+  }
+
+  function openTagPost(post: Post) {
+    if (!session?.user || post.author_id !== session.user.id || post.shared_post_id) return;
+    setPostActionTarget(null);
+    setTagPostTarget(post);
+    setTagSearch("");
+    setTaggedUserIds(new Set((post.tagged_profiles ?? []).map((item) => item.id)));
+  }
+
+  async function savePostTags() {
+    if (!supabase || !session?.user || !tagPostTarget || tagPostTarget.author_id !== session.user.id) return;
+    setTagBusy(true);
+
+    const { error: deleteError } = await supabase
+      .from("post_tags")
+      .delete()
+      .eq("post_id", tagPostTarget.id);
+
+    if (deleteError) {
+      setTagBusy(false);
+      setMessage("Could not update tags.");
+      return;
+    }
+
+    const selectedIds = [...taggedUserIds].filter((id) => id !== session.user.id);
+    if (selectedIds.length) {
+      const { error: insertError } = await supabase
+        .from("post_tags")
+        .insert(selectedIds.map((userId) => ({ post_id: tagPostTarget.id, user_id: userId })));
+
+      if (insertError) {
+        setTagBusy(false);
+        setMessage("Could not save the selected tags.");
+        return;
+      }
+    }
+
+    const tagMap = await loadPostTags([tagPostTarget.id]);
+    const taggedProfiles = tagMap.get(tagPostTarget.id) ?? [];
+    setPostTagsById((current) => ({ ...current, [tagPostTarget.id]: taggedProfiles }));
+    setPosts((current) => current.map((item) => item.id === tagPostTarget.id ? { ...item, tagged_profiles: taggedProfiles } : item));
+    setProfilePosts((current) => current.map((item) => item.id === tagPostTarget.id ? { ...item, tagged_profiles: taggedProfiles } : item));
+    setTagBusy(false);
+    setTagPostTarget(null);
+    setMessage(taggedProfiles.length ? "Post tags updated." : "Post tags cleared.");
+  }
+
+  function toggleTagUser(userId: string) {
+    setTaggedUserIds((current) => {
+      const next = new Set(current);
+      if (next.has(userId)) next.delete(userId);
+      else next.add(userId);
+      return next;
+    });
+  }
+
   function toggleSavedPost(post: Post) {
     setSavedPostIds((current) => {
       const next = new Set(current);
@@ -2002,6 +2234,7 @@ export function App() {
                   ) : (
                     posts.map((post) => (
                       <article
+                        id={`post-${post.id}`}
                         className={post.shared_post_id ? "post-card glass shared-post-card" : "post-card glass"}
                         key={post.id}
                       >
@@ -2035,6 +2268,15 @@ export function App() {
                           </button>
 
                           <div>
+                            <button
+                              className="post-more-button"
+                              type="button"
+                              aria-label="Post options"
+                              title="Post options"
+                              onClick={() => setPostActionTarget(post)}
+                            >
+                              <MoreVertical size={18} />
+                            </button>
                             <button
                               className="profile-name-link"
                               type="button"
@@ -2101,6 +2343,12 @@ export function App() {
                           </div>
                         )}
 
+                        {post.pinned_at && (
+                          <div className="post-status-label"><Pin size={12} /> Pinned</div>
+                        )}
+                        {post.tagged_profiles?.length ? (
+                          <div className="post-tag-label"><Tag size={12} /> {post.tagged_profiles.map((item) => `@${item.username}`).join(", ")}</div>
+                        ) : null}
                         <div className="post-actions">
                           <button
                             className={
@@ -2538,6 +2786,7 @@ export function App() {
                       {profilePosts.map(
                         (post) => (
                           <article
+                            id={`post-${post.id}`}
                             className="post-card glass"
                             key={post.id}
                           >
@@ -2559,6 +2808,15 @@ export function App() {
                               </div>
 
                               <div>
+                                <button
+                                  className="post-more-button"
+                                  type="button"
+                                  aria-label="Post options"
+                                  title="Post options"
+                                  onClick={() => setPostActionTarget(post)}
+                                >
+                                  <MoreVertical size={18} />
+                                </button>
                                 <strong>
                                   {
                                     profile.display_name
@@ -2603,6 +2861,12 @@ export function App() {
                             {renderExpandablePostContent(post.content, post.id)}
                             {renderPostMedia(post.media_url, post.media_type)}
 
+                            {post.pinned_at && (
+                              <div className="post-status-label"><Pin size={12} /> Pinned</div>
+                            )}
+                            {post.tagged_profiles?.length ? (
+                              <div className="post-tag-label"><Tag size={12} /> {post.tagged_profiles.map((item) => `@${item.username}`).join(", ")}</div>
+                            )}
                             <div className="post-actions">
                               {!post.shared_post_id && post.author_id === session?.user.id && (
                                 <button className="post-action" type="button" onClick={() => openEditPost(post)} aria-label="Edit post">
@@ -2656,7 +2920,7 @@ export function App() {
                     ) : (
                       <div className="feed-list">
                         {profileReposts.map((post) => (
-                          <article className="post-card glass" key={post.id}>
+                          <article id={`post-${post.id}`} className="post-card glass" key={post.id}>
                             <div className="repost-label">
                               <Repeat2 size={13} />
                               <span>You reposted this</span>
@@ -3029,7 +3293,69 @@ export function App() {
         </div>
       )}
 
-      {composerOpen && session && profile && (
+      {postActionTarget && session && profile && (
+        <div className="sheet-backdrop" role="presentation" onClick={() => !postActionBusy && setPostActionTarget(null)}>
+          <section className="post-action-sheet glass" role="dialog" aria-modal="true" aria-labelledby="post-action-title" onClick={(event) => event.stopPropagation()}>
+            <div className="sheet-header">
+              <div><p className="eyebrow">POST OPTIONS</p><h2 id="post-action-title">Manage this post.</h2></div>
+              <button className="icon-button" type="button" aria-label="Close" onClick={() => setPostActionTarget(null)} disabled={postActionBusy}><X size={18} /></button>
+            </div>
+            <div className="post-action-menu">
+              <button type="button" onClick={() => { const target = postActionTarget; setPostActionTarget(null); openEditPost(target); }}>
+                <Pencil size={18} /><span>Edit post</span>
+              </button>
+              <button type="button" onClick={() => void managePostAction("pin")} disabled={postActionBusy}>
+                <Pin size={18} /><span>{postActionTarget.pinned_at ? "Unpin post" : "Pin post"}</span>
+              </button>
+              <button type="button" onClick={() => openTagPost(postActionTarget)}>
+                <Tag size={18} /><span>Tag</span>
+              </button>
+              <button type="button" onClick={() => void managePostAction("archive")} disabled={postActionBusy}>
+                <Archive size={18} /><span>Move to archive</span>
+              </button>
+              <button className="post-action-destructive" type="button" onClick={() => void managePostAction("trash")} disabled={postActionBusy}>
+                <Trash2 size={18} /><span>Move to trash</span><small>Deleted after 30 days</small>
+              </button>
+              <button type="button" onClick={() => void managePostAction("copy")} disabled={postActionBusy}>
+                <Link2 size={18} /><span>Copy link</span>
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
+
+      {tagPostTarget && session && profile && (
+        <div className="sheet-backdrop" role="presentation" onClick={() => !tagBusy && setTagPostTarget(null)}>
+          <section className="auth-sheet glass tag-post-sheet" role="dialog" aria-modal="true" aria-labelledby="tag-post-title" onClick={(event) => event.stopPropagation()}>
+            <div className="sheet-header">
+              <div><p className="eyebrow">POST TAGS</p><h2 id="tag-post-title">Tag people.</h2></div>
+              <button className="icon-button" type="button" aria-label="Close" onClick={() => setTagPostTarget(null)} disabled={tagBusy}><X size={18} /></button>
+            </div>
+            <div className="input-wrap">
+              <Search size={15} />
+              <input value={tagSearch} onChange={(event) => setTagSearch(event.target.value)} placeholder="Search people…" autoFocus />
+            </div>
+            <div className="tag-people-list">
+              {tagProfiles
+                .filter((person) => {
+                  const query = tagSearch.trim().toLowerCase();
+                  return !query || person.display_name.toLowerCase().includes(query) || person.username.toLowerCase().includes(query);
+                })
+                .slice(0, 30)
+                .map((person) => (
+                  <button className={taggedUserIds.has(person.id) ? "tag-person active" : "tag-person"} type="button" key={person.id} onClick={() => toggleTagUser(person.id)}>
+                    <span className="avatar small-avatar" style={person.avatar_url ? { backgroundImage: `url(${person.avatar_url})` } : undefined}>{!person.avatar_url && initials(person.display_name)}</span>
+                    <span><strong>{person.display_name}</strong><small>@{person.username}</small></span>
+                    {taggedUserIds.has(person.id) && <span className="tag-check">✓</span>}
+                  </button>
+                ))}
+            </div>
+            <div className="composer-footer"><span>{taggedUserIds.size} selected</span><button className="primary-button" type="button" onClick={() => void savePostTags()} disabled={tagBusy}>{tagBusy ? "Saving…" : "Save tags"}</button></div>
+          </section>
+        </div>
+      )}
+
+
         <div
           className="sheet-backdrop"
           role="presentation"
