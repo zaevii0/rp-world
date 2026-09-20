@@ -1371,12 +1371,26 @@ export function App() {
   return (
     <div className={isDark ? "app dark" : "app light"}>
       <header className="topbar glass">
-        <button
-          className="brand-button"
-          type="button"
-          onClick={() => setView("home")}
-          aria-label="RP WORLD home"
-        >
+        {viewAs ? (
+          <button
+            className="nav-back-button"
+            type="button"
+            onClick={() => {
+              setViewAs(false);
+              setView("profile");
+            }}
+            aria-label="Back to your profile"
+            title="Back"
+          >
+            <ArrowLeft size={21} />
+          </button>
+        ) : (
+          <button
+            className="brand-button"
+            type="button"
+            onClick={() => setView("home")}
+            aria-label="RP WORLD home"
+          >
           <span className="brand-mark">
             <Sparkles size={16} />
           </span>
@@ -1386,6 +1400,7 @@ export function App() {
             <strong>RP WORLD</strong>
           </span>
         </button>
+        )}
 
         <div className="header-actions">
           <ThemePicker
