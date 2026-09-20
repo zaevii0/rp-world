@@ -2566,7 +2566,7 @@ export function App() {
                           <MessageCircle size={14} />
                           Message
                         </button>
-                        <button className="profile-action-button" type="button" onClick={() => { setView("home"); setPublicProfile(null); }}><ArrowLeft size={14} />Back</button>
+                        
                       </div>
                       <div className="profile-meta">
                         <span><Sparkles size={13} />{publicProfile.rp_id}</span>
@@ -2677,6 +2677,13 @@ export function App() {
             <Search size={19} />
             <span>Discover</span>
           </button>
+
+          {view === "public" && (
+            <button className="nav-item public-back-nav" type="button" aria-label="Back" title="Back" onClick={() => { setView("discover"); setPublicProfile(null); setViewAs(false); }}>
+              <ArrowLeft size={19} />
+              <span>Back</span>
+            </button>
+          )}
 
           <button
             className="nav-create"
