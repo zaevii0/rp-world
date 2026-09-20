@@ -821,6 +821,7 @@ export function App() {
         liked_at: likedAtMap.get(row.id) ?? null,
         comments: row.post_comments?.[0]?.count ?? 0,
         reposts: 0,
+        shares: 0,
         reposted: false,
       })),
     );
@@ -913,6 +914,7 @@ export function App() {
           liked_at: likedAtMap.get(row.id) ?? null,
           comments: row.post_comments?.[0]?.count ?? 0,
           reposts: 0,
+          shares: 0,
           reposted: true,
           reposted_at: repostedAtMap.get(row.id) ?? null,
         })),
