@@ -65,6 +65,8 @@ type Comment = {
   created_at: string;
   parent_id: string | null;
   profile?: Profile;
+  reactionCount: number;
+  reacted: boolean;
 };
 
 function readTheme(): ThemeId {
@@ -170,6 +172,7 @@ export function App() {
   >({});
   const [commentBusy, setCommentBusy] = useState<string | null>(null);
   const [replyTo, setReplyTo] = useState<{ postId: string; commentId: string } | null>(null);
+  const [commentReactionBusy, setCommentReactionBusy] = useState<string | null>(null);
   const [openTimestamp, setOpenTimestamp] = useState<string | null>(null);
   const [viewAs, setViewAs] = useState(false);
   const [publicProfile, setPublicProfile] = useState<Profile | null>(null);
@@ -922,6 +925,22 @@ export function App() {
 
     const rows = (data ?? []) as Comment[];
 
+    const commentIds = rows.map((row) => row.id);
+    const { data: reactions } = commentIds.length
+      ? await supabase
+          .from("comment_reactions")
+          .select("comment_id, user_id")
+          .in("comment_id", commentIds)
+      : { data: [] as { comment_id: string; user_id: string }[] };
+
+    const reactionRows = (reactions ?? []) as { comment_id: string; user_id: string }[];
+    const reactionCounts = new Map<string, number>();
+    const reactedIds = new Set<string>();
+    reactionRows.forEach((reaction) => {
+      reactionCounts.set(reaction.comment_id, (reactionCounts.get(reaction.comment_id) ?? 0) + 1);
+      if (reaction.user_id === session.user.id) reactedIds.add(reaction.comment_id);
+    });
+
     const authorIds = [
       ...new Set(rows.map((row) => row.author_id)),
     ];
@@ -944,6 +963,8 @@ export function App() {
       ...current,
       [postId]: rows.map((row) => ({
         ...row,
+        reactionCount: reactionCounts.get(row.id) ?? 0,
+        reacted: reactedIds.has(row.id),
         profile: profileMap.get(row.author_id),
       })),
     }));
@@ -1032,6 +1053,8 @@ export function App() {
 
     const newComment = {
       ...(data as Comment),
+      reactionCount: 0,
+      reacted: false,
       profile: profile ?? undefined,
     };
 
@@ -1062,6 +1085,56 @@ export function App() {
     );
   }
 
+  async function toggleCommentReaction(postId: string, comment: Comment) {
+    if (!supabase || !session?.user || commentReactionBusy === comment.id) return;
+
+    setCommentReactionBusy(comment.id);
+    const nextReacted = !comment.reacted;
+
+    setCommentsByPost((current) => ({
+      ...current,
+      [postId]: (current[postId] ?? []).map((item) =>
+        item.id === comment.id
+          ? {
+              ...item,
+              reacted: nextReacted,
+              reactionCount: item.reactionCount + (nextReacted ? 1 : -1),
+            }
+          : item,
+      ),
+    }));
+
+    const result = nextReacted
+      ? await supabase.from("comment_reactions").insert({
+          comment_id: comment.id,
+          user_id: session.user.id,
+          reaction_type: "like",
+        })
+      : await supabase
+          .from("comment_reactions")
+          .delete()
+          .eq("comment_id", comment.id)
+          .eq("user_id", session.user.id);
+
+    if (result.error) {
+      setCommentsByPost((current) => ({
+        ...current,
+        [postId]: (current[postId] ?? []).map((item) =>
+          item.id === comment.id
+            ? {
+                ...item,
+                reacted: comment.reacted,
+                reactionCount: comment.reactionCount,
+              }
+            : item,
+        ),
+      }));
+      setFeedError("Could not update the reaction. Please try again.");
+    }
+
+    setCommentReactionBusy(null);
+  }
+
   function renderCommentTree(postId: string, comments: Comment[], parentId: string | null, depth = 0): ReactNode[] {
     return comments.filter((comment) => comment.parent_id === parentId).map((comment) => (
       <div key={comment.id}>
@@ -1081,6 +1154,16 @@ export function App() {
             </div>
             <p>{comment.content}</p>
             <div className="comment-actions">
+              <button
+                className={comment.reacted ? "comment-action reaction-active" : "comment-action"}
+                type="button"
+                onClick={() => void toggleCommentReaction(postId, comment)}
+                disabled={commentReactionBusy === comment.id}
+                aria-label={comment.reacted ? "Unlike comment" : "Like comment"}
+              >
+                <Heart size={12} fill={comment.reacted ? "currentColor" : "none"} />
+                {comment.reactionCount > 0 ? comment.reactionCount : "Like"}
+              </button>
               <button className="comment-action" type="button" onClick={() => { setReplyTo({ postId, commentId: comment.id }); setOpenComments(postId); }}>
                 Reply
               </button>
