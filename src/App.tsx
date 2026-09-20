@@ -182,6 +182,7 @@ export function App() {
   const [activeConversation, setActiveConversation] = useState<string | null>(null);
   const [messagesByConversation, setMessagesByConversation] = useState<Record<string, Array<{ id: string; sender_id: string; content: string; created_at: string }>>>({});
   const [messageDraft, setMessageDraft] = useState("");
+  const [messageNoticeOpen, setMessageNoticeOpen] = useState(false);
 
   useEffect(() => {
     localStorage.setItem(THEME_KEY, theme);
@@ -2001,11 +2002,22 @@ export function App() {
                       <p className="profile-bio">{publicProfile.bio || "No bio yet. Tell the world who you are."}</p>
                       <div className="profile-actions profile-social-actions">
                         <button className="profile-action-button follow-button" type="button" onClick={() => void toggleFollowPublicProfile()}><UserPlus size={14} />{followingPublicProfile ? "Following" : "Follow"}</button>
-                        {publicProfileFriend ? (
-                          <button className="profile-action-button" type="button" onClick={() => void openMessageConversation()}><MessageCircle size={14} />Message</button>
-                        ) : (
-                          <span className="profile-action-hint">Follow each other to unlock messages</span>
-                        )}
+                        <button
+                          className="profile-action-button"
+                          type="button"
+                          onClick={() => {
+                            if (publicProfileFriend) {
+                              void openMessageConversation();
+                            } else {
+                              setMessageNoticeOpen(true);
+                            }
+                          }}
+                          aria-label="Message"
+                          title={publicProfileFriend ? "Message" : "Follow each other to unlock messages"}
+                        >
+                          <MessageCircle size={14} />
+                          Message
+                        </button>
                         <button className="profile-action-button" type="button" onClick={() => { setView("home"); setPublicProfile(null); }}><ArrowLeft size={14} />Back</button>
                       </div>
                       <div className="profile-meta">
@@ -2154,6 +2166,19 @@ export function App() {
             <span>Menu</span>
           </button>
         </nav>
+      )}
+
+      {messageNoticeOpen && (
+        <div className="sheet-backdrop" role="presentation" onClick={() => setMessageNoticeOpen(false)}>
+          <section className="message-notice glass" role="dialog" aria-modal="true" aria-labelledby="message-notice-title" onClick={(event) => event.stopPropagation()}>
+            <div className="message-notice-icon">
+              <MessageCircle size={22} />
+            </div>
+            <h3 id="message-notice-title">Messaging is locked</h3>
+            <p>You need to follow each other before you can start a conversation.</p>
+            <button className="primary-button" type="button" onClick={() => setMessageNoticeOpen(false)}>Got it</button>
+          </section>
+        </div>
       )}
 
       {activeConversation && (
