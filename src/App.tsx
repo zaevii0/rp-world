@@ -458,7 +458,6 @@ export function App() {
       )
       .is("archived_at", null)
       .is("trashed_at", null)
-      .order("pinned_at", { ascending: false, nullsFirst: false })
       .order("created_at", { ascending: false })
       .limit(30);
 
