@@ -1367,26 +1367,12 @@ export function App() {
   return (
     <div className={isDark ? "app dark" : "app light"}>
       <header className="topbar glass">
-        {viewAs ? (
-          <button
-            className="nav-back-button"
-            type="button"
-            onClick={() => {
-              setViewAs(false);
-              setView("profile");
-            }}
-            aria-label="Back to your profile"
-            title="Back"
-          >
-            <ArrowLeft size={21} />
-          </button>
-        ) : (
-          <button
-            className="brand-button"
-            type="button"
-            onClick={() => setView("home")}
-            aria-label="RP WORLD home"
-          >
+        <button
+          className="brand-button"
+          type="button"
+          onClick={() => setView("home")}
+          aria-label="RP WORLD home"
+        >
           <span className="brand-mark">
             <Sparkles size={16} />
           </span>
@@ -1396,7 +1382,6 @@ export function App() {
             <strong>RP WORLD</strong>
           </span>
         </button>
-        )}
 
         <div className="header-actions">
           <ThemePicker
@@ -1533,16 +1518,33 @@ export function App() {
                 <h2>{title}</h2>
               </div>
 
-              <button
-                className="glass circle-button"
-                type="button"
-                aria-label="Search"
-                onClick={() =>
-                  setView("discover")
-                }
-              >
-                <Search size={17} />
-              </button>
+              <div className="page-heading-actions">
+                {viewAs && (
+                  <button
+                    className="glass circle-button"
+                    type="button"
+                    onClick={() => {
+                      setViewAs(false);
+                      setView("profile");
+                    }}
+                    aria-label="Back to your profile"
+                    title="Back to your profile"
+                  >
+                    <ArrowLeft size={17} />
+                  </button>
+                )}
+
+                <button
+                  className="glass circle-button"
+                  type="button"
+                  aria-label="Search"
+                  onClick={() =>
+                    setView("discover")
+                  }
+                >
+                  <Search size={17} />
+                </button>
+              </div>
             </div>
 
             {view === "home" && (
@@ -1965,14 +1967,6 @@ export function App() {
                               Message
                             </button>
 
-                            <button
-                              className="profile-action-button"
-                              type="button"
-                              onClick={() => setViewAs(false)}
-                            >
-                              <ArrowLeft size={14} />
-                              Back
-                            </button>
                           </>
                         )}
                       </div>
