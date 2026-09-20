@@ -2317,7 +2317,7 @@ export function App() {
                       )}
                     </div>
                   )}
-                  ) : (
+                ) : (
                     profileReposts.length === 0 ? (
                       <div className="empty-state glass">
                         <Repeat2 size={22} />
