@@ -505,3 +505,29 @@ h1 { margin:3px 0 0; font-size:17px; letter-spacing:-.03em; }
   }
   .highlight-viewer-image { min-height:0; }
 }
+
+
+/* Profile highlight style picker */
+.highlight-style-field { display:grid; gap:10px; }
+.highlight-style-label { display:grid; gap:3px; }
+.highlight-style-label > span { font-size:12px; font-weight:700; }
+.highlight-style-label > small { font-size:10px; opacity:.48; }
+.highlight-style-options { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.highlight-style-option { min-width:0; padding:10px; display:flex; align-items:center; gap:10px; border:1px solid rgba(127,127,127,.16); border-radius:16px; color:inherit; background:rgba(127,127,127,.06); text-align:left; cursor:pointer; }
+.highlight-style-option:hover, .highlight-style-option.active { border-color:color-mix(in srgb,var(--accent) 52%,rgba(127,127,127,.18)); background:var(--accent-soft); }
+.highlight-style-option > span:last-child { display:grid; gap:2px; min-width:0; }
+.highlight-style-option strong { font-size:11px; }
+.highlight-style-option small { font-size:9px; opacity:.5; }
+.style-preview { flex:0 0 auto; width:42px; height:42px; display:grid; place-items:center; overflow:hidden; color:var(--accent); background:rgba(127,127,127,.1); }
+.style-preview-circle { border-radius:50%; border:2px solid color-mix(in srgb,var(--accent) 42%,rgba(127,127,127,.2)); }
+.style-preview-portrait { border-radius:10px; border:1px solid color-mix(in srgb,var(--accent) 35%,rgba(127,127,127,.2)); }
+.highlight-card-circle .highlight-image { border-radius:50%; }
+.highlight-card-portrait { width:104px; flex-basis:104px; min-height:150px; grid-template-rows:124px auto; gap:7px; }
+.highlight-card-portrait strong { width:104px; }
+.highlight-card-portrait .highlight-image { width:104px; height:124px; border-radius:13px; border:1px solid color-mix(in srgb,var(--accent) 35%,rgba(127,127,127,.18)); padding:0; box-shadow:0 5px 18px rgba(0,0,0,.12); }
+.highlight-card-portrait .add-highlight > span { border-radius:13px; }
+@media (max-width:560px) {
+  .highlight-card-portrait { width:92px; flex-basis:92px; min-height:135px; grid-template-rows:108px auto; }
+  .highlight-card-portrait strong { width:92px; }
+  .highlight-card-portrait .highlight-image { width:92px; height:108px; }
+}
