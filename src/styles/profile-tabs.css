@@ -436,3 +436,23 @@
     font-size: 13px;
   }
 }
+
+
+/* iOS-style edit post sheet */
+.edit-post-sheet {
+  width: min(100%, 520px);
+}
+
+.edit-post-sheet .textarea-wrap textarea {
+  min-height: 180px;
+}
+
+@media (max-width: 560px) {
+  .edit-post-sheet {
+    width: min(100%, 430px);
+    max-height: calc(100dvh - 24px);
+  }
+  .edit-post-sheet .textarea-wrap textarea {
+    min-height: 150px;
+  }
+}
