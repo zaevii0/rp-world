@@ -1993,19 +1993,19 @@ export function App() {
                         </span>
                       </div>
 
-                      <div className="profile-stats" aria-label="Profile statistics">
-                        <div>
-                          <strong>{profileStats.followers}</strong>
-                          <span>Followers</span>
-                        </div>
-                        <div>
-                          <strong>{profileStats.likes}</strong>
-                          <span>Likes received</span>
-                        </div>
-                        <div>
-                          <strong>{profilePosts.length}</strong>
-                          <span>Posts</span>
-                        </div>
+                      <div className="profile-meta profile-stats-pills" aria-label="Profile statistics">
+                        <span>
+                          <User size={13} />
+                          {profileStats.followers} {profileStats.followers === 1 ? "follower" : "followers"}
+                        </span>
+                        <span>
+                          <Heart size={13} />
+                          {profileStats.likes} {profileStats.likes === 1 ? "like" : "likes"}
+                        </span>
+                        <span>
+                          <Image size={13} />
+                          {profilePosts.length} {profilePosts.length === 1 ? "post" : "posts"}
+                        </span>
                       </div>
                     </div>
                   </div>
