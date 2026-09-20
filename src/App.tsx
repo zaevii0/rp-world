@@ -24,7 +24,7 @@ import {
   UserPlus,
   X,
 } from "lucide-react";
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { ThemePicker } from "./components/ThemePicker";
 import { supabase, supabaseConfigured } from "./lib/supabase";
@@ -178,7 +178,7 @@ export function App() {
   const [followingPublicProfile, setFollowingPublicProfile] = useState(false);
   const [followedByPublicProfile, setFollowedByPublicProfile] = useState(false);
   const [publicProfileFriend, setPublicProfileFriend] = useState(false);
-  const [conversations, setConversations] = useState<Array<{ id: string; user_low: string; user_high: string; other?: Profile }>>([]);
+  const [discoverProfiles, setDiscoverProfiles] = useState<Profile[]>([]);
   const [activeConversation, setActiveConversation] = useState<string | null>(null);
   const [messagesByConversation, setMessagesByConversation] = useState<Record<string, Array<{ id: string; sender_id: string; content: string; created_at: string }>>>({});
   const [messageDraft, setMessageDraft] = useState("");
@@ -267,6 +267,12 @@ export function App() {
       setPosts([]);
     }
   }, [session, profile]);
+
+  useEffect(() => {
+    if (view === "discover" && session?.user && profile) {
+      void loadDiscoverProfiles();
+    }
+  }, [view, session, profile]);
 
   useEffect(() => {
     if (view === "profile" && session?.user && profile) {
@@ -657,17 +663,10 @@ export function App() {
     }
   }
 
-  async function loadConversations() {
+  async function loadDiscoverProfiles() {
     if (!supabase || !session?.user) return;
-    const { data } = await supabase.from("conversations").select("id, user_low, user_high")
-      .or(`user_low.eq.${session.user.id},user_high.eq.${session.user.id}`).order("created_at", { ascending: false });
-    const rows = (data ?? []) as Array<{ id: string; user_low: string; user_high: string }>;
-    const otherIds = rows.map((row) => row.user_low === session.user.id ? row.user_high : row.user_low);
-    const { data: people } = otherIds.length
-      ? await supabase.from("profiles").select("*").in("id", otherIds)
-      : { data: [] as Profile[] };
-    const peopleMap = new Map((people ?? []).map((item) => [item.id, item as Profile]));
-    setConversations(rows.map((row) => ({ ...row, other: peopleMap.get(row.user_low === session.user.id ? row.user_high : row.user_low) })));
+    const { data } = await supabase.from("profiles").select("*").neq("id", session.user.id).order("display_name").limit(50);
+    setDiscoverProfiles((data ?? []) as Profile[]);
   }
 
   async function openMessageConversation() {
@@ -686,7 +685,7 @@ export function App() {
     if (!conversation) return;
     setActiveConversation(conversation.id);
     await loadConversationMessages(conversation.id);
-    await loadConversations();
+    await loadDiscoverProfiles();
   }
 
   async function loadConversationMessages(conversationId: string) {
@@ -963,7 +962,7 @@ export function App() {
     );
   }
 
-  function renderCommentTree(postId: string, comments: Comment[], parentId: string | null, depth = 0): JSX.Element[] {
+  function renderCommentTree(postId: string, comments: Comment[], parentId: string | null, depth = 0): ReactNode[] {
     return comments.filter((comment) => comment.parent_id === parentId).map((comment) => (
       <div key={comment.id}>
         <div className={`comment-row${replyTo?.commentId === comment.id ? " reply-target" : ""}`} style={{ marginLeft: Math.min(depth, 5) * 28 }}>
@@ -1090,7 +1089,6 @@ export function App() {
     setPublicProfile(null);
     setPublicProfilePosts([]);
     setPublicHighlights([]);
-    setConversations([]);
     setActiveConversation(null);
     setMessagesByConversation({});
     setMessageDraft("");
@@ -1546,18 +1544,30 @@ export function App() {
             )}
 
             {view === "discover" && (
-              <div className="empty-state glass">
-                <Search size={24} />
-
-                <strong>
-                  Discover is coming next.
-                </strong>
-
-                <span>
-                  Communities, arenas, creators,
-                  and search will live here.
-                </span>
-              </div>
+              <section className="discover-section">
+                <div className="section-heading">
+                  <div><p className="eyebrow">RP WORLD</p><h3>Discover people</h3></div>
+                </div>
+                {discoverProfiles.length === 0 ? (
+                  <div className="empty-state glass"><Search size={24} /><strong>No other profiles yet.</strong><span>New RP WORLD members will appear here.</span></div>
+                ) : (
+                  <div className="discover-list">
+                    {discoverProfiles.map((person) => (
+                      <article className="discover-card glass" key={person.id}>
+                        <button className="avatar profile-link-button" type="button" onClick={() => void loadPublicProfile(person.id)} aria-label={`Open ${person.display_name} profile`} style={person.avatar_url ? { backgroundImage: `url(${person.avatar_url})` } : undefined}>
+                          {!person.avatar_url && initials(person.display_name)}
+                        </button>
+                        <div className="discover-info">
+                          <button className="profile-name-link" type="button" onClick={() => void loadPublicProfile(person.id)}>{person.display_name}</button>
+                          <span>@{person.username}</span>
+                          <p>{person.bio || "RP WORLD member"}</p>
+                        </div>
+                        <button className="profile-action-button" type="button" onClick={() => void loadPublicProfile(person.id)}>View</button>
+                      </article>
+                    ))}
+                  </div>
+                )}
+              </section>
             )}
 
             {view === "profile" && (
