@@ -268,3 +268,60 @@ h1 { margin:3px 0 0; font-size:17px; letter-spacing:-.03em; }
 .comment-time {
   margin-top:5px;
 }
+
+
+/* Profile owner / public-view actions */
+.profile-name-row {
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+}
+
+.profile-actions {
+  display:flex;
+  align-items:center;
+  gap:6px;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+}
+
+.profile-action-button {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  min-height:32px;
+  padding:7px 11px;
+  border:1px solid rgba(127,127,127,.18);
+  border-radius:10px;
+  background:color-mix(in srgb,var(--accent-soft) 42%,transparent);
+  color:inherit;
+  font:inherit;
+  font-size:11px;
+  font-weight:600;
+  cursor:pointer;
+  backdrop-filter:blur(14px) saturate(140%);
+  -webkit-backdrop-filter:blur(14px) saturate(140%);
+  transition:transform .16s ease,background .16s ease,border-color .16s ease;
+}
+
+.profile-action-button:hover,
+.profile-action-button:focus-visible {
+  background:color-mix(in srgb,var(--accent-soft) 70%,transparent);
+  border-color:color-mix(in srgb,var(--accent) 28%,rgba(127,127,127,.18));
+  transform:translateY(-1px);
+  outline:none;
+}
+
+@media (max-width:600px) {
+  .profile-name-row {
+    align-items:flex-start;
+  }
+
+  .profile-action-button {
+    min-height:30px;
+    padding:6px 9px;
+    font-size:10px;
+  }
+}
