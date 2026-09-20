@@ -2033,22 +2033,6 @@ export function App() {
                   </div>
 
                   <div className={viewAs ? "highlights-row view-as" : "highlights-row"}>
-                    {!viewAs && (
-                      <button
-                        className={highlightStyle === "portrait" ? "highlight-card add-highlight highlight-card-portrait" : "highlight-card add-highlight highlight-card-circle"}
-                        type="button"
-                        onClick={() =>
-                          setHighlightOpen(true)
-                        }
-                      >
-                        <span>
-                          <Plus size={19} />
-                        </span>
-
-                        <strong>New</strong>
-                      </button>
-                    )}
-
                     {highlights.map((item) => (
                       <button
                         className={highlightStyle === "portrait" ? "highlight-card highlight-card-portrait" : "highlight-card highlight-card-circle"}
