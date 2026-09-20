@@ -137,6 +137,53 @@ function initials(name: string) {
   return name.trim().slice(0, 1).toUpperCase() || "R";
 }
 
+function getElegantGreeting(name: string) {
+  const hour = new Date().getHours();
+  let pool: string[];
+
+  if (hour >= 5 && hour < 12) {
+    pool = [
+      `A pleasant morning, ${name}.`,
+      `A lovely morning, ${name}.`,
+      `A fine morning, ${name}.`,
+    ];
+  } else if (hour >= 12 && hour < 18) {
+    pool = [
+      `A pleasant afternoon, ${name}.`,
+      `A lovely afternoon, ${name}.`,
+      `A fine afternoon, ${name}.`,
+    ];
+  } else {
+    pool = [
+      `A pleasant evening, ${name}.`,
+      `A lovely evening, ${name}.`,
+      `A fine evening, ${name}.`,
+      `A peaceful evening, ${name}.`,
+    ];
+  }
+
+  const key = "rpw:lastElegantGreeting";
+  let last = "";
+
+  try {
+    last = sessionStorage.getItem(key) || "";
+  } catch {
+    // Ignore unavailable session storage.
+  }
+
+  const choices = pool.filter((greeting) => greeting !== last);
+  const greeting =
+    choices[Math.floor(Math.random() * choices.length)] || pool[0];
+
+  try {
+    sessionStorage.setItem(key, greeting);
+  } catch {
+    // Ignore unavailable session storage.
+  }
+
+  return greeting;
+}
+
 function timeAgo(value: string) {
   const seconds = Math.max(
     1,
@@ -635,7 +682,7 @@ export function App() {
     if (view === "menu") return "RP WORLD";
 
     return profile
-      ? `Welcome, ${profile.display_name}.`
+      ? getElegantGreeting(profile.display_name)
       : "Your RP world.";
   }, [profile, publicProfile, view]);
 
