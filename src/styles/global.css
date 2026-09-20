@@ -950,3 +950,32 @@ h1 { margin:3px 0 0; font-size:17px; letter-spacing:-.03em; }
     padding: 16px;
   }
 }
+
+.message-notice {
+  width: min(420px, calc(100vw - 32px));
+  padding: 26px;
+  text-align: center;
+  border-radius: 24px;
+}
+
+.message-notice-icon {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 14px;
+  display: grid;
+  place-items: center;
+  border-radius: 16px;
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
+.message-notice h3 {
+  margin: 0 0 8px;
+}
+
+.message-notice p {
+  margin: 0 auto 20px;
+  max-width: 320px;
+  color: var(--muted);
+  line-height: 1.5;
+}
