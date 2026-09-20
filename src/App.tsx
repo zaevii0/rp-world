@@ -310,7 +310,7 @@ export function App() {
 
     const newComment = {
       ...(data as Comment),
-      profile,
+      profile: profile ?? undefined,
     };
     setCommentsByPost((current) => ({
       ...current,
