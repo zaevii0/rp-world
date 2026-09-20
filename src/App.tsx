@@ -1095,6 +1095,37 @@ export function App() {
     }
   }
 
+  function openEditPost(post: Post) {
+    if (!session?.user || post.author_id !== session.user.id || post.shared_post_id) return;
+    setEditPostTarget(post);
+    setEditPostText(post.content);
+    setFeedError("");
+    setEditPostOpen(true);
+  }
+
+  async function saveEditedPost(event: FormEvent) {
+    event.preventDefault();
+    if (!supabase || !session?.user || !editPostTarget || editPostBusy) return;
+    const content = editPostText.trim();
+    if (!content) return;
+    setEditPostBusy(true);
+    const { data, error: updateError } = await supabase.from("posts").update({ content }).eq("id", editPostTarget.id).eq("author_id", session.user.id).select("id, content").single();
+    if (updateError || !data) {
+      setEditPostBusy(false);
+      setFeedError(updateError?.message || "We could not update that post.");
+      return;
+    }
+    const updatePost = (items: Post[]) => items.map((item) => item.id === editPostTarget.id ? { ...item, content: data.content } : item);
+    setPosts(updatePost);
+    setProfilePosts(updatePost);
+    setPublicProfilePosts(updatePost);
+    setEditPostBusy(false);
+    setEditPostOpen(false);
+    setEditPostTarget(null);
+    setEditPostText("");
+    setMessage("Post updated.");
+  }
+
   async function loadComments(postId: string) {
     if (!supabase || !session?.user) return;
 
