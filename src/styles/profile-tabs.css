@@ -140,3 +140,13 @@
     transition: none;
   }
 }
+
+/* Keep the color theme picker above every app layer/navigation */
+.sheet-backdrop:has(.theme-sheet) {
+  z-index: 99999 !important;
+}
+
+.sheet-backdrop:has(.theme-sheet) .theme-sheet {
+  position: relative;
+  z-index: 100000 !important;
+}
