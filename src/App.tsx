@@ -1333,8 +1333,11 @@ export function App() {
                         key={post.id}
                       >
                         <div className="post-head">
-                          <span
-                            className="avatar"
+                          <button
+                            className="avatar profile-link-button"
+                            type="button"
+                            aria-label={`Open ${post.profile?.display_name ?? "member"} profile`}
+                            onClick={() => void loadPublicProfile(post.author_id)}
                             style={
                               post.profile?.avatar_url
                                 ? {
@@ -1350,14 +1353,18 @@ export function App() {
                                   ?.display_name ??
                                   "RP",
                               )}
-                          </span>
+                          </button>
 
                           <div>
-                            <strong>
+                            <button
+                              className="profile-name-link"
+                              type="button"
+                              onClick={() => void loadPublicProfile(post.author_id)}
+                            >
                               {post.profile
                                 ?.display_name ??
                                 "RP WORLD member"}
-                            </strong>
+                            </button>
 
                             <span className="post-meta">
                               @
