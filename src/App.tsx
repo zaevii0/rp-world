@@ -183,6 +183,7 @@ export function App() {
   const [messagesByConversation, setMessagesByConversation] = useState<Record<string, Array<{ id: string; sender_id: string; content: string; created_at: string }>>>({});
   const [messageDraft, setMessageDraft] = useState("");
   const [messageNoticeOpen, setMessageNoticeOpen] = useState(false);
+  const [profileStats, setProfileStats] = useState({ followers: 0, likes: 0 });
 
   useEffect(() => {
     localStorage.setItem(THEME_KEY, theme);
@@ -281,6 +282,12 @@ export function App() {
       void loadHighlights();
     }
   }, [view, session, profile]);
+
+  useEffect(() => {
+    if (session?.user && profile) {
+      void loadProfileStats(session.user.id);
+    }
+  }, [session, profile]);
 
   async function loadFeed() {
     if (!supabase || !session?.user) return;
@@ -541,6 +548,30 @@ export function App() {
     setProfileOpen(false);
   }
 
+  async function loadProfileStats(userId: string) {
+    if (!supabase) return;
+
+    const { count: followerCount } = await supabase
+      .from("user_follows")
+      .select("follower_id", { count: "exact", head: true })
+      .eq("following_id", userId);
+
+    const { data: userPosts } = await supabase
+      .from("posts")
+      .select("id, post_likes(count)")
+      .eq("author_id", userId);
+
+    const totalLikes = (userPosts ?? []).reduce((sum, post) => {
+      const likes = (post as { post_likes?: { count: number }[] }).post_likes?.[0]?.count ?? 0;
+      return sum + likes;
+    }, 0);
+
+    setProfileStats({
+      followers: followerCount ?? 0,
+      likes: totalLikes,
+    });
+  }
+
   async function loadProfilePosts() {
     if (!supabase || !session?.user) return;
 
@@ -638,6 +669,7 @@ export function App() {
     setFollowedByPublicProfile(Boolean(reverseFollow));
     setPublicProfileFriend(Boolean(myFollow && reverseFollow));
     setPublicProfile(targetProfile);
+    await loadProfileStats(userId);
     setView("public");
     setViewAs(false);
   }
@@ -1762,6 +1794,16 @@ export function App() {
                         </span>
 
                         <span>
+                          <User size={13} />
+                          {profileStats.followers} {profileStats.followers === 1 ? "follower" : "followers"}
+                        </span>
+
+                        <span>
+                          <Heart size={13} />
+                          {profileStats.likes} {profileStats.likes === 1 ? "like" : "likes"}
+                        </span>
+
+                        <span>
                           <MapPin size={13} />
                           RP WORLD
                         </span>
@@ -2022,6 +2064,8 @@ export function App() {
                       </div>
                       <div className="profile-meta">
                         <span><Sparkles size={13} />{publicProfile.rp_id}</span>
+                        <span><User size={13} />{profileStats.followers} {profileStats.followers === 1 ? "follower" : "followers"}</span>
+                        <span><Heart size={13} />{profileStats.likes} {profileStats.likes === 1 ? "like" : "likes"}</span>
                         <span><MapPin size={13} />RP WORLD</span>
                         {publicProfileFriend && <span><User size={13} />Friends</span>}
                       </div>
