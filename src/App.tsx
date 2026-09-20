@@ -371,6 +371,9 @@ export function App() {
 
     if (!supabase || !session?.user) return;
 
+    const client = supabase;
+    const user = session.user;
+
     setProfileBusy(true);
     setProfileError("");
 
@@ -399,9 +402,9 @@ export function App() {
     async function uploadProfileImage(file: File, folder: "avatar" | "cover") {
       const extension =
         file.name.split(".").pop()?.toLowerCase() || "jpg";
-      const filePath = `${session.user.id}/${folder}-${crypto.randomUUID()}.${extension}`;
+      const filePath = `${user.id}/${folder}-${crypto.randomUUID()}.${extension}`;
 
-      const { error: uploadError } = await supabase.storage
+      const { error: uploadError } = await client.storage
         .from("profile-media")
         .upload(filePath, file, {
           cacheControl: "3600",
@@ -411,7 +414,7 @@ export function App() {
 
       if (uploadError) throw uploadError;
 
-      return supabase.storage
+      return client.storage
         .from("profile-media")
         .getPublicUrl(filePath).data.publicUrl;
     }
@@ -442,7 +445,7 @@ export function App() {
     }
 
     const profilePayload = {
-      id: session.user.id,
+      id: user.id,
       username: cleanUsername,
       display_name: cleanDisplayName,
       bio: cleanBio,
@@ -455,7 +458,7 @@ export function App() {
       ? await supabase
           .from("profiles")
           .update(profilePayload)
-          .eq("id", session.user.id)
+          .eq("id", user.id)
           .select("*")
           .single()
       : await supabase
