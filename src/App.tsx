@@ -1521,26 +1521,6 @@ export function App() {
                     </div>
                   </div>
 
-                  <div className="profile-stats">
-                    <div>
-                      <strong>
-                        {profilePosts.length}
-                      </strong>
-                      <span>Posts</span>
-                    </div>
-
-                    <div>
-                      <strong>
-                        {highlights.length}
-                      </strong>
-                      <span>Highlights</span>
-                    </div>
-
-                    <div>
-                      <strong>RP</strong>
-                      <span>Identity</span>
-                    </div>
-                  </div>
                 </div>
 
                 <div className="profile-section">
