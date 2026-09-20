@@ -1484,3 +1484,39 @@ h1 { margin:3px 0 0; font-size:17px; letter-spacing:-.03em; }
     font-size: 7.5px;
   }
 }
+
+
+/* Exact timestamp popover — theme-safe iOS contrast. */
+.timestamp-popover {
+  color: var(--text-primary) !important;
+  background: color-mix(in srgb, var(--surface, #fff) 96%, var(--text-primary) 4%) !important;
+  border-color: color-mix(in srgb, var(--text-primary) 16%, transparent) !important;
+  box-shadow: 0 12px 30px color-mix(in srgb, #000 18%, transparent);
+}
+
+.timestamp-popover span,
+.timestamp-popover strong,
+.timestamp-popover small {
+  color: var(--text-primary) !important;
+  opacity: 1 !important;
+}
+
+.timestamp-popover strong {
+  font-weight: 650;
+}
+
+.timestamp-popover span + span {
+  color: var(--text-secondary, var(--text-primary)) !important;
+}
+
+.app.dark .timestamp-popover {
+  background: color-mix(in srgb, #17171a 94%, var(--accent) 6%) !important;
+  border-color: color-mix(in srgb, #fff 16%, transparent) !important;
+  box-shadow: 0 14px 34px color-mix(in srgb, #000 48%, transparent);
+}
+
+.app.light .timestamp-popover {
+  background: color-mix(in srgb, #fff 96%, var(--accent) 4%) !important;
+  border-color: color-mix(in srgb, #000 12%, transparent) !important;
+  box-shadow: 0 12px 30px color-mix(in srgb, #000 14%, transparent);
+}
