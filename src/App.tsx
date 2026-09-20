@@ -39,6 +39,17 @@ import { supabase, supabaseConfigured } from "./lib/supabase";
 import { themes, type Appearance, type ThemeId } from "./types/theme";
 import type { Profile } from "./types/profile";
 
+function RPWorldMark() {
+  return (
+    <svg className="rp-world-mark" viewBox="0 0 128 128" fill="none" aria-hidden="true">
+      <circle cx="64" cy="64" r="48" stroke="currentColor" strokeWidth="8" />
+      <path d="M64 22c-17 12-27 27-27 42s10 30 27 42c17-12 27-27 27-42S81 34 64 22Z" stroke="currentColor" strokeWidth="7" strokeLinejoin="round" />
+      <path d="M22 56c12-6 27-9 42-9s30 3 42 9M22 72c12 6 27 9 42 9s30-3 42-9" stroke="currentColor" strokeWidth="6" strokeLinecap="round" />
+      <path d="M49 48h30L49 80h30" stroke="currentColor" strokeWidth="7" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 const THEME_KEY = "rpw-theme";
 const APPEARANCE_KEY = "rpw-appearance";
 const VIEW_KEY = "rpw-current-view";
@@ -2087,7 +2098,7 @@ export function App() {
           aria-label="RP WORLD home"
         >
           <span className="brand-mark">
-            <img src="/rp-world-mark.svg" alt="" aria-hidden="true" />
+            <RPWorldMark />
           </span>
 
           <span>
@@ -2160,7 +2171,7 @@ export function App() {
       {!session || !profile ? (
         <main className="hero">
           <div className="hero-icon glass">
-            <img src="/rp-world-mark.svg" alt="" aria-hidden="true" />
+            <RPWorldMark />
           </div>
 
           <p className="eyebrow">
