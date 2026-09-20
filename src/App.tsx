@@ -911,6 +911,7 @@ export function App() {
     >;
 
     const postIds = rows.map((row) => row.id);
+    const tagMap = await loadPostTags(postIds);
 
     const { data: myLikes } = postIds.length
       ? await supabase
@@ -945,6 +946,7 @@ export function App() {
         pinned_at: row.pinned_at ?? null,
         archived_at: row.archived_at ?? null,
         trashed_at: row.trashed_at ?? null,
+        tagged_profiles: tagMap.get(row.id) ?? [],
         reposted: false,
       })),
     );
@@ -978,7 +980,9 @@ export function App() {
       .select(
         "id, author_id, content, media_url, media_type, created_at, pinned_at, archived_at, trashed_at, post_likes(count), post_comments(count)",
       )
-      .in("id", postIds);
+      .in("id", postIds)
+      .is("archived_at", null)
+      .is("trashed_at", null);
 
     if (postsError) return;
 
@@ -989,6 +993,7 @@ export function App() {
       }
     >;
     const authorIds = [...new Set(rows.map((row) => row.author_id))];
+    const tagMap = await loadPostTags(postIds);
 
     const { data: profiles } = authorIds.length
       ? await supabase.from("profiles").select("*").in("id", authorIds)
@@ -1038,6 +1043,10 @@ export function App() {
           comments: row.post_comments?.[0]?.count ?? 0,
           reposts: 0,
           shares: 0,
+          pinned_at: row.pinned_at ?? null,
+          archived_at: row.archived_at ?? null,
+          trashed_at: row.trashed_at ?? null,
+          tagged_profiles: tagMap.get(row.id) ?? [],
           reposted: true,
           reposted_at: repostedAtMap.get(row.id) ?? null,
         })),
@@ -1062,6 +1071,7 @@ export function App() {
 
     const rows = (targetPosts ?? []) as Array<Post & { post_likes?: { count: number }[]; post_comments?: { count: number }[] }>;
     const postIds = rows.map((row) => row.id);
+    const tagMap = await loadPostTags(postIds);
     const { data: myLikes } = postIds.length
       ? await supabase.from("post_likes").select("post_id, created_at").eq("user_id", session.user.id).in("post_id", postIds)
       : { data: [] as { post_id: string; created_at: string }[] };
@@ -1072,7 +1082,7 @@ export function App() {
       id: row.id, author_id: row.author_id, content: row.content, media_url: row.media_url,
       media_type: row.media_type ?? null, created_at: row.created_at, profile: targetProfile, likes: row.post_likes?.[0]?.count ?? 0,
       liked: likedSet.has(row.id), liked_at: likedAtMap.get(row.id) ?? null, comments: row.post_comments?.[0]?.count ?? 0,
-      reposts: 0, shares: 0, pinned_at: row.pinned_at ?? null, archived_at: row.archived_at ?? null, trashed_at: row.trashed_at ?? null, reposted: false,
+      reposts: 0, shares: 0, pinned_at: row.pinned_at ?? null, archived_at: row.archived_at ?? null, trashed_at: row.trashed_at ?? null, tagged_profiles: tagMap.get(row.id) ?? [], reposted: false,
     })));
 
     const { data: targetHighlights } = await supabase.from("profile_highlights")
