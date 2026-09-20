@@ -1026,10 +1026,18 @@ export function App() {
                     setComposerOpen(true)
                   }
                 >
-                  <span className="avatar">
-                    {initials(
-                      profile.display_name,
-                    )}
+                  <span
+                    className="avatar"
+                    style={
+                      profile.avatar_url
+                        ? {
+                            backgroundImage: `url(${profile.avatar_url})`,
+                          }
+                        : undefined
+                    }
+                  >
+                    {!profile.avatar_url &&
+                      initials(profile.display_name)}
                   </span>
 
                   <span>
@@ -1191,13 +1199,20 @@ export function App() {
                                         comment.id
                                       }
                                     >
-                                      <span className="avatar small-avatar">
-                                        {initials(
-                                          comment
-                                            .profile
-                                            ?.display_name ??
-                                            "RP",
-                                        )}
+                                      <span
+                                        className="avatar small-avatar"
+                                        style={
+                                          comment.profile?.avatar_url
+                                            ? {
+                                                backgroundImage: `url(${comment.profile.avatar_url})`,
+                                              }
+                                            : undefined
+                                        }
+                                      >
+                                        {!comment.profile?.avatar_url &&
+                                          initials(
+                                            comment.profile?.display_name ?? "RP",
+                                          )}
                                       </span>
 
                                       <div>
@@ -1229,10 +1244,18 @@ export function App() {
                                 )
                               }
                             >
-                              <span className="avatar small-avatar">
-                                {initials(
-                                  profile.display_name,
-                                )}
+                              <span
+                                className="avatar small-avatar"
+                                style={
+                                  profile.avatar_url
+                                    ? {
+                                        backgroundImage: `url(${profile.avatar_url})`,
+                                      }
+                                    : undefined
+                                }
+                              >
+                                {!profile.avatar_url &&
+                                  initials(profile.display_name)}
                               </span>
 
                               <input
