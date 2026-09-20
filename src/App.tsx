@@ -128,7 +128,7 @@ export function App() {
   const [highlightStyle, setHighlightStyle] = useState<HighlightStyle>("circle");
 
   const [view, setView] = useState<
-    "home" | "discover" | "profile" | "menu"
+    "home" | "discover" | "profile" | "public" | "menu"
   >("home");
 
   const [authOpen, setAuthOpen] = useState(false);
@@ -172,6 +172,16 @@ export function App() {
   const [replyTo, setReplyTo] = useState<{ postId: string; commentId: string } | null>(null);
   const [openTimestamp, setOpenTimestamp] = useState<string | null>(null);
   const [viewAs, setViewAs] = useState(false);
+  const [publicProfile, setPublicProfile] = useState<Profile | null>(null);
+  const [publicProfilePosts, setPublicProfilePosts] = useState<Post[]>([]);
+  const [publicHighlights, setPublicHighlights] = useState<Highlight[]>([]);
+  const [followingPublicProfile, setFollowingPublicProfile] = useState(false);
+  const [followedByPublicProfile, setFollowedByPublicProfile] = useState(false);
+  const [publicProfileFriend, setPublicProfileFriend] = useState(false);
+  const [conversations, setConversations] = useState<Array<{ id: string; user_low: string; user_high: string; other?: Profile }>>([]);
+  const [activeConversation, setActiveConversation] = useState<string | null>(null);
+  const [messagesByConversation, setMessagesByConversation] = useState<Record<string, Array<{ id: string; sender_id: string; content: string; created_at: string }>>>({});
+  const [messageDraft, setMessageDraft] = useState("");
 
   useEffect(() => {
     localStorage.setItem(THEME_KEY, theme);
@@ -338,12 +348,13 @@ export function App() {
   const title = useMemo(() => {
     if (view === "discover") return "Discover";
     if (view === "profile") return "Your profile";
+    if (view === "public") return publicProfile?.display_name ?? "Profile";
     if (view === "menu") return "RP WORLD";
 
     return profile
       ? `Welcome, ${profile.display_name}.`
       : "Your RP world.";
-  }, [profile, view]);
+  }, [profile, publicProfile, view]);
 
   function resetAuthMessages() {
     setError("");
@@ -575,6 +586,129 @@ export function App() {
         comments: row.post_comments?.[0]?.count ?? 0,
       })),
     );
+  }
+
+  async function loadPublicProfile(userId: string) {
+    if (!supabase || !session?.user || userId === session.user.id) {
+      setView("profile");
+      setViewAs(false);
+      return;
+    }
+
+    const { data: target } = await supabase.from("profiles").select("*").eq("id", userId).maybeSingle();
+    if (!target) return;
+
+    const targetProfile = target as Profile;
+    const { data: targetPosts } = await supabase
+      .from("posts")
+      .select("id, author_id, content, media_url, created_at, post_likes(count), post_comments(count)")
+      .eq("author_id", userId).order("created_at", { ascending: false }).limit(50);
+
+    const rows = (targetPosts ?? []) as Array<Post & { post_likes?: { count: number }[]; post_comments?: { count: number }[] }>;
+    const postIds = rows.map((row) => row.id);
+    const { data: myLikes } = postIds.length
+      ? await supabase.from("post_likes").select("post_id, created_at").eq("user_id", session.user.id).in("post_id", postIds)
+      : { data: [] as { post_id: string; created_at: string }[] };
+
+    const likedSet = new Set((myLikes ?? []).map((item) => item.post_id));
+    const likedAtMap = new Map((myLikes ?? []).map((item) => [item.post_id, item.created_at]));
+    setPublicProfilePosts(rows.map((row) => ({
+      id: row.id, author_id: row.author_id, content: row.content, media_url: row.media_url,
+      created_at: row.created_at, profile: targetProfile, likes: row.post_likes?.[0]?.count ?? 0,
+      liked: likedSet.has(row.id), liked_at: likedAtMap.get(row.id) ?? null, comments: row.post_comments?.[0]?.count ?? 0,
+    })));
+
+    const { data: targetHighlights } = await supabase.from("profile_highlights")
+      .select("id, user_id, title, image_url, created_at").eq("user_id", userId).order("created_at", { ascending: true });
+    setPublicHighlights((targetHighlights ?? []) as Highlight[]);
+
+    const { data: myFollow } = await supabase.from("user_follows").select("follower_id")
+      .eq("follower_id", session.user.id).eq("following_id", userId).maybeSingle();
+    const { data: reverseFollow } = await supabase.from("user_follows").select("follower_id")
+      .eq("follower_id", userId).eq("following_id", session.user.id).maybeSingle();
+
+    setFollowingPublicProfile(Boolean(myFollow));
+    setFollowedByPublicProfile(Boolean(reverseFollow));
+    setPublicProfileFriend(Boolean(myFollow && reverseFollow));
+    setPublicProfile(targetProfile);
+    setView("public");
+    setViewAs(false);
+  }
+
+  async function toggleFollowPublicProfile() {
+    if (!supabase || !session?.user || !publicProfile) return;
+
+    if (followingPublicProfile) {
+      const { error } = await supabase.from("user_follows").delete()
+        .eq("follower_id", session.user.id).eq("following_id", publicProfile.id);
+      if (!error) {
+        setFollowingPublicProfile(false);
+        setPublicProfileFriend(false);
+      }
+      return;
+    }
+
+    const { error } = await supabase.from("user_follows").insert({
+      follower_id: session.user.id, following_id: publicProfile.id,
+    });
+    if (!error) {
+      setFollowingPublicProfile(true);
+      setPublicProfileFriend(followedByPublicProfile);
+    }
+  }
+
+  async function loadConversations() {
+    if (!supabase || !session?.user) return;
+    const { data } = await supabase.from("conversations").select("id, user_low, user_high")
+      .or(`user_low.eq.${session.user.id},user_high.eq.${session.user.id}`).order("created_at", { ascending: false });
+    const rows = (data ?? []) as Array<{ id: string; user_low: string; user_high: string }>;
+    const otherIds = rows.map((row) => row.user_low === session.user.id ? row.user_high : row.user_low);
+    const { data: people } = otherIds.length
+      ? await supabase.from("profiles").select("*").in("id", otherIds)
+      : { data: [] as Profile[] };
+    const peopleMap = new Map((people ?? []).map((item) => [item.id, item as Profile]));
+    setConversations(rows.map((row) => ({ ...row, other: peopleMap.get(row.user_low === session.user.id ? row.user_high : row.user_low) })));
+  }
+
+  async function openMessageConversation() {
+    if (!supabase || !session?.user || !publicProfile || !publicProfileFriend) return;
+    let low = session.user.id, high = publicProfile.id;
+    if (low > high) [low, high] = [high, low];
+
+    const { data } = await supabase.from("conversations").select("id, user_low, user_high")
+      .eq("user_low", low).eq("user_high", high).maybeSingle();
+    let conversation = data;
+    if (!conversation) {
+      const { data: created } = await supabase.from("conversations")
+        .insert({ user_low: low, user_high: high }).select("id, user_low, user_high").single();
+      conversation = created;
+    }
+    if (!conversation) return;
+    setActiveConversation(conversation.id);
+    await loadConversationMessages(conversation.id);
+    await loadConversations();
+  }
+
+  async function loadConversationMessages(conversationId: string) {
+    if (!supabase || !session?.user) return;
+    const { data } = await supabase.from("messages").select("id, sender_id, content, created_at")
+      .eq("conversation_id", conversationId).order("created_at", { ascending: true });
+    setMessagesByConversation((current) => ({ ...current, [conversationId]: (data ?? []) as Array<{ id: string; sender_id: string; content: string; created_at: string }> }));
+  }
+
+  async function sendMessage(event: FormEvent) {
+    event.preventDefault();
+    if (!supabase || !session?.user || !activeConversation || !messageDraft.trim()) return;
+    const content = messageDraft.trim();
+    const { data, error } = await supabase.from("messages").insert({
+      conversation_id: activeConversation, sender_id: session.user.id, content,
+    }).select("id, sender_id, content, created_at").single();
+    if (error || !data) return;
+    setMessagesByConversation((current) => ({
+      ...current,
+      [activeConversation]: [...(current[activeConversation] ?? []), data as { id: string; sender_id: string; content: string; created_at: string }],
+    }));
+    setMessageDraft("");
   }
 
   async function loadHighlights() {
@@ -829,6 +963,39 @@ export function App() {
     );
   }
 
+  function renderCommentTree(postId: string, comments: Comment[], parentId: string | null, depth = 0): JSX.Element[] {
+    return comments.filter((comment) => comment.parent_id === parentId).map((comment) => (
+      <div key={comment.id}>
+        <div className={`comment-row${replyTo?.commentId === comment.id ? " reply-target" : ""}`} style={{ marginLeft: Math.min(depth, 5) * 28 }}>
+          <button className="avatar small-avatar profile-link-button" type="button" onClick={() => void loadPublicProfile(comment.author_id)} aria-label="Open profile"
+            style={comment.profile?.avatar_url ? { backgroundImage: `url(${comment.profile.avatar_url})` } : undefined}>
+            {!comment.profile?.avatar_url && initials(comment.profile?.display_name ?? "RP")}
+          </button>
+          <div>
+            <div className="comment-head">
+              <button className="profile-name-link" type="button" onClick={() => void loadPublicProfile(comment.author_id)}>
+                {comment.profile?.display_name ?? "RP WORLD member"}
+              </button>
+              <button className="timestamp-button" type="button" onClick={() => setOpenTimestamp(openTimestamp === comment.id ? null : comment.id)} title="Show exact date and time">
+                <Clock size={10} /> {timeAgo(comment.created_at)}
+              </button>
+            </div>
+            <p>{comment.content}</p>
+            <div className="comment-actions">
+              <button className="comment-action" type="button" onClick={() => { setReplyTo({ postId, commentId: comment.id }); setOpenComments(postId); }}>
+                Reply
+              </button>
+            </div>
+            {openTimestamp === comment.id && (
+              <div className="timestamp-popover comment-time"><strong>Posted</strong><span>{exactTime(comment.created_at)}</span></div>
+            )}
+          </div>
+        </div>
+        {renderCommentTree(postId, comments, comment.id, depth + 1)}
+      </div>
+    ));
+  }
+
   async function sharePost(post: Post) {
     const shareData = {
       title: post.profile?.display_name
@@ -920,6 +1087,13 @@ export function App() {
 
     setSession(null);
     setProfile(null);
+    setPublicProfile(null);
+    setPublicProfilePosts([]);
+    setPublicHighlights([]);
+    setConversations([]);
+    setActiveConversation(null);
+    setMessagesByConversation({});
+    setMessageDraft("");
     setPosts([]);
     setProfilePosts([]);
     setHighlights([]);
@@ -1295,88 +1469,7 @@ export function App() {
                                   conversation.
                                 </span>
                               ) : (
-                                (
-                                  commentsByPost[
-                                    post.id
-                                  ] ?? []
-                                ).map(
-                                  (comment) => (
-                                    <div
-                                      className={`comment-row${replyTo?.commentId === comment.id ? " reply-target" : ""}`}
-                                      key={
-                                        comment.id
-                                      }
-                                    >
-                                      <span
-                                        className="avatar small-avatar"
-                                        style={
-                                          comment.profile?.avatar_url
-                                            ? {
-                                                backgroundImage: `url(${comment.profile.avatar_url})`,
-                                              }
-                                            : undefined
-                                        }
-                                      >
-                                        {!comment.profile?.avatar_url &&
-                                          initials(
-                                            comment.profile?.display_name ?? "RP",
-                                          )}
-                                      </span>
-
-                                      <div>
-                                        <div className="comment-head">
-                                          <strong>
-                                            {comment
-                                              .profile
-                                              ?.display_name ??
-                                              "RP WORLD member"}
-                                          </strong>
-                                          <button
-                                            className="timestamp-button"
-                                            type="button"
-                                            onClick={() =>
-                                              setOpenTimestamp(
-                                                openTimestamp === comment.id ? null : comment.id,
-                                              )
-                                            }
-                                            title="Show exact date and time"
-                                          >
-                                            <Clock size={10} />
-                                            {timeAgo(comment.created_at)}
-                                          </button>
-                                        </div>
-
-                                        <p>
-                                          {
-                                            comment.content
-                                          }
-                                        </p>
-
-                                        <div className="comment-actions">
-                                          <button
-                                            className="comment-action"
-                                            type="button"
-                                            onClick={() => {
-                                              setReplyTo({
-                                                postId: post.id,
-                                                commentId: comment.id,
-                                              });
-                                              setOpenComments(post.id);
-                                            }}
-                                          >
-                                            Reply
-                                          </button>
-                                        </div>
-                                        {openTimestamp === comment.id && (
-                                          <div className="timestamp-popover comment-time">
-                                            <strong>Posted</strong>
-                                            <span>{exactTime(comment.created_at)}</span>
-                                          </div>
-                                        )}
-                                      </div>
-                                    </div>
-                                  ),
-                                )
+                                renderCommentTree(post.id, commentsByPost[post.id] ?? [], null)
                               )}
                             </div>
 
@@ -1813,6 +1906,61 @@ export function App() {
               </section>
             )}
 
+            {view === "public" && publicProfile && (
+              <section className="profile-page public-profile-page">
+                <div className="profile-hero glass">
+                  <div className="profile-cover" style={publicProfile.cover_url ? { backgroundImage: `linear-gradient(180deg,rgba(0,0,0,.04),rgba(0,0,0,.42)),url(${publicProfile.cover_url})` } : undefined} />
+                  <div className="profile-main">
+                    <div className="profile-avatar-wrap"><div className="profile-avatar avatar" style={publicProfile.avatar_url ? { backgroundImage: `url(${publicProfile.avatar_url})` } : undefined}>{!publicProfile.avatar_url && initials(publicProfile.display_name)}</div></div>
+                    <div className="profile-identity">
+                      <div className="profile-name-row"><div><h2>{publicProfile.display_name}</h2><span>@{publicProfile.username}</span></div></div>
+                      <p className="profile-bio">{publicProfile.bio || "No bio yet. Tell the world who you are."}</p>
+                      <div className="profile-actions profile-social-actions">
+                        <button className="profile-action-button follow-button" type="button" onClick={() => void toggleFollowPublicProfile()}><UserPlus size={14} />{followingPublicProfile ? "Following" : "Follow"}</button>
+                        {publicProfileFriend ? (
+                          <button className="profile-action-button" type="button" onClick={() => void openMessageConversation()}><MessageCircle size={14} />Message</button>
+                        ) : (
+                          <span className="profile-action-hint">Follow each other to unlock messages</span>
+                        )}
+                        <button className="profile-action-button" type="button" onClick={() => { setView("home"); setPublicProfile(null); }}><ArrowLeft size={14} />Back</button>
+                      </div>
+                      <div className="profile-meta">
+                        <span><Sparkles size={13} />{publicProfile.rp_id}</span>
+                        <span><MapPin size={13} />RP WORLD</span>
+                        {publicProfileFriend && <span><User size={13} />Friends</span>}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="profile-section">
+                  <div className="section-heading"><div><p className="eyebrow">HIGHLIGHTS</p><h3>Moments</h3></div></div>
+                  <div className="highlights-row view-as">
+                    {publicHighlights.length === 0 ? <span className="comments-empty">No highlights yet.</span> : publicHighlights.map((item) => (
+                      <button className={publicProfile.highlight_style === "portrait" ? "highlight-card highlight-card-portrait" : "highlight-card highlight-card-circle"} key={item.id} type="button" onClick={() => setActiveHighlight(item)}>
+                        <span className="highlight-image" style={item.image_url ? { backgroundImage: `url(${item.image_url})` } : undefined}>{!item.image_url && <Sparkles size={20} />}</span><strong>{item.title}</strong>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="profile-section profile-posts">
+                  <div className="section-heading"><div><p className="eyebrow">PUBLIC PROFILE</p><h3>Posts</h3></div></div>
+                  {publicProfilePosts.length === 0 ? <div className="empty-state glass"><Image size={22} /><strong>No posts yet.</strong><span>This user's published posts will appear here.</span></div> : (
+                    <div className="feed-list">{publicProfilePosts.map((post) => (
+                      <article className="post-card glass" key={post.id}>
+                        <div className="post-head"><div className="avatar" style={post.profile?.avatar_url ? { backgroundImage: `url(${post.profile.avatar_url})` } : undefined}>{!post.profile?.avatar_url && initials(post.profile?.display_name ?? "RP")}</div><div><strong>{post.profile?.display_name}</strong><span className="post-meta">@{post.profile?.username} · {timeAgo(post.created_at)}</span></div></div>
+                        <p className="post-content">{post.content}</p>
+                        <div className="post-actions">
+                          <button className={post.liked ? "post-action liked" : "post-action"} type="button" onClick={() => void toggleLike(post)}><Heart size={17} fill={post.liked ? "currentColor" : "none"} />{post.likes}</button>
+                          <button className="post-action" type="button" onClick={() => void toggleComments(post.id)}><MessageCircle size={17} />{post.comments || "Reply"}</button>
+                          <button className="post-action" type="button" onClick={() => void sharePost(post)}><Share2 size={17} />Share</button>
+                        </div>
+                      </article>
+                    ))}</div>
+                  )}
+                </div>
+              </section>
+            )}
+
             {view === "menu" && !viewAs && (
               <div className="menu-card glass">
                 <button
@@ -1922,6 +2070,20 @@ export function App() {
             <span>Menu</span>
           </button>
         </nav>
+      )}
+
+      {activeConversation && (
+        <div className="sheet-backdrop" role="presentation" onClick={() => setActiveConversation(null)}>
+          <section className="message-sheet glass" role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
+            <div className="sheet-header"><div><p className="eyebrow">FRIENDS</p><h2>Messages</h2></div><button className="icon-button" type="button" aria-label="Close messages" onClick={() => setActiveConversation(null)}><X size={18} /></button></div>
+            <div className="message-list">
+              {(messagesByConversation[activeConversation] ?? []).map((item) => (
+                <div className={item.sender_id === session?.user.id ? "message-bubble mine" : "message-bubble"} key={item.id}><span>{item.content}</span><small>{timeAgo(item.created_at)}</small></div>
+              ))}
+            </div>
+            <form className="message-form" onSubmit={sendMessage}><input value={messageDraft} onChange={(event) => setMessageDraft(event.target.value)} placeholder="Write a message…" maxLength={2000} autoFocus /><button type="submit" disabled={!messageDraft.trim()}>Send</button></form>
+          </section>
+        </div>
       )}
 
       {composerOpen && session && profile && (
