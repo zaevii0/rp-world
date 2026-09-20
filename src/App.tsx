@@ -125,6 +125,7 @@ export function App() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [profilePosts, setProfilePosts] = useState<Post[]>([]);
   const [profileReposts, setProfileReposts] = useState<Post[]>([]);
+  const [profileSection, setProfileSection] = useState<"posts" | "reposts">("posts");
   const [highlights, setHighlights] = useState<Highlight[]>([]);
   const [highlightOpen, setHighlightOpen] = useState(false);
   const [highlightTitle, setHighlightTitle] = useState("");
@@ -1394,20 +1395,17 @@ export function App() {
   async function toggleLike(post: Post) {
     if (!supabase || !session?.user) return;
 
-    setPosts((current) =>
-      current.map((item) =>
-        item.id === post.id
-          ? {
-              ...item,
-              liked: !item.liked,
-              liked_at: item.liked ? null : new Date().toISOString(),
-              likes:
-                item.likes +
-                (item.liked ? -1 : 1),
-            }
-          : item,
-      ),
-    );
+    const nextLikedAt = post.liked ? null : new Date().toISOString();
+    const nextLikes = post.likes + (post.liked ? -1 : 1);
+
+    const updateLikedPost = (item: Post) =>
+      item.id === post.id
+        ? { ...item, liked: !item.liked, liked_at: nextLikedAt, likes: nextLikes }
+        : item;
+
+    setPosts((current) => current.map(updateLikedPost));
+    setProfilePosts((current) => current.map(updateLikedPost));
+    setProfileReposts((current) => current.map(updateLikedPost));
 
     const result = post.liked
       ? await supabase
@@ -1423,18 +1421,14 @@ export function App() {
           });
 
     if (result.error) {
-      setPosts((current) =>
-        current.map((item) =>
-          item.id === post.id
-            ? {
-                ...item,
-                liked: post.liked,
-                liked_at: post.liked_at,
-                likes: post.likes,
-              }
-            : item,
-        ),
-      );
+      const restorePost = (item: Post) =>
+        item.id === post.id
+          ? { ...item, liked: post.liked, liked_at: post.liked_at, likes: post.likes }
+          : item;
+
+      setPosts((current) => current.map(restorePost));
+      setProfilePosts((current) => current.map(restorePost));
+      setProfileReposts((current) => current.map(restorePost));
     }
   }
 
@@ -1453,6 +1447,8 @@ export function App() {
     setMessageDraft("");
     setPosts([]);
     setProfilePosts([]);
+    setProfileReposts([]);
+    setProfileSection("posts");
     setHighlights([]);
     setView("home");
     setViewAs(false);
@@ -2154,17 +2150,41 @@ export function App() {
                 </div>
 
                 <div className="profile-section profile-posts">
-                  <div className="section-heading">
+                  <div className="section-heading profile-content-heading">
                     <div>
                       <p className="eyebrow">
                         {viewAs ? "PUBLIC PROFILE" : "YOUR ACTIVITY"}
                       </p>
 
-                      <h3>Posts</h3>
+                      <h3>{profileSection === "posts" ? "Posts" : "Reposts"}</h3>
                     </div>
+
+                    {!viewAs && (
+                      <div className="profile-content-tabs" role="tablist" aria-label="Profile content">
+                        <button
+                          className={profileSection === "posts" ? "profile-content-tab active" : "profile-content-tab"}
+                          type="button"
+                          role="tab"
+                          aria-selected={profileSection === "posts"}
+                          onClick={() => setProfileSection("posts")}
+                        >
+                          Posts <span>{profilePosts.length}</span>
+                        </button>
+                        <button
+                          className={profileSection === "reposts" ? "profile-content-tab active" : "profile-content-tab"}
+                          type="button"
+                          role="tab"
+                          aria-selected={profileSection === "reposts"}
+                          onClick={() => setProfileSection("reposts")}
+                        >
+                          Reposts <span>{profileReposts.length}</span>
+                        </button>
+                      </div>
+                    )}
                   </div>
 
-                  {profilePosts.length === 0 ? (
+                  {profileSection === "posts" ? (
+                    profilePosts.length === 0 ? (
                     <div className="empty-state glass">
                       <Image size={22} />
 
@@ -2296,6 +2316,88 @@ export function App() {
                         ),
                       )}
                     </div>
+                  )}
+                  ) : (
+                    profileReposts.length === 0 ? (
+                      <div className="empty-state glass">
+                        <Repeat2 size={22} />
+                        <strong>No reposts yet.</strong>
+                        <span>Posts you repost will appear here.</span>
+                      </div>
+                    ) : (
+                      <div className="feed-list">
+                        {profileReposts.map((post) => (
+                          <article className="post-card glass" key={post.id}>
+                            <div className="repost-label">
+                              <Repeat2 size={13} />
+                              <span>You reposted this</span>
+                              {post.reposted_at && <time dateTime={post.reposted_at}>{timeAgo(post.reposted_at)}</time>}
+                            </div>
+
+                            <div className="post-head">
+                              <div
+                                className="avatar"
+                                style={post.profile?.avatar_url ? { backgroundImage: "url(" + post.profile.avatar_url + ")" } : undefined}
+                              >
+                                {!post.profile?.avatar_url && initials(post.profile?.display_name ?? "R")}
+                              </div>
+                              <div>
+                                <strong>{post.profile?.display_name ?? "RP WORLD member"}</strong>
+                                <span className="post-meta">
+                                  @{post.profile?.username ?? "member"} ·{" "}
+                                  <button
+                                    className="timestamp-button"
+                                    type="button"
+                                    onClick={() => setOpenTimestamp(openTimestamp === "repost-" + post.id ? null : "repost-" + post.id)}
+                                    title="Show exact date and time"
+                                  >
+                                    <Clock size={11} />
+                                    {timeAgo(post.created_at)}
+                                  </button>
+                                </span>
+                                {openTimestamp === "repost-" + post.id && (
+                                  <div className="timestamp-popover">
+                                    <strong>Originally posted</strong>
+                                    <span>{exactTime(post.created_at)}</span>
+                                    {post.reposted_at && (
+                                      <>
+                                        <strong>Reposted by you</strong>
+                                        <span>{exactTime(post.reposted_at)}</span>
+                                      </>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+
+                            <p className="post-content">{post.content}</p>
+
+                            {post.media_url && (
+                              <img className="post-media" src={post.media_url} alt="" loading="lazy" />
+                            )}
+
+                            <div className="post-actions">
+                              <button
+                                className={post.liked ? "post-action liked" : "post-action"}
+                                type="button"
+                                onClick={() => void toggleLike(post)}
+                              >
+                                <Heart size={17} fill={post.liked ? "currentColor" : "none"} />
+                                {post.likes}
+                              </button>
+                              <span className="post-action">
+                                <MessageCircle size={17} />
+                                {post.comments}
+                              </span>
+                              <span className="post-action">
+                                <Repeat2 size={17} />
+                                Reposted
+                              </span>
+                            </div>
+                          </article>
+                        ))}
+                      </div>
+                    )
                   )}
                 </div>
               </section>
