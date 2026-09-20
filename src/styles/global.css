@@ -1276,3 +1276,90 @@ h1 { margin:3px 0 0; font-size:17px; letter-spacing:-.03em; }
 .comment-action svg {
   flex: 0 0 auto;
 }
+
+
+/* Custom emoji reaction picker */
+.comment-reaction-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.comment-reaction-emoji {
+  font-size: 13px;
+  line-height: 1;
+}
+
+.comment-reaction-picker {
+  position: absolute;
+  z-index: 30;
+  left: 0;
+  bottom: calc(100% + 8px);
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 7px 8px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--surface) 94%, transparent);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, .16);
+  backdrop-filter: blur(22px) saturate(150%);
+  -webkit-backdrop-filter: blur(22px) saturate(150%);
+  animation: reaction-picker-in .16s ease-out;
+}
+
+.comment-reaction-option {
+  width: 31px;
+  height: 31px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  transition: transform .16s ease, background .16s ease;
+}
+
+.comment-reaction-option:hover,
+.comment-reaction-option:focus-visible {
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  transform: scale(1.2);
+  outline: none;
+}
+
+.comment-reaction-option.active {
+  background: color-mix(in srgb, var(--accent) 13%, transparent);
+}
+
+@keyframes reaction-picker-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px) scale(.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 640px) {
+  .comment-reaction-picker {
+    left: -4px;
+    max-width: calc(100vw - 32px);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .comment-reaction-picker::-webkit-scrollbar {
+    display: none;
+  }
+
+  .comment-reaction-option {
+    width: 29px;
+    height: 29px;
+    font-size: 17px;
+  }
+}
