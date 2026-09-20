@@ -406,6 +406,17 @@ export function App() {
     setMessage("");
   }
 
+  function openMenu() {
+    // Always leave public-profile mode before opening Menu. This prevents
+    // stale viewAs state from hiding the Menu on the first navigation tap.
+    setViewAs(false);
+    setPublicProfile(null);
+    setPublicProfilePosts([]);
+    setPublicHighlights([]);
+    setView("menu");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
   async function handleAuth(event: FormEvent) {
     event.preventDefault();
 
@@ -2472,7 +2483,7 @@ export function App() {
               </section>
             )}
 
-            {view === "menu" && !viewAs && (
+            {view === "menu" && (
               <div className="menu-card glass">
                 <button
                   type="button"
@@ -2575,7 +2586,7 @@ export function App() {
                 : "nav-item"
             }
             type="button"
-            onClick={() => setView("menu")}
+            onClick={openMenu}
           >
             <Menu size={19} />
             <span>Menu</span>
