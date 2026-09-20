@@ -108,7 +108,6 @@
   opacity: 1;
 }
 
-/* Compact iPhone layout */
 @media (max-width: 560px) {
   .profile-content-heading {
     gap: 11px;
@@ -133,7 +132,6 @@
   }
 }
 
-/* Respect reduced-motion preferences */
 @media (prefers-reduced-motion: reduce) {
   .profile-content-tab,
   .profile-content-tab span {
@@ -141,12 +139,22 @@
   }
 }
 
-/* Keep the color theme picker above every app layer/navigation */
+/* Theme picker — absolute top layer.
+   The extremely high z-index plus fixed viewport positioning keeps the
+   backdrop/dialog above navigation, text, cards, sheets, and app chrome. */
 .sheet-backdrop:has(.theme-sheet) {
-  z-index: 99999 !important;
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100dvh !important;
+  min-height: 100dvh !important;
+  z-index: 2147483647 !important;
+  isolation: isolate !important;
+  pointer-events: auto !important;
 }
 
 .sheet-backdrop:has(.theme-sheet) .theme-sheet {
-  position: relative;
-  z-index: 100000 !important;
+  position: relative !important;
+  z-index: 2147483647 !important;
+  pointer-events: auto !important;
 }
