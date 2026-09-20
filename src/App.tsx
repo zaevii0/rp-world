@@ -1438,6 +1438,11 @@ export function App() {
                         </div>
                       </div>
 
+                      <p className="profile-bio">
+                        {profile.bio ||
+                          "No bio yet. Tell the world who you are."}
+                      </p>
+
                       <div className="profile-actions profile-social-actions">
                         {!viewAs ? (
                           <>
@@ -1494,11 +1499,6 @@ export function App() {
                           </>
                         )}
                       </div>
-
-                      <p className="profile-bio">
-                        {profile.bio ||
-                          "No bio yet. Tell the world who you are."}
-                      </p>
 
                       <div className="profile-meta">
                         <span>
