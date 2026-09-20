@@ -456,3 +456,19 @@
     min-height: 150px;
   }
 }
+
+/* Long-post reading and post media — iOS-style. */
+.post-content-wrap { display:block; }
+.post-see-more { display:inline-flex; margin:5px 0 0; padding:0; border:0; background:transparent; color:var(--accent); font:inherit; font-size:12px; font-weight:650; cursor:pointer; }
+.post-see-more:active { transform:scale(.97); }
+.post-see-more:focus-visible { outline:2px solid color-mix(in srgb,var(--accent) 45%,transparent); outline-offset:3px; border-radius:5px; }
+.post-media { display:block; width:100%; max-height:520px; object-fit:cover; margin-top:12px; border-radius:16px; background:color-mix(in srgb,var(--text-primary) 5%,transparent); }
+.post-video { height:auto; aspect-ratio:16/10; object-fit:contain; }
+.post-media-picker { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:11px 12px; border:1px solid color-mix(in srgb,var(--text-primary) 10%,transparent); border-radius:14px; background:color-mix(in srgb,var(--surface,#fff) 65%,transparent); cursor:pointer; }
+.post-media-picker input { width:100%; max-width:190px; font-size:11px; }
+.post-media-picker-label { display:inline-flex; align-items:center; gap:7px; font-size:12px; font-weight:650; color:var(--text-primary); }
+.post-media-selected { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:9px 11px; border-radius:12px; background:color-mix(in srgb,var(--accent) 8%,transparent); color:var(--text-secondary); font-size:11px; }
+.post-media-selected.current { margin-top:-2px; }
+.post-media-remove { display:grid; place-items:center; width:26px; height:26px; flex:0 0 auto; border:0; border-radius:50%; background:color-mix(in srgb,var(--text-primary) 8%,transparent); color:var(--text-primary); cursor:pointer; }
+.post-media-remove:active { transform:scale(.94); }
+@media (max-width:560px) { .post-media-picker { align-items:flex-start; flex-direction:column; } .post-media-picker input { max-width:none; width:100%; } .post-media { max-height:430px; border-radius:14px; } .post-see-more { font-size:11px; } }
