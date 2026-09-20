@@ -1,4 +1,4 @@
-import { Heart, Home, LogIn, LogOut, Mail, Menu, MessageCircle, Moon, Plus, Search, Sparkles, Sun, User, UserPlus, X } from "lucide-react";
+import { Camera, Heart, Home, Image, Link as LinkIcon, LogIn, LogOut, Mail, MapPin, Menu, MessageCircle, Moon, Pencil, Plus, Search, Sparkles, Sun, User, UserPlus, X } from "lucide-react";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { ThemePicker } from "./components/ThemePicker";
@@ -20,7 +20,7 @@ type Post = {
   liked: boolean;
   comments: number;
 };
-type Comment = {
+type Highlight = { id: string; user_id: string; title: string; image_url: string | null; created_at: string; };\n\ntype Comment = {
   id: string;
   post_id: string;
   author_id: string;
@@ -56,7 +56,7 @@ export function App() {
   const [appearance, setAppearance] = useState<Appearance>(readAppearance);
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [posts, setPosts] = useState<Post[]>([]);
+  const [posts, setPosts] = useState<Post[]>([]);\n  const [profilePosts, setProfilePosts] = useState<Post[]>([]);\n  const [highlights, setHighlights] = useState<Highlight[]>([]);\n  const [highlightOpen, setHighlightOpen] = useState(false);\n  const [highlightTitle, setHighlightTitle] = useState("");\n  const [highlightImage, setHighlightImage] = useState("");\n  const [highlightBusy, setHighlightBusy] = useState(false);
   const [view, setView] = useState<"home" | "discover" | "profile" | "menu">("home");
   const [authOpen, setAuthOpen] = useState(false);
   const [authMode, setAuthMode] = useState<"login" | "signup">("login");
@@ -66,7 +66,7 @@ export function App() {
   const [composerOpen, setComposerOpen] = useState(false);
   const [username, setUsername] = useState("");
   const [displayName, setDisplayName] = useState("");
-  const [bio, setBio] = useState("");
+  const [bio, setBio] = useState("");\n  const [avatarUrl, setAvatarUrl] = useState("");\n  const [coverUrl, setCoverUrl] = useState("");
   const [postText, setPostText] = useState("");
   const [busy, setBusy] = useState(false);
   const [profileBusy, setProfileBusy] = useState(false);
@@ -119,7 +119,7 @@ export function App() {
       } else {
         setUsername(data.username);
         setDisplayName(data.display_name);
-        setBio(data.bio);
+        setBio(data.bio);\n        setAvatarUrl(data.avatar_url ?? "");\n        setCoverUrl(data.cover_url ?? "");
       }
     }
     void loadProfile();
@@ -246,6 +246,65 @@ export function App() {
     }
     setProfile(result.data as Profile);
     setProfileOpen(false);
+  }
+
+  async function loadProfilePosts() {
+    if (!supabase || !session?.user) return;
+    const { data, error: loadError } = await supabase
+      .from("posts")
+      .select("id, author_id, content, media_url, created_at, post_likes(count), post_comments(count)")
+      .eq("author_id", session.user.id)
+      .order("created_at", { ascending: false })
+      .limit(50);
+    if (loadError) return;
+    const rows = (data ?? []) as Array<Post & { post_likes?: { count: number }[]; post_comments?: { count: number }[] }>;
+    const postIds = rows.map((row) => row.id);
+    const { data: myLikes } = postIds.length
+      ? await supabase.from("post_likes").select("post_id").eq("user_id", session.user.id).in("post_id", postIds)
+      : { data: [] as { post_id: string }[] };
+    const likedSet = new Set((myLikes ?? []).map((item) => item.post_id));
+    setProfilePosts(rows.map((row) => ({
+      id: row.id,
+      author_id: row.author_id,
+      content: row.content,
+      media_url: row.media_url,
+      created_at: row.created_at,
+      profile: profile ?? undefined,
+      likes: row.post_likes?.[0]?.count ?? 0,
+      liked: likedSet.has(row.id),
+      comments: row.post_comments?.[0]?.count ?? 0,
+    })));
+  }
+
+  async function loadHighlights() {
+    if (!supabase || !session?.user) return;
+    const { data } = await supabase
+      .from("profile_highlights")
+      .select("id, user_id, title, image_url, created_at")
+      .eq("user_id", session.user.id)
+      .order("created_at", { ascending: true });
+    setHighlights((data ?? []) as Highlight[]);
+  }
+
+  async function createHighlight(event: FormEvent) {
+    event.preventDefault();
+    if (!supabase || !session?.user || !highlightTitle.trim()) return;
+    setHighlightBusy(true);
+    const { data, error: saveError } = await supabase
+      .from("profile_highlights")
+      .insert({
+        user_id: session.user.id,
+        title: highlightTitle.trim(),
+        image_url: highlightImage.trim() || null,
+      })
+      .select("id, user_id, title, image_url, created_at")
+      .single();
+    setHighlightBusy(false);
+    if (saveError || !data) return;
+    setHighlights((current) => [...current, data as Highlight]);
+    setHighlightTitle("");
+    setHighlightImage("");
+    setHighlightOpen(false);
   }
 
   async function createPost(event: FormEvent) {
@@ -443,7 +502,60 @@ export function App() {
             )}
 
             {view === "discover" && <div className="empty-state glass"><Search size={24} /><strong>Discover is coming next.</strong><span>Communities, arenas, creators, and search will live here.</span></div>}
-            {view === "profile" && <section className="profile-card glass"><div className="profile-cover" /><div className="profile-avatar avatar">{initials(profile.display_name)}</div><h2>{profile.display_name}</h2><span>@{profile.username}</span><p>{profile.bio || "No bio yet."}</p><button className="primary-button" type="button" onClick={() => setProfileOpen(true)}>Edit profile</button></section>}
+            {view === "profile" && (
+  <section className="profile-page">
+    <div className="profile-hero glass">
+      <div className="profile-cover" style={profile.cover_url ? { backgroundImage: `linear-gradient(180deg,rgba(0,0,0,.04),rgba(0,0,0,.42)),url(${profile.cover_url})` } : undefined}>
+        <button className="profile-edit-float" type="button" onClick={() => setProfileOpen(true)} aria-label="Edit profile"><Pencil size={15}/></button>
+      </div>
+      <div className="profile-main">
+        <div className="profile-avatar-wrap">
+          <div className="profile-avatar avatar" style={profile.avatar_url ? { backgroundImage: `url(${profile.avatar_url})` } : undefined}>
+            {!profile.avatar_url && initials(profile.display_name)}
+          </div>
+        </div>
+        <div className="profile-identity">
+          <div className="profile-name-row"><div><h2>{profile.display_name}</h2><span>@{profile.username}</span></div><button className="outline-button" type="button" onClick={() => setProfileOpen(true)}><Pencil size={14}/> Edit</button></div>
+          <p className="profile-bio">{profile.bio || "No bio yet. Tell the world who you are."}</p>
+          <div className="profile-meta"><span><Sparkles size={13}/> {profile.rp_id}</span><span><MapPin size={13}/> RP WORLD</span></div>
+        </div>
+      </div>
+      <div className="profile-stats">
+        <div><strong>{profilePosts.length}</strong><span>Posts</span></div>
+        <div><strong>{highlights.length}</strong><span>Highlights</span></div>
+        <div><strong>RP</strong><span>Identity</span></div>
+      </div>
+    </div>
+
+    <div className="profile-section">
+      <div className="section-heading"><div><p className="eyebrow">HIGHLIGHTS</p><h3>Moments</h3></div><button className="small-add" type="button" onClick={() => setHighlightOpen(true)}><Plus size={14}/> Add</button></div>
+      <div className="highlights-row">
+        <button className="highlight-card add-highlight glass" type="button" onClick={() => setHighlightOpen(true)}><span><Plus size={19}/></span><strong>New</strong></button>
+        {highlights.map((item) => (
+          <div className="highlight-card glass" key={item.id}>
+            <div className="highlight-image" style={item.image_url ? { backgroundImage: `url(${item.image_url})` } : undefined}>{!item.image_url && <Sparkles size={20}/>}</div>
+            <strong>{item.title}</strong>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <div className="profile-section profile-posts">
+      <div className="section-heading"><div><p className="eyebrow">YOUR ACTIVITY</p><h3>Posts</h3></div></div>
+      {profilePosts.length === 0 ? (
+        <div className="empty-state glass"><Image size={22}/><strong>No posts yet.</strong><span>Your published posts will appear here.</span><button className="primary-button" type="button" onClick={() => setComposerOpen(true)}>Create a post</button></div>
+      ) : (
+        <div className="feed-list">{profilePosts.map((post) => (
+          <article className="post-card glass" key={post.id}>
+            <div className="post-head"><div className="avatar" style={profile.avatar_url ? { backgroundImage: `url(${profile.avatar_url})` } : undefined}>{!profile.avatar_url && initials(profile.display_name)}</div><div><strong>{profile.display_name}</strong><span>@{profile.username} · {timeAgo(post.created_at)}</span></div></div>
+            <p className="post-content">{post.content}</p>
+            <div className="post-actions"><button className={post.liked ? "post-action liked" : "post-action"} type="button" onClick={() => void toggleLike(post)}><Heart size={17} fill={post.liked ? "currentColor" : "none"} />{post.likes}</button><span className="post-action"><MessageCircle size={17}/>{post.comments}</span></div>
+          </article>
+        ))}</div>
+      )}
+    </div>
+  </section>
+)}
             {view === "menu" && <div className="menu-card glass"><button type="button" onClick={() => setProfileOpen(true)}><User size={18}/> Edit profile</button><button type="button" onClick={() => setView("discover")}><Search size={18}/> Discover</button><button type="button" onClick={() => void handleLogout()}><LogOut size={18}/> Sign out</button></div>}
           </section>
         </main>
@@ -490,6 +602,20 @@ export function App() {
         </div>
       )}
 
+      {highlightOpen && session && profile && (
+        <div className="sheet-backdrop" role="presentation" onClick={() => setHighlightOpen(false)}>
+          <section className="auth-sheet glass" role="dialog" aria-modal="true" aria-labelledby="highlight-title" onClick={(event) => event.stopPropagation()}>
+            <div className="sheet-header"><div><p className="eyebrow">PROFILE HIGHLIGHT</p><h2 id="highlight-title">Add a moment.</h2></div><button className="icon-button" type="button" aria-label="Close" onClick={() => setHighlightOpen(false)}><X size={18}/></button></div>
+            <p className="sheet-copy">Create a highlight for your profile. You can add an image URL now; image uploads can be connected to Supabase Storage next.</p>
+            <form className="auth-form" onSubmit={createHighlight}>
+              <label><span>Title</span><div className="input-wrap"><input value={highlightTitle} onChange={(event) => setHighlightTitle(event.target.value)} maxLength={24} placeholder="Scenes, Events, OCs…" required /></div></label>
+              <label><span>Image URL <small>optional</small></span><div className="input-wrap"><LinkIcon size={15}/><input value={highlightImage} onChange={(event) => setHighlightImage(event.target.value)} placeholder="https://…" /></div></label>
+              <button className="primary-button full" type="submit" disabled={highlightBusy}>{highlightBusy ? "Saving…" : "Add highlight"}</button>
+            </form>
+          </section>
+        </div>
+      )}
+
       {profileOpen && session && (
         <div className="sheet-backdrop" role="presentation">
           <section className="profile-sheet glass" role="dialog" aria-modal="true" aria-labelledby="profile-title">
@@ -498,6 +624,8 @@ export function App() {
             <form className="auth-form" onSubmit={handleProfileSubmit}>
               <label><span>Username</span><div className="input-wrap"><span className="input-prefix">@</span><input type="text" value={username} onChange={(event) => setUsername(event.target.value.replace(/[^a-zA-Z0-9_]/g, "").toLowerCase())} placeholder="yourname" maxLength={24} required/></div></label>
               <label><span>Display name</span><div className="input-wrap"><input type="text" value={displayName} onChange={(event) => setDisplayName(event.target.value)} placeholder="Your RP name" maxLength={60} required/></div></label>
+              <label><span>Avatar URL <small>optional</small></span><div className="input-wrap"><Camera size={15}/><input type="url" value={avatarUrl} onChange={(event) => setAvatarUrl(event.target.value)} placeholder="https://…" /></div></label>
+              <label><span>Cover photo URL <small>optional</small></span><div className="input-wrap"><Image size={15}/><input type="url" value={coverUrl} onChange={(event) => setCoverUrl(event.target.value)} placeholder="https://…" /></div></label>
               <label><span>Bio <small>optional</small></span><div className="input-wrap textarea-wrap"><textarea value={bio} onChange={(event) => setBio(event.target.value)} placeholder="A short line about your RP identity." maxLength={160} rows={3}/></div></label>
               {profileError && <p className="form-message error">{profileError}</p>}
               <button className="primary-button full" type="submit" disabled={profileBusy}>{profileBusy ? "Saving…" : profile ? "Save changes" : "Continue"}</button>
