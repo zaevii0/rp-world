@@ -1,0 +1,13 @@
+{
+  "name": "RP WORLD",
+  "short_name": "RP WORLD",
+  "description": "A social world built for role players.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone"],
+  "orientation": "portrait-primary",
+  "background_color": "#050505",
+  "theme_color": "#050505",
+  "icons": []
+}
