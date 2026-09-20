@@ -1610,6 +1610,17 @@ export function App() {
               </div>
 
               <div className="page-heading-actions">
+                <button
+                  className="glass circle-button"
+                  type="button"
+                  aria-label="Search"
+                  onClick={() =>
+                    setView("discover")
+                  }
+                >
+                  <Search size={17} />
+                </button>
+
                 {viewAs && (
                   <button
                     className="glass circle-button"
@@ -1624,17 +1635,6 @@ export function App() {
                     <ArrowLeft size={17} />
                   </button>
                 )}
-
-                <button
-                  className="glass circle-button"
-                  type="button"
-                  aria-label="Search"
-                  onClick={() =>
-                    setView("discover")
-                  }
-                >
-                  <Search size={17} />
-                </button>
               </div>
             </div>
 
