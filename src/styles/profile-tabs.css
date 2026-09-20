@@ -158,3 +158,28 @@
   z-index: 2147483647 !important;
   pointer-events: auto !important;
 }
+
+/* Theme picker close control — keep the X readable in every theme. */
+.theme-sheet .sheet-header > .icon-button {
+  color: var(--text-primary, currentColor) !important;
+  background: color-mix(in srgb, var(--text-primary, currentColor) 8%, transparent) !important;
+  border: 1px solid color-mix(in srgb, var(--text-primary, currentColor) 12%, transparent) !important;
+  opacity: 1 !important;
+  box-shadow: none;
+}
+
+.theme-sheet .sheet-header > .icon-button:hover {
+  color: var(--accent) !important;
+  background: color-mix(in srgb, var(--accent) 12%, transparent) !important;
+  border-color: color-mix(in srgb, var(--accent) 22%, transparent) !important;
+}
+
+.theme-sheet .sheet-header > .icon-button:active {
+  color: var(--accent) !important;
+  transform: scale(.94);
+}
+
+.theme-sheet .sheet-header > .icon-button:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--accent) 45%, transparent);
+  outline-offset: 2px;
+}
