@@ -1209,7 +1209,13 @@ export function App() {
     if (!supabase || !session?.user || !editPostTarget || editPostBusy) return;
 
     const content = editPostText.trim();
-    if (!content && !editPostTarget.media_url && !editPostMediaFile) {
+    const resultingMedia = editPostMediaFile
+      ? true
+      : editPostMediaRemove
+        ? false
+        : Boolean(editPostTarget.media_url);
+
+    if (!content && !resultingMedia) {
       setFeedError("Add some text, a photo, or a video before saving.");
       return;
     }
