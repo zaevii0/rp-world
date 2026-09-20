@@ -167,6 +167,10 @@ export function App() {
   const [coverFile, setCoverFile] = useState<File | null>(null);
 
   const [postText, setPostText] = useState("");
+  const [editPostOpen, setEditPostOpen] = useState(false);
+  const [editPostTarget, setEditPostTarget] = useState<Post | null>(null);
+  const [editPostText, setEditPostText] = useState("");
+  const [editPostBusy, setEditPostBusy] = useState(false);
 
   const [busy, setBusy] = useState(false);
   const [profileBusy, setProfileBusy] = useState(false);
