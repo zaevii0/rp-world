@@ -1,5 +1,6 @@
 import {
   Camera,
+  Clock,
   Heart,
   Home,
   Image,
@@ -37,6 +38,7 @@ type Post = {
   profile?: Profile;
   likes: number;
   liked: boolean;
+  liked_at: string | null;
   comments: number;
 };
 
@@ -89,6 +91,13 @@ function timeAgo(value: string) {
 
   const days = Math.floor(hours / 24);
   return `${days}d`;
+}
+
+function exactTime(value: string) {
+  return new Intl.DateTimeFormat(undefined, {
+    dateStyle: "medium",
+    timeStyle: "medium",
+  }).format(new Date(value));
 }
 
 export function App() {
@@ -149,6 +158,7 @@ export function App() {
     Record<string, string>
   >({});
   const [commentBusy, setCommentBusy] = useState<string | null>(null);
+  const [openTimestamp, setOpenTimestamp] = useState<string | null>(null);
 
   useEffect(() => {
     localStorage.setItem(THEME_KEY, theme);
@@ -280,13 +290,16 @@ export function App() {
     const { data: myLikes } = postIds.length
       ? await supabase
           .from("post_likes")
-          .select("post_id")
+          .select("post_id, created_at")
           .eq("user_id", session.user.id)
           .in("post_id", postIds)
-      : { data: [] as { post_id: string }[] };
+      : { data: [] as { post_id: string; created_at: string }[] };
 
     const likedSet = new Set(
       (myLikes ?? []).map((item) => item.post_id),
+    );
+    const likedAtMap = new Map(
+      (myLikes ?? []).map((item) => [item.post_id, item.created_at]),
     );
 
     setPosts(
@@ -299,6 +312,7 @@ export function App() {
         profile: profileMap.get(row.author_id),
         likes: row.post_likes?.[0]?.count ?? 0,
         liked: likedSet.has(row.id),
+        liked_at: likedAtMap.get(row.id) ?? null,
         comments: row.post_comments?.[0]?.count ?? 0,
       })),
     );
@@ -519,13 +533,16 @@ export function App() {
     const { data: myLikes } = postIds.length
       ? await supabase
           .from("post_likes")
-          .select("post_id")
+          .select("post_id, created_at")
           .eq("user_id", session.user.id)
           .in("post_id", postIds)
-      : { data: [] as { post_id: string }[] };
+      : { data: [] as { post_id: string; created_at: string }[] };
 
     const likedSet = new Set(
       (myLikes ?? []).map((item) => item.post_id),
+    );
+    const likedAtMap = new Map(
+      (myLikes ?? []).map((item) => [item.post_id, item.created_at]),
     );
 
     setProfilePosts(
@@ -538,6 +555,7 @@ export function App() {
         profile: profile ?? undefined,
         likes: row.post_likes?.[0]?.count ?? 0,
         liked: likedSet.has(row.id),
+        liked_at: likedAtMap.get(row.id) ?? null,
         comments: row.post_comments?.[0]?.count ?? 0,
       })),
     );
@@ -801,6 +819,7 @@ export function App() {
           ? {
               ...item,
               liked: !item.liked,
+              liked_at: item.liked ? null : new Date().toISOString(),
               likes:
                 item.likes +
                 (item.liked ? -1 : 1),
@@ -829,6 +848,7 @@ export function App() {
             ? {
                 ...item,
                 liked: post.liked,
+                liked_at: post.liked_at,
                 likes: post.likes,
               }
             : item,
@@ -1110,16 +1130,38 @@ export function App() {
                                 "RP WORLD member"}
                             </strong>
 
-                            <span>
+                            <span className="post-meta">
                               @
                               {post.profile
                                 ?.username ??
                                 "member"}{" "}
                               ·{" "}
-                              {timeAgo(
-                                post.created_at,
-                              )}
+                              <button
+                                className="timestamp-button"
+                                type="button"
+                                onClick={() =>
+                                  setOpenTimestamp(
+                                    openTimestamp === post.id ? null : post.id,
+                                  )
+                                }
+                                title="Show exact date and time"
+                              >
+                                <Clock size={11} />
+                                {timeAgo(post.created_at)}
+                              </button>
                             </span>
+                            {openTimestamp === post.id && (
+                              <div className="timestamp-popover">
+                                <strong>Posted</strong>
+                                <span>{exactTime(post.created_at)}</span>
+                                {post.liked && post.liked_at && (
+                                  <>
+                                    <strong>Liked by you</strong>
+                                    <span>{exactTime(post.liked_at)}</span>
+                                  </>
+                                )}
+                              </div>
+                            )}
                           </div>
                         </div>
 
@@ -1216,18 +1258,39 @@ export function App() {
                                       </span>
 
                                       <div>
-                                        <strong>
-                                          {comment
-                                            .profile
-                                            ?.display_name ??
-                                            "RP WORLD member"}
-                                        </strong>
+                                        <div className="comment-head">
+                                          <strong>
+                                            {comment
+                                              .profile
+                                              ?.display_name ??
+                                              "RP WORLD member"}
+                                          </strong>
+                                          <button
+                                            className="timestamp-button"
+                                            type="button"
+                                            onClick={() =>
+                                              setOpenTimestamp(
+                                                openTimestamp === comment.id ? null : comment.id,
+                                              )
+                                            }
+                                            title="Show exact date and time"
+                                          >
+                                            <Clock size={10} />
+                                            {timeAgo(comment.created_at)}
+                                          </button>
+                                        </div>
 
                                         <p>
                                           {
                                             comment.content
                                           }
                                         </p>
+                                        {openTimestamp === comment.id && (
+                                          <div className="timestamp-popover comment-time">
+                                            <strong>Posted</strong>
+                                            <span>{exactTime(comment.created_at)}</span>
+                                          </div>
+                                        )}
                                       </div>
                                     </div>
                                   ),
@@ -1544,16 +1607,38 @@ export function App() {
                                   }
                                 </strong>
 
-                                <span>
+                                <span className="post-meta">
                                   @
                                   {
                                     profile.username
                                   }{" "}
                                   ·{" "}
-                                  {timeAgo(
-                                    post.created_at,
-                                  )}
+                                  <button
+                                    className="timestamp-button"
+                                    type="button"
+                                    onClick={() =>
+                                      setOpenTimestamp(
+                                        openTimestamp === post.id ? null : post.id,
+                                      )
+                                    }
+                                    title="Show exact date and time"
+                                  >
+                                    <Clock size={11} />
+                                    {timeAgo(post.created_at)}
+                                  </button>
                                 </span>
+                                {openTimestamp === post.id && (
+                                  <div className="timestamp-popover">
+                                    <strong>Posted</strong>
+                                    <span>{exactTime(post.created_at)}</span>
+                                    {post.liked && post.liked_at && (
+                                      <>
+                                        <strong>Liked by you</strong>
+                                        <span>{exactTime(post.liked_at)}</span>
+                                      </>
+                                    )}
+                                  </div>
+                                )}
                               </div>
                             </div>
 
