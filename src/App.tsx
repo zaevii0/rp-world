@@ -143,7 +143,7 @@ export function App() {
       setFeedError("The feed is unavailable right now.");
       return;
     }
-    const rows = (data ?? []) as Array<Post & { post_likes?: { count: number }[] }>;
+    const rows = (data ?? []) as Array<Post & { post_likes?: { count: number }[]; post_comments?: { count: number }[] }>;
     const authorIds = [...new Set(rows.map((row) => row.author_id))];
     const { data: profiles } = authorIds.length
       ? await supabase.from("profiles").select("*").in("id", authorIds)
