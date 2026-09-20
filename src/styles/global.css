@@ -797,3 +797,156 @@ h1 { margin:3px 0 0; font-size:17px; letter-spacing:-.03em; }
     font-size:11px;
   }
 }
+
+
+/* Public profiles, discovery and friends */
+.profile-link-button {
+  border: 0;
+  padding: 0;
+  color: inherit;
+  cursor: pointer;
+}
+.profile-name-link {
+  padding: 0;
+  border: 0;
+  color: inherit;
+  background: transparent;
+  font: inherit;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+}
+.profile-name-link:hover,
+.profile-name-link:focus-visible {
+  color: var(--accent);
+  outline: none;
+}
+.profile-action-hint {
+  align-self: center;
+  font-size: 9px;
+  opacity: .48;
+}
+.discover-section {
+  display: grid;
+  gap: 14px;
+}
+.discover-list {
+  display: grid;
+  gap: 10px;
+}
+.discover-card {
+  display: grid;
+  grid-template-columns: 44px minmax(0,1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 18px;
+}
+.discover-info {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+.discover-info > span {
+  font-size: 10px;
+  opacity: .48;
+}
+.discover-info p {
+  margin: 2px 0 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 10px;
+  opacity: .58;
+}
+.message-sheet {
+  width: min(100%, 520px);
+  max-height: min(82dvh, 700px);
+  margin: auto;
+  display: grid;
+  grid-template-rows: auto minmax(0,1fr) auto;
+  gap: 12px;
+  padding: 18px;
+}
+.message-list {
+  min-height: 240px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 6px 2px;
+}
+.message-bubble {
+  align-self: flex-start;
+  max-width: 78%;
+  display: grid;
+  gap: 3px;
+  padding: 9px 12px;
+  border-radius: 16px 16px 16px 5px;
+  background: rgba(127,127,127,.1);
+  font-size: 12px;
+  line-height: 1.4;
+}
+.message-bubble.mine {
+  align-self: flex-end;
+  border-radius: 16px 16px 5px 16px;
+  color: #fff;
+  background: var(--accent);
+}
+.message-bubble small {
+  font-size: 8px;
+  opacity: .52;
+}
+.message-bubble.mine small {
+  opacity: .72;
+}
+.message-form {
+  display: grid;
+  grid-template-columns: minmax(0,1fr) auto;
+  gap: 8px;
+}
+.message-form input {
+  min-width: 0;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid rgba(127,127,127,.18);
+  border-radius: 14px;
+  color: inherit;
+  background: rgba(127,127,127,.07);
+  outline: none;
+}
+.message-form input:focus {
+  border-color: color-mix(in srgb,var(--accent) 45%,transparent);
+}
+.message-form button {
+  min-width: 58px;
+  border: 0;
+  border-radius: 14px;
+  color: #fff;
+  background: var(--accent);
+  font: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.message-form button:disabled {
+  opacity: .45;
+  cursor: default;
+}
+@media (max-width:560px) {
+  .discover-card {
+    grid-template-columns: 40px minmax(0,1fr) auto;
+    gap: 9px;
+    padding: 10px;
+  }
+  .discover-card .profile-action-button {
+    min-height: 29px;
+  }
+  .message-sheet {
+    width: 100%;
+    max-height: 100dvh;
+    min-height: 100dvh;
+    border-radius: 0;
+    padding: 16px;
+  }
+}
