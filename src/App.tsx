@@ -2411,6 +2411,12 @@ export function App() {
                             </p>
 
                             <div className="post-actions">
+                              {!post.shared_post_id && post.author_id === session?.user.id && (
+                                <button className="post-action" type="button" onClick={() => openEditPost(post)} aria-label="Edit post">
+                                  <Pencil size={17} />
+                                  Edit
+                                </button>
+                              )}
                               <button
                                 className={
                                   post.liked
