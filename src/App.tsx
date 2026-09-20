@@ -209,6 +209,7 @@ export function App() {
       username: cleanUsername,
       display_name: cleanDisplayName,
       bio: cleanBio,
+      theme_id: theme,
     };
 
     const result = profile
