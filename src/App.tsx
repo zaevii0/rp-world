@@ -48,6 +48,7 @@ type Post = {
   comments: number;
   reposts: number;
   reposted: boolean;
+  reposted_at?: string | null;
 };
 
 type HighlightStyle = "circle" | "portrait";
@@ -123,6 +124,7 @@ export function App() {
 
   const [posts, setPosts] = useState<Post[]>([]);
   const [profilePosts, setProfilePosts] = useState<Post[]>([]);
+  const [profileReposts, setProfileReposts] = useState<Post[]>([]);
   const [highlights, setHighlights] = useState<Highlight[]>([]);
   const [highlightOpen, setHighlightOpen] = useState(false);
   const [highlightTitle, setHighlightTitle] = useState("");
@@ -304,6 +306,7 @@ export function App() {
   useEffect(() => {
     if (view === "profile" && session?.user && profile) {
       void loadProfilePosts();
+      void loadProfileReposts();
       void loadHighlights();
     }
   }, [view, session, profile]);
@@ -652,6 +655,98 @@ export function App() {
         reposts: 0,
         reposted: false,
       })),
+    );
+  }
+
+  async function loadProfileReposts() {
+    if (!supabase || !session?.user) return;
+
+    const { data: repostRows, error: repostError } = await supabase
+      .from("post_reposts")
+      .select("post_id, created_at")
+      .eq("user_id", session.user.id)
+      .order("created_at", { ascending: false })
+      .limit(50);
+
+    if (repostError) return;
+
+    const reposts = (repostRows ?? []) as Array<{
+      post_id: string;
+      created_at: string;
+    }>;
+    const postIds = reposts.map((row) => row.post_id);
+
+    if (!postIds.length) {
+      setProfileReposts([]);
+      return;
+    }
+
+    const { data: postRows, error: postsError } = await supabase
+      .from("posts")
+      .select(
+        "id, author_id, content, media_url, created_at, post_likes(count), post_comments(count)",
+      )
+      .in("id", postIds);
+
+    if (postsError) return;
+
+    const rows = (postRows ?? []) as Array<
+      Post & {
+        post_likes?: { count: number }[];
+        post_comments?: { count: number }[];
+      }
+    >;
+    const authorIds = [...new Set(rows.map((row) => row.author_id))];
+
+    const { data: profiles } = authorIds.length
+      ? await supabase.from("profiles").select("*").in("id", authorIds)
+      : { data: [] as Profile[] };
+
+    const profileMap = new Map(
+      (profiles ?? []).map((item) => [item.id, item as Profile]),
+    );
+
+    const { data: myLikes } = await supabase
+      .from("post_likes")
+      .select("post_id, created_at")
+      .eq("user_id", session.user.id)
+      .in("post_id", postIds);
+
+    const likedSet = new Set(
+      (myLikes ?? []).map((item) => item.post_id),
+    );
+    const likedAtMap = new Map(
+      (myLikes ?? []).map((item) => [item.post_id, item.created_at]),
+    );
+    const repostedAtMap = new Map(
+      reposts.map((item) => [item.post_id, item.created_at]),
+    );
+
+    const postOrder = new Map(
+      postIds.map((postId, index) => [postId, index]),
+    );
+
+    setProfileReposts(
+      rows
+        .sort(
+          (a, b) =>
+            (postOrder.get(a.id) ?? 0) - (postOrder.get(b.id) ?? 0),
+        )
+        .map((row) => ({
+          id: row.id,
+          author_id: row.author_id,
+          content: row.content,
+          media_url: row.media_url,
+          created_at: row.created_at,
+          profile: profileMap.get(row.author_id),
+          likes: row.post_likes?.[0]?.count ?? 0,
+          liked: likedSet.has(row.id),
+          liked_at: likedAtMap.get(row.id) ?? null,
+          comments: row.post_comments?.[0]?.count ?? 0,
+          reposts: 0,
+          reposted: true,
+          reposted_at: repostedAtMap.get(row.id) ?? null,
+        })),
     );
   }
 
