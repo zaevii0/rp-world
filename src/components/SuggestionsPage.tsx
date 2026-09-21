@@ -1,4 +1,4 @@
-import { Lightbulb, Send } from "lucide-react";
+import { Check, Lightbulb, Send } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "../lib/supabase";
@@ -14,6 +14,7 @@ export function SuggestionsPage({ session }: SuggestionsPageProps) {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [successOpen, setSuccessOpen] = useState(false);
 
   async function submitSuggestion(event: FormEvent) {
     event.preventDefault();
@@ -51,10 +52,37 @@ export function SuggestionsPage({ session }: SuggestionsPageProps) {
     setTitle("");
     setCategory("Feature");
     setDescription("");
-    setMessage("Suggestion sent. Thank you for helping shape RP WORLD.");
+    setMessage("");
+    setSuccessOpen(true);
   }
 
   return (
+    <>
+      {successOpen && (
+        <div
+          className="suggestion-success-popup"
+          role="presentation"
+          onClick={() => setSuccessOpen(false)}
+        >
+          <section
+            className="suggestion-success-popup-card glass"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="suggestion-success-title"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="suggestion-success-popup-icon" aria-hidden="true">
+              <Check size={24} />
+            </div>
+            <h3 id="suggestion-success-title">Suggestion sent.</h3>
+            <p>Thank you for helping shape RP WORLD.</p>
+            <button className="primary-button" type="button" onClick={() => setSuccessOpen(false)}>
+              Done
+            </button>
+          </section>
+        </div>
+      )}
+
     <section className="suggestions-page">
       <div className="suggestions-card glass">
         <div className="suggestions-header">
@@ -122,5 +150,6 @@ export function SuggestionsPage({ session }: SuggestionsPageProps) {
         </form>
       </div>
     </section>
+    </>
   );
 }
