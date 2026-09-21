@@ -42,3 +42,58 @@ using (
 );
 
 notify pgrst, 'reload schema';
+
+-- Prevent a user from creating a shared-post wrapper around content they
+-- are not allowed to view, including direct API calls that bypass the UI.
+create or replace function public.can_view_post(viewer_id uuid, target_post_id uuid)
+returns boolean
+language sql
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1
+    from public.posts p
+    where p.id = target_post_id
+      and (
+        p.author_id = viewer_id
+        or p.privacy = 'public'
+        or (
+          p.privacy = 'friends'
+          and exists (
+            select 1 from public.user_follows f
+            where f.follower_id = viewer_id
+              and f.following_id = p.author_id
+          )
+          and exists (
+            select 1 from public.user_follows f
+            where f.follower_id = p.author_id
+              and f.following_id = viewer_id
+          )
+        )
+      )
+  );
+$$;
+
+revoke all on function public.can_view_post(uuid, uuid) from public;
+grant execute on function public.can_view_post(uuid, uuid) to authenticated;
+
+create or replace function public.validate_shared_post_visibility()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if new.shared_post_id is not null
+     and not public.can_view_post((select auth.uid()), new.shared_post_id) then
+    raise exception 'You cannot share a post you do not have permission to view.';
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists validate_shared_post_visibility on public.posts;
+create trigger validate_shared_post_visibility
+before insert or update of shared_post_id on public.posts
+for each row execute function public.validate_shared_post_visibility();
