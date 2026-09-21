@@ -4003,3 +4003,35 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
 .stay-signed-in-option span {
   opacity: .82;
 }
+
+
+/* Discover — clearly mark the active category with the user's theme color. */
+.discover-category-summary[aria-expanded="true"],
+.discover-category-group:has(.discover-category-summary[aria-expanded="true"]) > .discover-category-summary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  box-shadow:
+    0 8px 24px color-mix(in srgb, var(--accent) 24%, transparent),
+    inset 0 1px 0 rgba(255,255,255,.18);
+}
+
+.discover-category-summary[aria-expanded="true"] .discover-category-icon,
+.discover-category-summary[aria-expanded="true"] .discover-category-chevron {
+  color: #fff;
+  background: rgba(255,255,255,.14);
+  border-color: rgba(255,255,255,.18);
+}
+
+.discover-category-summary[aria-expanded="true"] .discover-category-title,
+.discover-category-summary[aria-expanded="true"] .discover-category-description {
+  color: #fff;
+}
+
+.discover-category-summary[aria-expanded="true"] .discover-category-description {
+  opacity: .78;
+}
+
+.discover-category-summary[aria-expanded="true"] .discover-category-chevron {
+  box-shadow: 0 2px 10px rgba(0,0,0,.12);
+}
