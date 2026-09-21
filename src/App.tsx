@@ -1901,7 +1901,7 @@ export function App() {
         ...row,
         reactionCount: 0,
         reactionType: null as string | null,
-        profile: undefined,
+        profile: undefined as Profile | undefined,
       })),
     }));
 
@@ -3234,7 +3234,6 @@ export function App() {
                         {viewAs ? "PUBLIC PROFILE" : "YOUR ACTIVITY"}
                       </p>
 
-                      <h3>{profileSection === "posts" ? "Posts" : "Reposts"}</h3>
                     </div>
 
                     {!viewAs && (
