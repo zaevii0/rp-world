@@ -1893,40 +1893,64 @@ export function App() {
 
     const rows = (data ?? []) as Comment[];
 
-    const commentIds = rows.map((row) => row.id);
-    const { data: reactions } = commentIds.length
-      ? await supabase
-          .from("comment_reactions")
-          .select("comment_id, user_id, reaction_type")
-          .in("comment_id", commentIds)
-      : { data: [] as { comment_id: string; user_id: string; reaction_type: string }[] };
+    // Paint the actual comments immediately. Reactions and author profiles
+    // are secondary enrichment and must not block the first visible render.
+    setCommentsByPost((current) => ({
+      ...current,
+      [postId]: rows.map((row) => ({
+        ...row,
+        reactionCount: 0,
+        reactionType: null as string | null,
+        profile: undefined,
+      })),
+    }));
 
-    const reactionRows = (reactions ?? []) as { comment_id: string; user_id: string; reaction_type: string }[];
+    if (!rows.length) return;
+
+    const commentIds = rows.map((row) => row.id);
+    const authorIds = [...new Set(rows.map((row) => row.author_id))];
+
+    // These two queries are independent, so fetch them together.
+    const [reactionsResult, profilesResult] = await Promise.all([
+      supabase
+        .from("comment_reactions")
+        .select("comment_id, user_id, reaction_type")
+        .in("comment_id", commentIds),
+      authorIds.length
+        ? supabase
+            .from("profiles")
+            .select("*")
+            .in("id", authorIds)
+        : Promise.resolve({ data: [] as Profile[] }),
+    ]);
+
+    const reactionRows = (reactionsResult.data ?? []) as {
+      comment_id: string;
+      user_id: string;
+      reaction_type: string;
+    }[];
+
     const reactionCounts = new Map<string, number>();
     const reactionTypes = new Map<string, string>();
+
     reactionRows.forEach((reaction) => {
-      reactionCounts.set(reaction.comment_id, (reactionCounts.get(reaction.comment_id) ?? 0) + 1);
-      if (reaction.user_id === session.user.id) reactionTypes.set(reaction.comment_id, reaction.reaction_type);
+      reactionCounts.set(
+        reaction.comment_id,
+        (reactionCounts.get(reaction.comment_id) ?? 0) + 1,
+      );
+      if (reaction.user_id === session.user.id) {
+        reactionTypes.set(reaction.comment_id, reaction.reaction_type);
+      }
     });
 
-    const authorIds = [
-      ...new Set(rows.map((row) => row.author_id)),
-    ];
-
-    const { data: profiles } = authorIds.length
-      ? await supabase
-          .from("profiles")
-          .select("*")
-          .in("id", authorIds)
-      : { data: [] as Profile[] };
-
     const profileMap = new Map(
-      (profiles ?? []).map((item) => [
+      (profilesResult.data ?? []).map((item) => [
         item.id,
         item as Profile,
       ]),
     );
 
+    // Enrich the already-visible comments without delaying their display.
     setCommentsByPost((current) => ({
       ...current,
       [postId]: rows.map((row) => ({
