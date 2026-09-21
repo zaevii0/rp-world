@@ -5017,6 +5017,9 @@ export function App() {
                   <button type="button" onClick={() => void managePostAction("copy")} disabled={postActionBusy}>
                     <Link2 size={18} /><span>Copy link</span>
                   </button>
+                  <button type="button" onClick={() => setPostActionTarget(null)} disabled={postActionBusy}>
+                    <X size={18} /><span>Back</span>
+                  </button>
                 </>
               ) : (
               <>
