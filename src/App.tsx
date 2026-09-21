@@ -4065,26 +4065,33 @@ export function App() {
               )}
             </div>
             <form className="message-form" onSubmit={sendMessage}>
-              <button className="message-attach-button" type="button" aria-label="Message options" title="More message options" disabled>
-                <Plus size={18} />
+              <button className="message-attach-button" type="button" aria-label="Add attachment" title="Attachments" disabled>
+                <Plus size={20} strokeWidth={2.2} />
               </button>
-              <textarea
-                value={messageDraft}
-                onChange={(event) => setMessageDraft(event.target.value)}
-                placeholder="Message"
-                maxLength={2000}
-                rows={1}
-                autoFocus
-                aria-label="Write a message"
-                onKeyDown={(event) => {
-                  if (event.key === "Enter" && !event.shiftKey) {
-                    event.preventDefault();
-                    if (messageDraft.trim()) void sendMessage(event as unknown as FormEvent);
-                  }
-                }}
-              />
-              <button type="submit" disabled={!messageDraft.trim()} aria-label="Send message" title="Send message">
-                <Send size={17} />
+              <div className="message-input-shell">
+                <textarea
+                  value={messageDraft}
+                  onChange={(event) => {
+                    setMessageDraft(event.target.value);
+                    const target = event.currentTarget;
+                    target.style.height = "auto";
+                    target.style.height = `${Math.min(target.scrollHeight, 120)}px`;
+                  }}
+                  placeholder="Message"
+                  maxLength={2000}
+                  rows={1}
+                  autoFocus
+                  aria-label="Write a message"
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" && !event.shiftKey) {
+                      event.preventDefault();
+                      if (messageDraft.trim()) void sendMessage(event as unknown as FormEvent);
+                    }
+                  }}
+                />
+              </div>
+              <button className="message-send-button" type="submit" disabled={!messageDraft.trim()} aria-label="Send message" title="Send message">
+                <Send size={17} strokeWidth={2.3} />
               </button>
             </form>
           </section>
