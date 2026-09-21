@@ -1168,6 +1168,15 @@ h1 { margin:3px 0 0; font-size:17px; letter-spacing:-.03em; }
   color: inherit;
   background: rgba(127,127,127,.065);
   outline: none;
+  box-shadow: none;
+  appearance: none;
+}
+.message-form input:-webkit-autofill,
+.message-form input:-webkit-autofill:hover,
+.message-form input:-webkit-autofill:focus {
+  -webkit-text-fill-color: inherit;
+  -webkit-box-shadow: 0 0 0 1000px transparent inset;
+  transition: background-color 9999s ease-in-out 0s;
 }
 .message-form input:focus {
   border-color: color-mix(in srgb,var(--accent) 45%,transparent);
