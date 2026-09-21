@@ -2879,40 +2879,38 @@ export function App() {
   }
 
   function renderCommentTree(postId: string, comments: Comment[], parentId: string | null, depth = 0): ReactNode[] {
-    return comments.filter((comment) => comment.parent_id === parentId).map((comment) => {
-      const children = comments.filter((item) => item.parent_id === comment.id);
-      const repliesCollapsed = collapsedReplyIds.has(comment.id);
+    const children = comments.filter((comment) => comment.parent_id === parentId);
+    const visible = parentId === null ? children : (collapsedReplyIds.has(parentId) ? children.slice(0, 2) : children);
+    return visible.map((comment) => {
+      const replies = comments.filter((item) => item.parent_id === comment.id);
+      const isEditing = commentEditId === comment.id;
+      const reactionSummary = commentReactionOptions
+        .filter((reaction) => (comment.reactionCounts?.[reaction.type] ?? 0) > 0)
+        .sort((a, b) => (comment.reactionCounts?.[b.type] ?? 0) - (comment.reactionCounts?.[a.type] ?? 0))
+        .slice(0, 3);
+      if (comment.is_hidden && comment.author_id !== session?.user.id) return null;
       return (
         <div key={comment.id} className={depth > 0 ? "comment-thread-reply" : "comment-thread"}>
           <div className={`comment-row${replyTo?.commentId === comment.id ? " reply-target" : ""}`}>
-            <button className="avatar small-avatar profile-link-button" type="button" onClick={() => void loadPublicProfile(comment.author_id)} aria-label="Open profile"
+            <button className={depth > 0 ? "avatar comment-avatar comment-avatar-reply profile-link-button" : "avatar comment-avatar profile-link-button"} type="button" onClick={() => void loadPublicProfile(comment.author_id)} aria-label="Open profile"
               style={comment.profile?.avatar_url ? { backgroundImage: `url(${comment.profile.avatar_url})` } : undefined}>
               {!comment.profile?.avatar_url && initials(comment.profile?.display_name ?? "RP")}
             </button>
             <div className="comment-body">
-              <div
-                className="comment-bubble"
+              <div className="comment-bubble"
                 onPointerDown={() => {
                   if (commentLongPressRef.current) clearTimeout(commentLongPressRef.current);
-                  commentLongPressRef.current = setTimeout(() => {
-                    setCommentActionTarget(comment);
-                    setCommentActionPostId(postId);
-                  }, 600);
+                  commentLongPressRef.current = setTimeout(() => { setCommentActionTarget(comment); setCommentActionPostId(postId); }, 600);
                 }}
-                onPointerUp={() => {
-                  if (commentLongPressRef.current) clearTimeout(commentLongPressRef.current);
-                  commentLongPressRef.current = null;
-                }}
-                onPointerCancel={() => {
-                  if (commentLongPressRef.current) clearTimeout(commentLongPressRef.current);
-                  commentLongPressRef.current = null;
-                }}
-                onContextMenu={(event) => event.preventDefault()}
-              >
+                onPointerUp={() => { if (commentLongPressRef.current) clearTimeout(commentLongPressRef.current); commentLongPressRef.current = null; }}
+                onPointerCancel={() => { if (commentLongPressRef.current) clearTimeout(commentLongPressRef.current); commentLongPressRef.current = null; }}
+                onContextMenu={(event) => event.preventDefault()}>
                 <button className="profile-name-link" type="button" onClick={() => void loadPublicProfile(comment.author_id)}>
                   {comment.profile?.display_name ?? "RP WORLD member"}
                 </button>
-                {commentEditId === comment.id ? (
+                {comment.is_deleted ? (
+                  <p className="comment-deleted">This comment was deleted.</p>
+                ) : isEditing ? (
                   <div className="comment-edit-inline">
                     <textarea value={commentEditDraft} onChange={(event) => setCommentEditDraft(event.target.value)} maxLength={500} autoFocus />
                     <div><button type="button" onClick={() => setCommentEditId(null)}>Cancel</button><button type="button" disabled={commentActionBusy === comment.id} onClick={() => void manageComment(postId, comment, "edit", commentEditDraft)}>Save</button></div>
@@ -2928,69 +2926,56 @@ export function App() {
                   </>
                 )}
               </div>
-              <div className="comment-actions">
-                <div className="comment-reaction-wrap">
-                  <button
-                    className={comment.reactionType ? "comment-action reaction-active" : "comment-action"}
-                    type="button"
-                    onClick={() => setOpenReactionPicker(openReactionPicker === comment.id ? null : comment.id)}
-                    disabled={commentReactionBusy === comment.id}
-                    aria-label="React to comment"
-                    aria-expanded={openReactionPicker === comment.id}
-                  >
-                    <span>React</span>
-                  </button>
+
+              {!comment.is_deleted && (
+                <>
+                  <div className="comment-actions">
+                    <div className="comment-reaction-wrap">
+                      <button className={comment.reactionType ? "comment-action reaction-active" : "comment-action"} type="button"
+                        onClick={() => setOpenReactionPicker(openReactionPicker === comment.id ? null : comment.id)}
+                        disabled={commentReactionBusy === comment.id}>
+                        {comment.reactionType ? (commentReactionOptions.find((item) => item.type === comment.reactionType)?.label ?? "React") : "React"}
+                      </button>
+                      {openReactionPicker === comment.id && (
+                        <div className="comment-reaction-picker" role="menu">
+                          {commentReactionOptions.map((reaction) => (
+                            <button key={reaction.type} className={comment.reactionType === reaction.type ? "comment-reaction-option active" : "comment-reaction-option"} type="button"
+                              onClick={() => void setCommentReaction(postId, comment, reaction.type)} aria-label={reaction.label} title={reaction.label}>{reaction.emoji}</button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    <button className="comment-action" type="button" onClick={() => setReplyTo({ postId, commentId: comment.id })}>Reply</button>
+                    <span className="comment-timestamp">{timeAgo(comment.created_at)}{comment.edited_at ? " (edited)" : ""}</span>
+                    {comment.is_pinned && <span className="comment-pinned">Pinned</span>}
+                  </div>
                   {comment.reactionCount > 0 && (
-                    <button className="comment-reaction-count" type="button" onClick={() => void showCommentReactionUsers(comment)} aria-label={comment.reactionCount + " reactions"}>
-                      {comment.reactionCount}
+                    <button className="comment-reaction-summary" type="button" onClick={() => void showCommentReactionUsers(comment)}>
+                      {reactionSummary.map((reaction) => <span key={reaction.type}>{reaction.emoji}</span>)} <strong>{comment.reactionCount}</strong>
                     </button>
                   )}
-                  {openReactionPicker === comment.id && (
-                    <div className="comment-reaction-picker" role="menu" aria-label="All available comment reactions">
-                      {commentReactionOptions.map((reaction) => (
-                        <button
-                          key={reaction.type}
-                          className={comment.reactionType === reaction.type ? "comment-reaction-option active" : "comment-reaction-option"}
-                          type="button"
-                          role="menuitem"
-                          title={reaction.label}
-                          aria-label={reaction.label}
-                          onClick={() => void setCommentReaction(postId, comment, reaction.type)}
-                        >
-                          <span>{reaction.emoji}</span>
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-                <button className="comment-action" type="button" onClick={() => { setReplyTo({ postId, commentId: comment.id }); setOpenComments(postId); }}>
-                  Reply
-                </button>
-                <button className="timestamp-button comment-timestamp" type="button" onClick={() => setOpenTimestamp(openTimestamp === comment.id ? null : comment.id)} title="Show exact date and time">
-                  {timeAgo(comment.created_at)}
-                </button>
-              </div>
-              {openTimestamp === comment.id && (
-                <div className="timestamp-popover comment-time"><strong>Posted</strong><span>{exactTime(comment.created_at)}</span></div>
+                </>
               )}
-              {children.length > 0 && (
-                <button
-                  className="comment-replies-toggle"
-                  type="button"
-                  onClick={() => setCollapsedReplyIds((current) => {
-                    const next = new Set(current);
-                    if (next.has(comment.id)) next.delete(comment.id);
-                    else next.add(comment.id);
-                    return next;
-                  })}
-                >
+
+              {replies.length > 0 && (
+                <button className="comment-replies-toggle" type="button" onClick={() => setCollapsedReplyIds((current) => {
+                  const next = new Set(current);
+                  if (next.has(comment.id)) next.delete(comment.id); else next.add(comment.id);
+                  return next;
+                })}>
                   <span className="comment-replies-line" aria-hidden="true" />
-                  {repliesCollapsed ? `View ${children.length} ${children.length === 1 ? "reply" : "replies"}` : `Hide ${children.length === 1 ? "reply" : "replies"}`}
+                  {collapsedReplyIds.has(comment.id) ? `View ${replies.length} ${replies.length === 1 ? "reply" : "replies"}` : "Hide replies"}
                 </button>
+              )}
+
+              {commentMentionQuery[postId] !== null && commentMentionQuery[postId] !== undefined && (
+                <div className="comment-mention-popover">
+                  <span>Type a username mention: @{commentMentionQuery[postId]}</span>
+                </div>
               )}
             </div>
           </div>
-          {!repliesCollapsed && children.length > 0 && renderCommentTree(postId, comments, comment.id, depth + 1)}
+          {!collapsedReplyIds.has(comment.id) && replies.length > 0 && renderCommentTree(postId, comments, comment.id, depth + 1)}
         </div>
       );
     });
