@@ -2316,7 +2316,7 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
 .suggestion-success-popup-card .primary-button {
   margin-top: 20px;
 }
-/* iMessage text bubbles — native Messages proportions and colors */
+/* iMessage text bubbles — native Messages proportions, with RP WORLD theme colors */
 .message-list {
   min-height: 0;
   overflow-y: auto;
@@ -2344,11 +2344,11 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
   max-width: min(76%, 430px);
   min-width: 0;
   padding: 7px 12px 6px;
-  border: 1px solid color-mix(in srgb, var(--accent) 14%, var(--text-primary, #fff) 6%, transparent);
+  border: 0;
   border-radius: 19px 19px 19px 5px;
-  background: color-mix(in srgb, var(--accent) 10%, var(--surface-strong, #18181b) 90%);
-  color: var(--text-primary, #f5f5f7);
-  box-shadow: 0 1px 0 color-mix(in srgb, var(--text-primary, #fff) 4%, transparent);
+  background: color-mix(in srgb, var(--accent) 8%, #e9e9eb);
+  color: #17171a;
+  box-shadow: none;
   line-height: 1.38;
   overflow-wrap: anywhere;
 }
@@ -2358,7 +2358,7 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
 }
 .message-bubble.mine {
   border-radius: 19px 19px 5px 19px;
-  background: #0a84ff;
+  background: var(--accent);
   color: #fff;
   box-shadow: none;
 }
@@ -2393,13 +2393,33 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
   flex: 0 0 auto;
 }
 
+/* Incoming bubbles stay neutral like iMessage, with a subtle tint from the selected theme. */
 .app.dark .message-bubble:not(.mine) {
-  background: color-mix(in srgb, var(--accent) 12%, #18181b 88%);
+  background: color-mix(in srgb, var(--accent) 11%, #3a3a3c);
   color: #f5f5f7;
 }
 .app.light .message-bubble:not(.mine) {
-  background: color-mix(in srgb, var(--accent) 8%, #f0f0f3 92%);
+  background: color-mix(in srgb, var(--accent) 8%, #e9e9eb);
   color: #17171a;
+}
+
+/* The active theme controls outgoing bubble, send button and focus treatment in both modes. */
+.message-bubble.mine,
+.message-send-button {
+  background: var(--accent);
+}
+.message-bubble.mine:hover {
+  background: color-mix(in srgb, var(--accent) 90%, #000);
+}
+.message-send-button:hover:not(:disabled),
+.message-send-button:focus-visible:not(:disabled) {
+  background: color-mix(in srgb, var(--accent) 90%, #000);
+  box-shadow: none;
+}
+.message-send-button:disabled {
+  opacity: .32;
+  background: color-mix(in srgb, var(--accent) 45%, #888);
+  box-shadow: none;
 }
 
 .message-chat-header {
@@ -2442,19 +2462,9 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
   width: 34px;
   height: 34px;
   margin-bottom: 2px;
-  background: #0a84ff;
   box-shadow: none;
 }
-.message-send-button:hover:not(:disabled),
-.message-send-button:focus-visible:not(:disabled) {
-  background: #007aff;
-  box-shadow: none;
-}
-.message-send-button:disabled {
-  opacity: .32;
-  background: #8e8e93;
-  box-shadow: none;
-}
+
 
 @media (max-width: 560px) {
   .message-list { padding: 14px 9px 10px; }
