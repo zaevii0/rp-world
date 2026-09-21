@@ -143,6 +143,8 @@ type Comment = {
   content: string;
   created_at: string;
   parent_id: string | null;
+  media_url: string | null;
+  media_type: string | null;
   profile?: Profile;
   reactionCount: number;
   reactionType: string | null;
@@ -344,6 +346,15 @@ export function App() {
   const [replyTo, setReplyTo] = useState<{ postId: string; commentId: string } | null>(null);
   const [commentReactionBusy, setCommentReactionBusy] = useState<string | null>(null);
   const [openReactionPicker, setOpenReactionPicker] = useState<string | null>(null);
+  const [commentActionTarget, setCommentActionTarget] = useState<Comment | null>(null);
+  const [commentActionPostId, setCommentActionPostId] = useState<string | null>(null);
+  const [commentEditId, setCommentEditId] = useState<string | null>(null);
+  const [commentEditDraft, setCommentEditDraft] = useState("");
+  const [commentActionBusy, setCommentActionBusy] = useState<string | null>(null);
+  const [commentReactionUsers, setCommentReactionUsers] = useState<Array<{ id: string; profile: Profile; reactionType: string }>>([]);
+  const [commentReactionUsersOpen, setCommentReactionUsersOpen] = useState(false);
+  const [commentReactionUsersBusy, setCommentReactionUsersBusy] = useState(false);
+  const [commentMediaFiles, setCommentMediaFiles] = useState<Record<string, File | null>>({});
   const [openTimestamp, setOpenTimestamp] = useState<string | null>(null);
   const [collapsedReplyIds, setCollapsedReplyIds] = useState<Set<string>>(new Set());
   const [viewAs, setViewAs] = useState(false);
