@@ -83,6 +83,55 @@ with check (
   )
 );
 
+-- RLS identifies conversation membership; this trigger prevents a recipient from
+-- editing message content and prevents either party from changing immutable fields.
+create or replace function public.protect_message_updates()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $
+begin
+  if new.id <> old.id
+     or new.conversation_id <> old.conversation_id
+     or new.sender_id <> old.sender_id
+     or new.client_id is distinct from old.client_id
+     or new.created_at <> old.created_at
+     or new.reply_to_id is distinct from old.reply_to_id
+     or new.character_id is distinct from old.character_id then
+    raise exception 'Message identity fields cannot be changed';
+  end if;
+
+  if auth.uid() = old.sender_id then
+    return new;
+  end if;
+
+  if auth.uid() is null then
+    raise exception 'Authentication required';
+  end if;
+
+  if new.content <> old.content
+     or new.edited_at is distinct from old.edited_at
+     or new.unsent_at is distinct from old.unsent_at
+     or new.media_url is distinct from old.media_url
+     or new.media_type is distinct from old.media_type then
+    raise exception 'Only the sender can edit or unsend a message';
+  end if;
+
+  if new.delivered_at is distinct from old.delivered_at
+     or new.read_at is distinct from old.read_at then
+    return new;
+  end if;
+
+  raise exception 'No permitted message update';
+end;
+$;
+
+drop trigger if exists protect_message_updates on public.messages;
+create trigger protect_message_updates
+before update on public.messages
+for each row execute function public.protect_message_updates();
+
 grant select, insert, update on public.messages to authenticated;
 grant select, insert, update, delete on public.message_reactions to authenticated;
 
