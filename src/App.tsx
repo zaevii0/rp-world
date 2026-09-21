@@ -3775,29 +3775,32 @@ export function App() {
                                   initials(profile.display_name)}
                               </span>
 
-                              <input
-                                value={
-                                  commentDrafts[
-                                    post.id
-                                  ] ?? ""
-                                }
-                                onChange={(event) =>
-                                  setCommentDrafts(
-                                    (current) => ({
-                                      ...current,
-                                      [post.id]:
-                                        event.target
-                                          .value,
-                                    }),
-                                  )
-                                }
-                                placeholder={replyTo?.postId === post.id ? "Write a reply to this comment…" : "Write a reply…"}
+                              <textarea
+                                value={commentDrafts[post.id] ?? ""}
+                                rows={1}
+                                onChange={(event) => {
+                                  const value = event.target.value;
+                                  setCommentDrafts((current) => ({ ...current, [post.id]: value }));
+                                  const cursor = event.target.selectionStart ?? value.length;
+                                  const match = value.slice(0, cursor).match(/(?:^|\\s)@([a-zA-Z0-9_]*)$/);
+                                  setCommentMentionQuery((current) => ({ ...current, [post.id]: match ? match[1] : null }));
+                                  setCommentMentionStart((current) => ({ ...current, [post.id]: match ? cursor - match[1].length - 1 : null }));
+                                  event.target.style.height = "auto";
+                                  event.target.style.height = Math.min(event.target.scrollHeight, 140) + "px";
+                                }}
+                                onKeyDown={(event) => {
+                                  if (event.key === "Enter" && !event.shiftKey) {
+                                    event.preventDefault();
+                                    void createComment(event as unknown as FormEvent, post.id);
+                                  }
+                                }}
+                                placeholder={replyTo?.postId === post.id ? "Write a reply…" : "Write a comment…"}
                                 maxLength={500}
-                                aria-label="Write a reply"
+                                aria-label="Write a comment"
                               />
 
                               <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" hidden id={`comment-media-${post.id}`} onChange={(event) => setCommentMediaFiles((current) => ({ ...current, [post.id]: event.target.files?.[0] ?? null }))} />
-                              <button type="button" className="comment-media-trigger" aria-label="Add photo to comment" onClick={() => document.getElementById(`comment-media-${post.id}`)?.click()}><Image size={16} /></button>
+                              <button type="button" className="comment-media-trigger" aria-label="Add photo or GIF to comment" onClick={() => document.getElementById(`comment-media-${post.id}`)?.click()}><Image size={16} /></button>
                               {commentMediaFiles[post.id] && <span className="comment-media-selected">{commentMediaFiles[post.id]?.name}</span>}
 
                               <button
