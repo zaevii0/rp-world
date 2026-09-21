@@ -2734,7 +2734,51 @@ export function App() {
     );
   }
 
-  async function setCommentReaction(postId: string, comment: Comment, reactionType: string) {
+  async function manageComment(postId: string, comment: Comment, action: "edit" | "delete", content = "") {
+    if (!supabase || !session?.user || comment.author_id !== session.user.id) return;
+    setCommentActionBusy(comment.id);
+    try {
+      if (action === "edit") {
+        const nextContent = content.trim();
+        if (!nextContent && !comment.media_url) throw new Error("Comment cannot be empty.");
+        const { error } = await supabase.from("post_comments").update({ content: nextContent }).eq("id", comment.id).eq("author_id", session.user.id);
+        if (error) throw error;
+        setCommentsByPost((current) => ({ ...current, [postId]: (current[postId] ?? []).map((item) => item.id === comment.id ? { ...item, content: nextContent } : item) }));
+        setCommentEditId(null);
+      } else {
+        const { error } = await supabase.from("post_comments").delete().eq("id", comment.id).eq("author_id", session.user.id);
+        if (error) throw error;
+        setCommentsByPost((current) => ({ ...current, [postId]: (current[postId] ?? []).filter((item) => item.id !== comment.id && item.parent_id !== comment.id) }));
+      }
+      setCommentActionTarget(null);
+    } catch (error) {
+      console.error("RP WORLD comment action failed", error);
+      setFeedError(error instanceof Error ? error.message : "Could not update this comment.");
+    } finally {
+      setCommentActionBusy(null);
+    }
+  }
+
+  async function showCommentReactionUsers(comment: Comment) {
+    if (!supabase) return;
+    setCommentReactionUsersOpen(true);
+    setCommentReactionUsersBusy(true);
+    try {
+      const { data: reactions, error } = await supabase.from("comment_reactions").select("user_id, reaction_type").eq("comment_id", comment.id);
+      if (error) throw error;
+      const ids = [...new Set((reactions ?? []).map((item) => item.user_id))];
+      const { data: profiles } = ids.length ? await supabase.from("profiles").select("*").in("id", ids) : { data: [] };
+      const map = new Map((profiles ?? []).map((item) => [item.id, item as Profile]));
+      setCommentReactionUsers((reactions ?? []).map((item) => ({ id: item.user_id, profile: map.get(item.user_id), reactionType: item.reaction_type })).filter((item): item is { id: string; profile: Profile; reactionType: string } => Boolean(item.profile)));
+    } catch (error) {
+      console.error("RP WORLD reaction users load failed", error);
+      setCommentReactionUsers([]);
+    } finally {
+      setCommentReactionUsersBusy(false);
+    }
+  }
+
+    async function setCommentReaction(postId: string, comment: Comment, reactionType: string) {
     if (!supabase || !session?.user || commentReactionBusy === comment.id) return;
 
     setCommentReactionBusy(comment.id);
