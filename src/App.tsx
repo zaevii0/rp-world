@@ -903,13 +903,7 @@ export function App() {
           filter: `conversation_id=eq.${conversationId}`,
         },
         (payload) => {
-          const incoming = payload.new as {
-            id: string;
-            conversation_id: string;
-            sender_id: string;
-            content: string;
-            created_at: string;
-          };
+          const incoming = payload.new as ChatMessage;
 
           if (incoming.conversation_id !== conversationId) return;
 
@@ -920,10 +914,10 @@ export function App() {
             return {
               ...current,
               [conversationId]: [...existing, {
-                id: incoming.id,
-                sender_id: incoming.sender_id,
-                content: incoming.content,
-                created_at: incoming.created_at,
+                ...incoming,
+                conversation_id: conversationId,
+                reactions: incoming.reactions ?? [],
+                status: incoming.status ?? "sent",
               }],
             };
           });
