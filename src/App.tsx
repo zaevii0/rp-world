@@ -4346,10 +4346,8 @@ export function App() {
                 : "nav-item"
             }
             type="button"
-            onPointerDown={startScreenshotLongPress}
-            onPointerUp={() => finishScreenshotPress(() => setView("home"))}
-            onPointerCancel={cancelScreenshotLongPress}
-            onContextMenu={(event) => event.preventDefault()}
+            onPointerDown={() => {}}
+            onPointerUp={() => setView("home")}
           >
             <Home size={19} />
             <span>Home</span>
