@@ -2915,7 +2915,7 @@ export function App() {
                     <button className="comment-reaction-count" type="button" onClick={() => void showCommentReactionUsers(comment)} aria-label={comment.reactionCount + " reactions"}>
                       {comment.reactionCount}
                     </button>
-                  )}}
+                  )}
                   {openReactionPicker === comment.id && (
                     <div className="comment-reaction-picker" role="menu" aria-label="All available comment reactions">
                       {commentReactionOptions.map((reaction) => (
