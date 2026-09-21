@@ -627,7 +627,7 @@ export function App() {
     const { data, error: loadError } = await supabase
       .from("posts")
       .select(
-        "id, author_id, content, media_url, media_type, created_at, pinned_at, archived_at, trashed_at, shared_post_id, share_caption, post_likes(count), post_comments(count)",
+        "id, author_id, content, media_url, media_type, created_at, pinned_at, archived_at, trashed_at, privacy, shared_post_id, share_caption, post_likes(count), post_comments(count)",
       )
       .is("archived_at", null)
       .is("trashed_at", null)
@@ -1076,7 +1076,7 @@ export function App() {
     const { data, error: loadError } = await supabase
       .from("posts")
       .select(
-        "id, author_id, content, media_url, media_type, created_at, pinned_at, archived_at, trashed_at, post_likes(count), post_comments(count)",
+        "id, author_id, content, media_url, media_type, created_at, pinned_at, archived_at, trashed_at, privacy, post_likes(count), post_comments(count)",
       )
       .eq("author_id", session.user.id)
       .is("archived_at", null)
@@ -1162,7 +1162,7 @@ export function App() {
     const { data: postRows, error: postsError } = await supabase
       .from("posts")
       .select(
-        "id, author_id, content, media_url, media_type, created_at, pinned_at, archived_at, trashed_at, post_likes(count), post_comments(count)",
+        "id, author_id, content, media_url, media_type, created_at, pinned_at, archived_at, trashed_at, privacy, post_likes(count), post_comments(count)",
       )
       .in("id", postIds)
       .is("archived_at", null)
@@ -1264,7 +1264,7 @@ export function App() {
         supabase.from("profiles").select("*").eq("id", userId).maybeSingle(),
         supabase
           .from("posts")
-          .select("id, author_id, content, media_url, media_type, created_at, pinned_at, archived_at, trashed_at, post_likes(count), post_comments(count)")
+          .select("id, author_id, content, media_url, media_type, created_at, pinned_at, archived_at, trashed_at, privacy, post_likes(count), post_comments(count)")
           .eq("author_id", userId)
           .is("archived_at", null)
           .is("trashed_at", null)
@@ -1757,7 +1757,7 @@ export function App() {
         .update({ content, media_url: mediaUrl, media_type: mediaType })
         .eq("id", editPostTarget.id)
         .eq("author_id", session.user.id)
-        .select("id, content, media_url, media_type")
+        .select("id, content, media_url, media_type, privacy")
         .single();
 
       if (updateError || !data) {
@@ -2135,7 +2135,7 @@ export function App() {
         share_caption: caption || null,
         privacy: sharePrivacy,
       })
-      .select("id, author_id, content, media_url, media_type, created_at, shared_post_id, share_caption")
+      .select("id, author_id, content, media_url, media_type, created_at, privacy, shared_post_id, share_caption")
       .single();
     setShareBusy(false);
     if (shareError || !data) {
