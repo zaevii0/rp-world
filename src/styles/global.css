@@ -3279,6 +3279,12 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
 }
 
 
+/* Conversation thread top spacing */
+.message-list {
+  padding-top: 24px;
+  border-top: 1px solid color-mix(in srgb, var(--accent) 14%, transparent);
+}
+
 /* iOS-style RP WORLD chat controls */
 .message-chat-header {
   min-height: 74px;
