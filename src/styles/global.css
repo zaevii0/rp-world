@@ -3234,9 +3234,8 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
   }
 }
 
-/* Final RP WORLD messaging polish — theme color + liquid glass + rounded frame. */
+/* Final RP WORLD messaging polish — theme color + liquid glass. */
 .message-sheet {
-  border-radius: 28px;
   overflow: hidden;
   border-color: color-mix(in srgb, var(--accent) 22%, transparent);
   background: rgba(255,255,255,.065);
@@ -3270,14 +3269,12 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
 
 @media (max-width: 560px) {
   .message-sheet {
-    border-radius: 22px;
-    width: calc(100% - 10px);
+      width: calc(100% - 10px);
     height: calc(100dvh - 10px);
     max-height: calc(100dvh - 10px);
   }
 
   .message-list {
-    border-radius: 0 0 22px 22px;
   }
 }
 
