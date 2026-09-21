@@ -1,5 +1,6 @@
 import {
   ArrowLeft,
+  ArrowUp,
   Camera,
   ShieldCheck,
   Clock,
@@ -4173,13 +4174,13 @@ export function App() {
                 )}
               </div>
               <button
-                className="icon-button"
+                className="icon-button message-refresh-button"
                 type="button"
                 aria-label="Refresh messages"
                 title="Refresh messages"
                 onClick={() => void loadConversationMessages(activeConversation)}
               >
-                <RefreshCw size={18} />
+                <RefreshCw size={17} />
               </button>
             </div>
             <div className="message-list" role="log" aria-live="polite">
@@ -4242,7 +4243,7 @@ export function App() {
                     target.style.height = "auto";
                     target.style.height = `${Math.min(target.scrollHeight, 120)}px`;
                   }}
-                  placeholder="Message"
+                  placeholder="iMessage"
                   maxLength={2000}
                   rows={1}
                   autoFocus
@@ -4256,7 +4257,7 @@ export function App() {
                 />
               </div>
               <button className="message-send-button" type="submit" disabled={!messageDraft.trim()} aria-label="Send message" title="Send message">
-                <Send size={17} strokeWidth={2.3} />
+                <ArrowUp size={18} strokeWidth={2.5} />
               </button>
             </form>
           </section>
