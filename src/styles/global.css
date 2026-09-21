@@ -5033,3 +5033,61 @@ svg {
     min-height: 100vh;
   }
 }
+
+
+/* Edge-to-edge device viewport: the app owns the full screen behind system chrome. */
+html,
+body,
+#root {
+  width: 100%;
+  min-height: 100%;
+  background: transparent;
+}
+
+body {
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+.app {
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding-top: max(0px, env(safe-area-inset-top));
+  padding-right: max(10px, env(safe-area-inset-right));
+  padding-bottom: max(10px, env(safe-area-inset-bottom));
+  padding-left: max(10px, env(safe-area-inset-left));
+}
+
+.app::before {
+  content: "";
+  position: fixed;
+  z-index: -1;
+  inset: 0;
+  pointer-events: none;
+  background: inherit;
+}
+
+@supports (height: 100svh) {
+  .app {
+    min-height: 100svh;
+  }
+}
+
+@supports (height: 100dvh) {
+  .app {
+    min-height: 100dvh;
+  }
+}
+
+/* Standalone iOS/PWA: keep the system status icons over the app surface. */
+@media (display-mode: standalone) {
+  html,
+  body,
+  #root,
+  .app {
+    min-height: 100dvh;
+  }
+}
