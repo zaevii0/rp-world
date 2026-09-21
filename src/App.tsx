@@ -357,6 +357,8 @@ export function App() {
   const [followingPublicProfile, setFollowingPublicProfile] = useState(false);
   const [followedByPublicProfile, setFollowedByPublicProfile] = useState(false);
   const [publicProfileFriend, setPublicProfileFriend] = useState(false);
+  const [friendActionsOpen, setFriendActionsOpen] = useState(false);
+  const [friendActionBusy, setFriendActionBusy] = useState(false);
   const [discoverProfiles, setDiscoverProfiles] = useState<Profile[]>([]);
   const [discoverSearch, setDiscoverSearch] = useState("");
   const [openDiscoverCategory, setOpenDiscoverCategory] = useState("");
@@ -1777,6 +1779,11 @@ export function App() {
   async function toggleFollowPublicProfile() {
     if (!supabase || !session?.user || !publicProfile) return;
 
+    if (publicProfileFriend) {
+      setFriendActionsOpen(true);
+      return;
+    }
+
     if (followingPublicProfile) {
       const { error } = await supabase.from("user_follows").delete()
         .eq("follower_id", session.user.id).eq("following_id", publicProfile.id);
@@ -1793,6 +1800,25 @@ export function App() {
     if (!error) {
       setFollowingPublicProfile(true);
       setPublicProfileFriend(followedByPublicProfile);
+    }
+  }
+
+  async function unfriendPublicProfile() {
+    if (!supabase || !session?.user || !publicProfile || friendActionBusy) return;
+    setFriendActionBusy(true);
+    try {
+      const { error } = await supabase.from("user_follows").delete()
+        .eq("follower_id", session.user.id)
+        .eq("following_id", publicProfile.id);
+      if (error) throw error;
+      setFollowingPublicProfile(false);
+      setPublicProfileFriend(false);
+      setFriendActionsOpen(false);
+    } catch (error) {
+      console.error("RP WORLD unfriend failed", error);
+      setMessage("Could not unfriend this user. Please try again.");
+    } finally {
+      setFriendActionBusy(false);
     }
   }
 
@@ -4148,7 +4174,7 @@ export function App() {
                       <div className="profile-name-row"><div><h2>{publicProfile.display_name}{publicProfile.username === "zaevii" && <span className="verified-badge" aria-label="Verified">✓</span>}</h2><span>@{publicProfile.username}</span></div></div>
                       {publicProfile.bio ? <p className="profile-bio">{publicProfile.bio}</p> : null}
                       <div className="profile-actions profile-social-actions">
-                        <button className="profile-action-button follow-button" type="button" onClick={() => void toggleFollowPublicProfile()}><UserPlus size={14} />{publicProfileFriend ? "Friends" : followingPublicProfile ? "Following" : "Follow"}</button>
+                        <button className={publicProfileFriend ? "profile-action-button follow-button friend-button" : "profile-action-button follow-button"} type="button" onClick={() => void toggleFollowPublicProfile()}><UserPlus size={14} />{publicProfileFriend ? "Friends" : followingPublicProfile ? "Following" : "Follow"}</button>
                         <button
                           className="profile-action-button"
                           type="button"
@@ -4167,6 +4193,19 @@ export function App() {
                         </button>
                         
                       </div>
+                      {friendActionsOpen && publicProfileFriend && (
+                        <div className="friend-actions-popover" role="dialog" aria-label="Friend options">
+                          <div className="friend-actions-title">Friends</div>
+                          <button type="button" className="friend-action-danger" onClick={() => void unfriendPublicProfile()} disabled={friendActionBusy}>
+                            <UserPlus size={15} />
+                            {friendActionBusy ? "Updating…" : "Unfriend / Unfollow"}
+                          </button>
+                          <button type="button" className="friend-action-back" onClick={() => setFriendActionsOpen(false)} disabled={friendActionBusy}>
+                            <ArrowLeft size={15} />
+                            Back
+                          </button>
+                        </div>
+                      )}
                       <div className="profile-meta">
                         <span><Sparkles size={13} />{publicProfile.rp_id}</span>
                         <button className="profile-meta-button" type="button" onClick={() => void openFollowers(publicProfile.id, publicProfile.display_name)} aria-label="View followers"><User size={13} />{profileStats.followers} {profileStats.followers === 1 ? "follower" : "followers"}</button>
