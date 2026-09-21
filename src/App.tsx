@@ -2790,8 +2790,13 @@ export function App() {
       const { data: reactions, error } = await supabase.from("comment_reactions").select("user_id, reaction_type").eq("comment_id", comment.id);
       if (error) throw error;
       const ids = [...new Set((reactions ?? []).map((item) => item.user_id))];
-      const { data: profiles } = ids.length ? await supabase.from("profiles").select("*").in("id", ids) : { data: [] };
-      const map = new Map((profiles ?? []).map((item) => [item.id, item as Profile]));
+      let profiles: Profile[] = [];
+      if (ids.length) {
+        const { data, error: profileError } = await supabase.from("profiles").select("*").in("id", ids);
+        if (profileError) throw profileError;
+        profiles = (data ?? []) as Profile[];
+      }
+      const map = new Map(profiles.map((item) => [item.id, item as Profile]));
       setCommentReactionUsers((reactions ?? []).map((item) => ({ id: item.user_id, profile: map.get(item.user_id), reactionType: item.reaction_type })).filter((item): item is { id: string; profile: Profile; reactionType: string } => Boolean(item.profile)));
     } catch (error) {
       console.error("RP WORLD reaction users load failed", error);
