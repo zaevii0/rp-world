@@ -3293,84 +3293,114 @@ export function App() {
                           }
                         : undefined
                     }
-                  />
+                  >
+
+                  </div>
+
                   <div className="profile-main">
                     <div className="profile-avatar-wrap">
                       <div
                         className="profile-avatar avatar"
                         style={
                           profile.avatar_url
-                            ? { backgroundImage: `url(${profile.avatar_url})` }
+                            ? {
+                                backgroundImage: `url(${profile.avatar_url})`,
+                              }
                             : undefined
                         }
                       >
-                        {!profile.avatar_url && initials(profile.display_name)}
+                        {!profile.avatar_url &&
+                          initials(
+                            profile.display_name,
+                          )}
                       </div>
                     </div>
 
                     <div className="profile-identity">
                       <div className="profile-name-row">
                         <div>
-                          <h2>{profile.display_name}</h2>
-                          <span>@{profile.username}</span>
+                          <h2>
+                            {profile.display_name}
+                          </h2>
+
+                          <span>
+                            @{profile.username}
+                          </span>
                         </div>
                       </div>
+
                       {profile.bio ? <p className="profile-bio">{profile.bio}</p> : null}
+
+                      <div className="profile-actions profile-social-actions">
+                        {!viewAs ? (
+                          <>
+                            <button
+                              className="profile-action-button"
+                              type="button"
+                              onClick={() => setProfileOpen(true)}
+                            >
+                              <Pencil size={14} />
+                              Edit
+                            </button>
+
+                            <button
+                              className="profile-action-button"
+                              type="button"
+                              onClick={() => setViewAs(true)}
+                            >
+                              <Eye size={14} />
+                              View as
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <button
+                              className="profile-action-button follow-button"
+                              type="button"
+                              onClick={() =>
+                                setMessage("Follow is ready for the public profile.")
+                              }
+                            >
+                              <UserPlus size={14} />
+                              Follow
+                            </button>
+
+                            <button
+                              className="profile-action-button"
+                              type="button"
+                              onClick={() =>
+                                setMessage("Messaging will open here once direct messaging is connected.")
+                              }
+                            >
+                              <MessageCircle size={14} />
+                              Message
+                            </button>
+
+                          </>
+                        )}
+                      </div>
+
+                      <div className="profile-meta">
+                        <span>
+                          <Sparkles size={13} />
+                          {profile.rp_id}
+                        </span>
+                        <span>
+                          <User size={13} />
+                          {profileStats.followers} {profileStats.followers === 1 ? "follower" : "followers"}
+                        </span>
+                        <span>
+                          <Heart size={13} />
+                          {profileStats.likes} {profileStats.likes === 1 ? "like" : "likes"}
+                        </span>
+                        <span>
+                          <MapPin size={13} />
+                          RP WORLD
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="profile-info-card glass">
-                  <div className="profile-info-actions">
-                    {!viewAs ? (
-                      <>
-                        <button className="profile-action-button" type="button" onClick={() => setProfileOpen(true)}>
-                          <Pencil size={14} />
-                          Edit
-                        </button>
-                        <button className="profile-action-button" type="button" onClick={() => setViewAs(true)}>
-                          <Eye size={14} />
-                          View as
-                        </button>
-                      </>
-                    ) : (
-                      <>
-                        <button className="profile-action-button follow-button" type="button" onClick={() => setMessage("Follow is ready for the public profile.")}>
-                          <UserPlus size={14} />
-                          Follow
-                        </button>
-                        <button className="profile-action-button" type="button" onClick={() => setMessage("Messaging will open here once direct messaging is connected.")}>
-                          <MessageCircle size={14} />
-                          Message
-                        </button>
-                      </>
-                    )}
-                  </div>
-
-                  <div className="profile-info-divider" />
-
-                  <div className="profile-info-grid">
-                    <div>
-                      <Sparkles size={15} />
-                      <strong>{profile.rp_id}</strong>
-                      <span>RP ID</span>
-                    </div>
-                    <div>
-                      <User size={15} />
-                      <strong>{profileStats.followers}</strong>
-                      <span>{profileStats.followers === 1 ? "Follower" : "Followers"}</span>
-                    </div>
-                    <div>
-                      <Heart size={15} />
-                      <strong>{profileStats.likes}</strong>
-                      <span>{profileStats.likes === 1 ? "Like" : "Likes"}</span>
-                    </div>
-                    <div>
-                      <MapPin size={15} />
-                      <strong>RP WORLD</strong>
-                      <span>Location</span>
-                    </div>
-                  </div>
                 </div>
 
                 <div className="profile-section">
