@@ -2592,3 +2592,21 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
   }
   .message-form textarea { font-size: 16px; }
 }
+
+
+/* Home page accent */
+.home-page-heading {
+  position: relative;
+  padding-top: 10px;
+}
+.home-page-heading::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 54px;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--accent);
+  box-shadow: 0 0 16px color-mix(in srgb, var(--accent) 42%, transparent);
+}
