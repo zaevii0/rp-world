@@ -1720,11 +1720,6 @@ export function App() {
   }
 
 
-    setHighlightEditTitle(highlight.title);
-    setHighlightEditFile(null);
-    setHighlightEditOpen(true);
-  }
-
   async function updateHighlight(event: FormEvent) {
     event.preventDefault();
     if (!supabase || !session?.user || !activeHighlight) return;
