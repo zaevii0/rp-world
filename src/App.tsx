@@ -27,6 +27,7 @@ import {
   Pencil,
   Plus,
   Search,
+  Send,
   Sparkles,
   Sun,
   User,
@@ -3509,7 +3510,7 @@ export function App() {
             aria-label="Messages"
             onClick={() => void openMessageInbox()}
           >
-            <MessageCircle size={22} strokeWidth={1.9} />
+            <Send size={22} strokeWidth={1.9} />
           </button>
 
           <button
