@@ -4323,3 +4323,116 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
   background: color-mix(in srgb, var(--accent) 14%, transparent) !important;
   border-color: color-mix(in srgb, var(--accent) 28%, transparent) !important;
 }
+
+
+/* Long-press screenshot editor */
+.screenshot-editor {
+  position:fixed;
+  inset:0;
+  z-index:120;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:18px;
+  background:rgba(0,0,0,.5);
+  backdrop-filter:blur(18px);
+  -webkit-backdrop-filter:blur(18px);
+}
+.screenshot-editor-card {
+  width:min(100%,760px);
+  max-height:calc(100dvh - 36px);
+  overflow:auto;
+  padding:20px;
+  border-radius:30px;
+}
+.screenshot-preview {
+  width:100%;
+  max-height:58dvh;
+  margin:18px 0 14px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+  border-radius:20px;
+  background:#050505;
+  border:1px solid rgba(255,255,255,.1);
+}
+.screenshot-draw-canvas {
+  display:block;
+  width:100%;
+  height:auto;
+  max-height:58dvh;
+  object-fit:contain;
+  touch-action:none;
+  cursor:default;
+}
+.screenshot-edit-tools {
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  padding:10px;
+  margin-bottom:8px;
+  border-radius:18px;
+  background:rgba(127,127,127,.08);
+}
+.screenshot-tool {
+  min-height:38px;
+  padding:0 13px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  border:1px solid rgba(127,127,127,.16);
+  border-radius:12px;
+  color:inherit;
+  background:transparent;
+  cursor:pointer;
+  font-size:12px;
+  font-weight:650;
+}
+.screenshot-tool.active {
+  color:#fff;
+  border-color:var(--accent);
+  background:var(--accent);
+}
+.screenshot-actions {
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:8px;
+}
+.screenshot-actions .mode-switch {
+  width:auto;
+  min-height:42px;
+  margin-top:0;
+  padding:0 13px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+}
+.screenshot-discard {
+  color:#ef7b7b !important;
+}
+@media (max-width:560px) {
+  .screenshot-editor {
+    padding:10px;
+  }
+  .screenshot-editor-card {
+    max-height:calc(100dvh - 20px);
+    padding:16px;
+    border-radius:26px;
+  }
+  .screenshot-preview,
+  .screenshot-draw-canvas {
+    max-height:52dvh;
+  }
+  .screenshot-actions {
+    display:grid;
+    grid-template-columns:1fr 1fr;
+  }
+  .screenshot-actions .primary-button {
+    grid-column:1 / -1;
+    margin-top:0;
+  }
+}
