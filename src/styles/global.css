@@ -2460,3 +2460,53 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
 .post-tagged-name:active {
   opacity: .7;
 }
+
+
+/* Suggestion confirmation popup */
+.suggestion-success-popup {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(0, 0, 0, .42);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.suggestion-success-popup-card {
+  width: min(420px, 100%);
+  padding: 26px;
+  border: 1px solid rgba(255, 255, 255, .12);
+  border-radius: 24px;
+  text-align: center;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, .32);
+}
+
+.suggestion-success-popup-icon {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 14px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.suggestion-success-popup-card h3 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.suggestion-success-popup-card p {
+  margin: 8px 0 0;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  font-size: 13px;
+}
+
+.suggestion-success-popup-card .primary-button {
+  margin-top: 20px;
+}
