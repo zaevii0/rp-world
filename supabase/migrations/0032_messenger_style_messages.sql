@@ -101,3 +101,42 @@ before update on public.messages
 for each row execute function public.set_message_updated_at();
 
 notify pgrst, 'reload schema';
+
+
+insert into storage.buckets (id, name, public)
+values ('message-media', 'message-media', false)
+on conflict (id) do nothing;
+
+drop policy if exists "Conversation members can read message media" on storage.objects;
+create policy "Conversation members can read message media"
+on storage.objects for select to authenticated
+using (
+  bucket_id = 'message-media'
+  and exists (
+    select 1
+    from public.conversations c
+    where c.id::text = split_part(name, '/', 2)
+      and (auth.uid() = c.user_low or auth.uid() = c.user_high)
+  )
+);
+
+drop policy if exists "Users can upload message media" on storage.objects;
+create policy "Users can upload message media"
+on storage.objects for insert to authenticated
+with check (
+  bucket_id = 'message-media'
+  and auth.uid()::text = split_part(name, '/', 1)
+  and exists (
+    select 1
+    from public.conversations c
+    where c.id::text = split_part(name, '/', 2)
+      and (auth.uid() = c.user_low or auth.uid() = c.user_high)
+  )
+);
+
+drop policy if exists "Users can delete their message media" on storage.objects;
+create policy "Users can delete their message media"
+on storage.objects for delete to authenticated
+using (bucket_id = 'message-media' and owner_id = auth.uid()::text);
+
+notify pgrst, 'reload schema';
