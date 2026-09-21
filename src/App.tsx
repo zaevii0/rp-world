@@ -1721,24 +1721,40 @@ export function App() {
     setPostBusy(true);
     setFeedError("");
 
+    let createdPostId: string | null = null;
     let uploadedMediaPath: string | null = null;
 
     try {
       const postId = crypto.randomUUID();
-      const mediaUrl = postMediaFile ? await uploadPostMedia(postMediaFile, postId) : null;
-      uploadedMediaPath = mediaUrl;
-      const mediaType = postMediaFile?.type || null;
+      createdPostId = postId;
 
-      const { error: saveError } = await supabase.from("posts").insert({
+      // Create the post first so Storage RLS can verify that the uploader
+      // owns the post represented by the second path segment.
+      const { error: createError } = await supabase.from("posts").insert({
         id: postId,
         author_id: session.user.id,
         content: postText.trim(),
-        media_url: mediaUrl,
-        media_type: mediaType,
+        media_url: null,
+        media_type: null,
         privacy: postPrivacy,
       });
 
-      if (saveError) throw saveError;
+      if (createError) throw createError;
+
+      if (postMediaFile) {
+        uploadedMediaPath = await uploadPostMedia(postMediaFile, postId);
+
+        const { error: mediaLinkError } = await supabase
+          .from("posts")
+          .update({
+            media_url: uploadedMediaPath,
+            media_type: postMediaFile.type,
+          })
+          .eq("id", postId)
+          .eq("author_id", session.user.id);
+
+        if (mediaLinkError) throw mediaLinkError;
+      }
 
       setPostText("");
       setPostMediaFile(null);
@@ -1747,9 +1763,21 @@ export function App() {
       await loadFeed();
       if (view === "profile") await loadProfilePosts();
     } catch (saveError) {
-      if (uploadedMediaPath && supabase) {
-        await supabase.storage.from("post-media").remove([uploadedMediaPath]).catch(() => undefined);
+      if (uploadedMediaPath) {
+        await supabase.storage
+          .from("post-media")
+          .remove([uploadedMediaPath])
+          .catch(() => undefined);
       }
+      if (createdPostId) {
+        await supabase
+          .from("posts")
+          .delete()
+          .eq("id", createdPostId)
+          .eq("author_id", session.user.id)
+          .catch(() => undefined);
+      }
+
       setFeedError(
         saveError instanceof Error
           ? saveError.message
