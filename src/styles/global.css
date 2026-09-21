@@ -4253,3 +4253,24 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
   width: 17px;
   height: 17px;
 }
+
+
+/* Discover branch icons — keep theme-colored icons visible on every surface. */
+.discover-category-card .discover-category-icon {
+  color: var(--accent) !important;
+  background: color-mix(in srgb, var(--accent) 10%, transparent) !important;
+  border-color: color-mix(in srgb, var(--accent) 18%, transparent) !important;
+}
+
+.discover-category-card .discover-category-icon svg {
+  color: var(--accent) !important;
+  stroke: currentColor;
+  opacity: 1;
+  visibility: visible;
+}
+
+.discover-category-card:hover .discover-category-icon {
+  color: var(--accent) !important;
+  background: color-mix(in srgb, var(--accent) 14%, transparent) !important;
+  border-color: color-mix(in srgb, var(--accent) 28%, transparent) !important;
+}
