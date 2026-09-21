@@ -4360,10 +4360,7 @@ export function App() {
                 : "nav-item"
             }
             type="button"
-            onPointerDown={startScreenshotLongPress}
-            onPointerUp={() => finishScreenshotPress(() => setView("discover"))}
-            onPointerCancel={cancelScreenshotLongPress}
-            onContextMenu={(event) => event.preventDefault()}
+            onPointerUp={() => setView("discover")}
           >
             <LayoutGrid size={19} />
             <span>Discover</span>
@@ -4388,10 +4385,7 @@ export function App() {
                 : "nav-item"
             }
             type="button"
-            onPointerDown={startScreenshotLongPress}
-            onPointerUp={() => finishScreenshotPress(() => setView("profile"))}
-            onPointerCancel={cancelScreenshotLongPress}
-            onContextMenu={(event) => event.preventDefault()}
+            onPointerUp={() => setView("profile")}
           >
             <User size={19} />
             <span>Profile</span>
@@ -4404,10 +4398,7 @@ export function App() {
                 : "nav-item"
             }
             type="button"
-            onPointerDown={startScreenshotLongPress}
-            onPointerUp={() => finishScreenshotPress(openMenu)}
-            onPointerCancel={cancelScreenshotLongPress}
-            onContextMenu={(event) => event.preventDefault()}
+            onPointerUp={openMenu}
           >
             <Menu size={19} />
             <span>Menu</span>
