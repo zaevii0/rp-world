@@ -1591,6 +1591,13 @@ export function App() {
     setDiscoverProfiles((data ?? []) as Profile[]);
   }
 
+  function formatMessageTime(value: string) {
+    return new Intl.DateTimeFormat(undefined, {
+      hour: "numeric",
+      minute: "2-digit",
+    }).format(new Date(value));
+  }
+
   function formatMessageDateTime(value: string) {
     return new Intl.DateTimeFormat("en-US", {
       month: "long",
@@ -4323,7 +4330,7 @@ export function App() {
                             aria-expanded={expanded}
                             title="Show exact date and time"
                           >
-                            {expanded ? formatMessageDateTime(item.created_at) : timeAgo(item.created_at)}
+                            {expanded ? formatMessageDateTime(item.created_at) : formatMessageTime(item.created_at)}
                           </button>
                           {item.sender_id === session?.user.id && <CheckCheck size={12} aria-label="Sent" />}
                         </div>
