@@ -50,7 +50,6 @@ import {
   User,
   UserPlus,
   X,
-  RefreshCw,
   CheckCheck,
   Settings,
   Mic,
@@ -323,7 +322,6 @@ export function App() {
   const [shareTarget, setShareTarget] = useState<Post | null>(null);
   const [shareCaption, setShareCaption] = useState("");
   const [shareBusy, setShareBusy] = useState(false);
-  const [savedPostIds, setSavedPostIds] = useState<Set<string>>(new Set());
   const [postActionTarget, setPostActionTarget] = useState<Post | null>(null);
   const [tagPostTarget, setTagPostTarget] = useState<Post | null>(null);
   const [tagProfiles, setTagProfiles] = useState<Profile[]>([]);
@@ -777,13 +775,15 @@ export function App() {
     };
   }, [session]);
 
+  // Feed loading only depends on authentication. Do not wait for the profile
+  // query: both can load in parallel so the feed can reach first paint sooner.
   useEffect(() => {
-    if (session?.user && profile) {
+    if (session?.user) {
       void loadFeed();
     } else {
       setPosts([]);
     }
-  }, [session, profile]);
+  }, [session]);
 
   useEffect(() => {
     if (!tagPostTarget || !session?.user || !supabase) {
@@ -817,6 +817,7 @@ export function App() {
       void loadProfilePosts();
       void loadProfileReposts();
       void loadHighlights();
+      void loadProfileStats(session.user.id);
     }
   }, [view, session, profile]);
 
@@ -885,12 +886,6 @@ export function App() {
       void supabase.removeChannel(messageChannel);
     };
   }, [session, activeConversation]);
-
-  useEffect(() => {
-    if (session?.user && profile) {
-      void loadProfileStats(session.user.id);
-    }
-  }, [session, profile]);
 
   async function loadPostTags(postIds: string[]) {
     if (!supabase || !postIds.length) return new Map<string, Profile[]>();
