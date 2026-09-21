@@ -4920,3 +4920,116 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
   padding: 18px;
   border-radius: 24px;
 }
+
+
+/* Responsive viewport foundation: keep every page flush with the available screen. */
+html {
+  width: 100%;
+  min-width: 320px;
+  min-height: 100%;
+  background: #050505;
+  overflow-x: hidden;
+}
+
+body {
+  width: 100%;
+  min-width: 320px;
+  min-height: 100vh;
+  min-height: 100dvh;
+  margin: 0;
+  overflow-x: hidden;
+  background: #050505;
+}
+
+#root {
+  width: 100%;
+  min-width: 320px;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+.app {
+  width: 100%;
+  min-width: 320px;
+  min-height: 100vh;
+  min-height: 100dvh;
+  height: auto;
+  margin: 0;
+  padding-top: max(12px, env(safe-area-inset-top));
+  padding-right: max(12px, env(safe-area-inset-right));
+  padding-bottom: max(24px, env(safe-area-inset-bottom));
+  padding-left: max(12px, env(safe-area-inset-left));
+  overflow-x: clip;
+}
+
+.app.dark {
+  background: radial-gradient(circle at 50% -10%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 36rem), #050505;
+  background-attachment: fixed;
+}
+
+.app.light {
+  background: radial-gradient(circle at 50% -10%, color-mix(in srgb, var(--accent) 10%, transparent), transparent 36rem), #f4f4f7;
+  background-attachment: fixed;
+}
+
+.social-shell {
+  width: min(100%, 720px);
+  min-width: 0;
+  margin: clamp(18px, 3vh, 28px) auto max(110px, calc(96px + env(safe-area-inset-bottom)));
+}
+
+.topbar {
+  width: min(100%, 760px);
+  min-width: 0;
+  margin: 0 auto;
+}
+
+.page-heading,
+.post-card,
+.composer,
+.empty-state,
+.discover-shell,
+.profile-card,
+.message-sheet,
+.message-chat {
+  max-width: 100%;
+  min-width: 0;
+}
+
+img,
+video,
+canvas,
+svg {
+  max-width: 100%;
+}
+
+@media (max-width: 720px) {
+  .app {
+    padding-right: max(10px, env(safe-area-inset-right));
+    padding-left: max(10px, env(safe-area-inset-left));
+  }
+
+  .social-shell {
+    margin-top: 16px;
+  }
+}
+
+@media (min-width: 721px) and (max-height: 800px) {
+  .social-shell {
+    margin-top: 16px;
+  }
+}
+
+@media (max-height: 680px) {
+  .hero {
+    margin-top: clamp(32px, 7vh, 72px);
+  }
+}
+
+@supports not (height: 100dvh) {
+  body,
+  #root,
+  .app {
+    min-height: 100vh;
+  }
+}
