@@ -50,6 +50,7 @@ import { supabase, supabaseConfigured } from "./lib/supabase";
 import { themes, type Appearance, type ThemeId } from "./types/theme";
 import type { Profile } from "./types/profile";
 import { SuggestionsPage } from "./components/SuggestionsPage";
+import { Stories } from "./components/Stories";
 import { AdminPanelPage } from "./components/AdminPanelPage";
 
 function RPWorldMark() {
@@ -997,8 +998,7 @@ export function App() {
       return "Please choose an image or video file.";
     }
     const maxBytes = file.type.startsWith("video/")
-      ? 50 * 1024 * 1024
-      : 10 * 1024 * 1024;
+      ? 50 * 1024 * 1024      : 10 * 1024 * 1024;
     if (file.size > maxBytes) {
       return file.type.startsWith("video/")
         ? "Videos must be 50 MB or smaller."
@@ -1998,7 +1998,6 @@ export function App() {
       if (!data) {
         throw new Error("Could not save highlight: no record was returned.");
       }
-
       setHighlights((current) => [
         ...current,
         data as Highlight,
@@ -2997,8 +2996,7 @@ export function App() {
             </button>
           )}
 
-          <div className="status glass">
-            <span className="status-dot" />
+          <div className="status glass">            <span className="status-dot" />
 
             {supabaseConfigured
               ? session
@@ -3064,7 +3062,9 @@ export function App() {
             {view === "home" && (
               <>
                 <button
-                  className="composer glass"
+                  <Stories session={session} profile={profile} />
+
+                                className="composer glass"
                   type="button"
                   onClick={() =>
                     setComposerOpen(true)
@@ -3997,8 +3997,7 @@ export function App() {
                             )}
                           </div>
                         </div>
-                        {renderExpandablePostContent(post.content, post.id)}
-                        {renderPostMedia(post.media_url, post.media_type)}
+                        {renderExpandablePostContent(post.content, post.id)}                        {renderPostMedia(post.media_url, post.media_type)}
                         {post.pinned_at && <div className="post-status-label"><Pin size={12} /> Pinned</div>}
                         {post.tagged_profiles?.length ? (
                           <div className="post-tag-label"><Tag size={12} /> {post.tagged_profiles.map((item) => `@${item.username}`).join(", ")}</div>
@@ -4997,8 +4996,7 @@ export function App() {
             className="post-media-viewer-card"
             role="dialog"
             aria-modal="true"
-            aria-label={activePostMedia.type === "video" ? "Video viewer" : "Image viewer"}
-            onClick={(event) => event.stopPropagation()}
+            aria-label={activePostMedia.type === "video" ? "Video viewer" : "Image viewer"}            onClick={(event) => event.stopPropagation()}
           >
             <button
               className="post-media-viewer-close"
