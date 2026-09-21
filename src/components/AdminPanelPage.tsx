@@ -1,4 +1,4 @@
-import { Check, Clock3, Filter, RefreshCw, X } from "lucide-react";
+import { Check, Clock3, Filter, RefreshCw } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "../lib/supabase";
 import type { Profile } from "../types/profile";
