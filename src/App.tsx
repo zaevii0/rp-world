@@ -4365,7 +4365,7 @@ export function App() {
             onPointerDown={startScreenshotLongPress}
             onPointerUp={() => finishScreenshotPress(() => setView("discover"))}
             onPointerCancel={cancelScreenshotLongPress}
-            onPointerLeave={cancelScreenshotLongPress}
+            onContextMenu={(event) => event.preventDefault()}
           >
             <LayoutGrid size={19} />
             <span>Discover</span>
@@ -4378,7 +4378,7 @@ export function App() {
             onPointerDown={startScreenshotLongPress}
             onPointerUp={() => finishScreenshotPress(() => void openMessageInbox())}
             onPointerCancel={cancelScreenshotLongPress}
-            onPointerLeave={cancelScreenshotLongPress}
+            onContextMenu={(event) => event.preventDefault()}
           >
             <Send size={22} strokeWidth={1.9} />
           </button>
@@ -4393,7 +4393,7 @@ export function App() {
             onPointerDown={startScreenshotLongPress}
             onPointerUp={() => finishScreenshotPress(() => setView("profile"))}
             onPointerCancel={cancelScreenshotLongPress}
-            onPointerLeave={cancelScreenshotLongPress}
+            onContextMenu={(event) => event.preventDefault()}
           >
             <User size={19} />
             <span>Profile</span>
@@ -4409,7 +4409,7 @@ export function App() {
             onPointerDown={startScreenshotLongPress}
             onPointerUp={() => finishScreenshotPress(openMenu)}
             onPointerCancel={cancelScreenshotLongPress}
-            onPointerLeave={cancelScreenshotLongPress}
+            onContextMenu={(event) => event.preventDefault()}
           >
             <Menu size={19} />
             <span>Menu</span>
