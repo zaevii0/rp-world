@@ -19,7 +19,6 @@ import {
   MessageCircle,
   Share2,
   Repeat2,
-  Bookmark,
   MoreVertical,
   Pin,
   Tag,
@@ -2307,15 +2306,6 @@ export function App() {
       else next.add(userId);
       return next;
     });
-  }
-
-  function toggleSavedPost(post: Post) {
-    setSavedPostIds((current) => {
-      const next = new Set(current);
-      if (next.has(post.id)) next.delete(post.id); else next.add(post.id);
-      return next;
-    });
-    setMessage(savedPostIds.has(post.id) ? "Removed from saved." : "Post saved.");
   }
 
   async function sharePostExternally(post: Post) {
