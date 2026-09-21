@@ -38,7 +38,7 @@ import {
   RefreshCw,
   CheckCheck,
 } from "lucide-react";
-import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent, type ReactNode } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { ThemePicker } from "./components/ThemePicker";
 import { supabase, supabaseConfigured } from "./lib/supabase";
@@ -1673,7 +1673,7 @@ export function App() {
     setHighlightEditOpen(true);
   }
 
-  async function addHighlightMedia(event: React.ChangeEvent<HTMLInputElement>) {
+  async function addHighlightMedia(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0] ?? null;
     event.target.value = "";
     if (!supabase || !session?.user || !activeHighlight || !file || highlightEditBusy) return;
