@@ -4437,3 +4437,150 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
     margin-top:0;
   }
 }
+
+/* Followers sheet — iOS-style follower management */
+.followers-sheet {
+  width: min(100%, 560px);
+  max-height: min(760px, calc(100dvh - 32px));
+  overflow: hidden;
+  padding: 20px;
+  border-radius: 30px;
+}
+.followers-list {
+  display: grid;
+  gap: 7px;
+  margin-top: 14px;
+  max-height: calc(100dvh - 180px);
+  overflow-y: auto;
+  padding: 2px;
+}
+.follower-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding: 9px;
+  border: 1px solid color-mix(in srgb, var(--text-primary) 8%, transparent);
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--text-primary) 4%, transparent);
+}
+.follower-identity {
+  min-width: 0;
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0;
+  border: 0;
+  color: inherit;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+.follower-avatar {
+  width: 44px;
+  height: 44px;
+  font-size: 12px;
+}
+.follower-identity > span {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+.follower-identity strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+}
+.follower-identity small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 10px;
+  opacity: .48;
+}
+.follower-identity em {
+  font-style: normal;
+  font-size: 9px;
+  opacity: .45;
+}
+.follower-actions {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.follower-action {
+  min-height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 0 9px;
+  border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent);
+  border-radius: 999px;
+  color: var(--accent);
+  background: var(--accent-soft);
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.follower-action.following {
+  color: var(--text-primary);
+  border-color: color-mix(in srgb, var(--text-primary) 12%, transparent);
+  background: color-mix(in srgb, var(--text-primary) 6%, transparent);
+  opacity: .62;
+}
+.follower-action:disabled { cursor: default; }
+.follower-action.follower-hide {
+  color: var(--text-primary);
+  border-color: color-mix(in srgb, var(--text-primary) 10%, transparent);
+  background: transparent;
+  opacity: .48;
+}
+.follower-action:hover:not(:disabled) {
+  filter: brightness(1.06);
+  transform: translateY(-1px);
+}
+.followers-loading,
+.followers-empty {
+  min-height: 180px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 7px;
+  margin-top: 14px;
+  border-radius: 20px;
+  background: color-mix(in srgb, var(--text-primary) 4%, transparent);
+  text-align: center;
+}
+.followers-empty svg { color: var(--accent); }
+.followers-empty strong { font-size: 14px; }
+.followers-empty span { max-width: 280px; font-size: 11px; opacity: .48; }
+.profile-meta-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 9px;
+  border: 0;
+  border-radius: 999px;
+  color: inherit;
+  background: rgba(127,127,127,.07);
+  cursor: pointer;
+  font-size: 10px;
+  opacity: .62;
+}
+.profile-meta-button:hover {
+  color: var(--accent);
+  opacity: 1;
+  background: var(--accent-soft);
+}
+.profile-meta-button svg { color: var(--accent); }
+@media (max-width:560px) {
+  .followers-sheet { padding: 17px; border-radius: 26px; }
+  .follower-row { align-items: flex-start; }
+  .follower-actions { flex-direction: column; align-items: stretch; }
+  .follower-action { min-height: 30px; padding-inline: 8px; }
+}
