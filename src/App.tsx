@@ -33,7 +33,6 @@ import {
   Mail,
   MapPin,
   Menu,
-  MessageCircle,
   Share2,
   Repeat2,
   MoreVertical,
