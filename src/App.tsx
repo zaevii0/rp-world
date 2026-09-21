@@ -3535,7 +3535,6 @@ export function App() {
                         <span><User size={13} />{profileStats.followers} {profileStats.followers === 1 ? "follower" : "followers"}</span>
                         <span><Heart size={13} />{profileStats.likes} {profileStats.likes === 1 ? "like" : "likes"}</span>
                         <span><MapPin size={13} />RP WORLD</span>
-                        {publicProfileFriend && <span><User size={13} />Friends</span>}
                       </div>
                     </div>
                   </div>
