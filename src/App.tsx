@@ -872,10 +872,10 @@ export function App() {
       .from("post-media")
       .createSignedUrls(paths, 3600);
 
-    if (error || !data?.signedUrls) return;
+    if (error || !data) return;
 
     const nextUrls: Record<string, string> = {};
-    data.signedUrls.forEach((item) => {
+    data.forEach((item: { path: string; signedUrl: string }) => {
       if (item.signedUrl) {
         nextUrls[item.path] = item.signedUrl;
       }
@@ -1764,18 +1764,24 @@ export function App() {
       if (view === "profile") await loadProfilePosts();
     } catch (saveError) {
       if (uploadedMediaPath) {
-        await supabase.storage
-          .from("post-media")
-          .remove([uploadedMediaPath])
-          .catch(() => undefined);
+        try {
+          await supabase.storage
+            .from("post-media")
+            .remove([uploadedMediaPath]);
+        } catch {
+          // Best-effort cleanup only; preserve the original publish error.
+        }
       }
       if (createdPostId) {
-        await supabase
-          .from("posts")
-          .delete()
-          .eq("id", createdPostId)
-          .eq("author_id", session.user.id)
-          .catch(() => undefined);
+        try {
+          await supabase
+            .from("posts")
+            .delete()
+            .eq("id", createdPostId)
+            .eq("author_id", session.user.id);
+        } catch {
+          // Best-effort cleanup only; preserve the original publish error.
+        }
       }
 
       setFeedError(
@@ -1852,7 +1858,7 @@ export function App() {
         throw new Error(updateError?.message || "We could not update that post.");
       }
 
-      const updatePost = (items: Post[]) =>
+      const updatePost = (items: Post[]): Post[] =>
         items.map((item) =>
           item.id === editPostTarget.id
             ? {
@@ -1875,7 +1881,11 @@ export function App() {
       setMessage("Post updated.");
     } catch (updateError) {
       if (uploadedEditMediaPath && supabase) {
-        await supabase.storage.from("post-media").remove([uploadedEditMediaPath]).catch(() => undefined);
+        try {
+          await supabase.storage.from("post-media").remove([uploadedEditMediaPath]);
+        } catch {
+          // Best-effort cleanup only; preserve the original edit error.
+        }
       }
       setFeedError(
         updateError instanceof Error
