@@ -2344,11 +2344,11 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
   max-width: min(76%, 430px);
   min-width: 0;
   padding: 7px 12px 6px;
-  border: 0;
+  border: 1px solid color-mix(in srgb, var(--accent) 14%, var(--text-primary, #fff) 6%, transparent);
   border-radius: 19px 19px 19px 5px;
-  background: #e9e9eb;
-  color: #111114;
-  box-shadow: none;
+  background: color-mix(in srgb, var(--accent) 10%, var(--surface-strong, #18181b) 90%);
+  color: var(--text-primary, #f5f5f7);
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--text-primary, #fff) 4%, transparent);
   line-height: 1.38;
   overflow-wrap: anywhere;
 }
@@ -2394,12 +2394,12 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
 }
 
 .app.dark .message-bubble:not(.mine) {
-  background: #3a3a3c;
+  background: color-mix(in srgb, var(--accent) 12%, #18181b 88%);
   color: #f5f5f7;
 }
 .app.light .message-bubble:not(.mine) {
-  background: #e9e9eb;
-  color: #111114;
+  background: color-mix(in srgb, var(--accent) 8%, #f0f0f3 92%);
+  color: #17171a;
 }
 
 .message-chat-header {
