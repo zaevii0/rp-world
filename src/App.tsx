@@ -5,6 +5,9 @@ import {
   Clock,
   Eye,
   EyeOff,
+  Globe2,
+  LockKeyhole,
+  Users,
   Heart,
   Home,
   Image,
@@ -93,6 +96,7 @@ type Post = {
   trashed_at?: string | null;
   tagged_profiles?: Profile[];
   shared_post_id?: string | null;
+  privacy?: "public" | "friends" | "only_me";
   share_caption?: string | null;
   shared_original?: {
     content: string;
@@ -100,6 +104,7 @@ type Post = {
     media_type?: string | null;
     created_at: string;
     profile?: Profile;
+    privacy?: "public" | "friends" | "only_me";
   } | null;
 };
 
@@ -258,6 +263,8 @@ export function App() {
   const [coverFile, setCoverFile] = useState<File | null>(null);
 
   const [postText, setPostText] = useState("");
+  const [postPrivacy, setPostPrivacy] = useState<"public" | "friends" | "only_me">("public");
+  const [sharePrivacy, setSharePrivacy] = useState<"public" | "friends" | "only_me">("public");
   const [postMediaFile, setPostMediaFile] = useState<File | null>(null);
   const [expandedPosts, setExpandedPosts] = useState<Record<string, boolean>>({});
   const [editPostMediaFile, setEditPostMediaFile] = useState<File | null>(null);
@@ -283,6 +290,7 @@ export function App() {
   const [tagSearch, setTagSearch] = useState("");
   const [tagBusy, setTagBusy] = useState(false);
   const [postActionBusy, setPostActionBusy] = useState(false);
+  const [privacyBusy, setPrivacyBusy] = useState(false);
 
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -727,6 +735,7 @@ export function App() {
         shares: shareCounts.get(row.id) ?? 0,
         pinned_at: row.pinned_at ?? null,
         archived_at: row.archived_at ?? null,
+      privacy: row.privacy ?? "public",
         trashed_at: row.trashed_at ?? null,
         tagged_profiles: tagMap.get(row.id) ?? [],
         shared_post_id: row.shared_post_id ?? null,
@@ -1335,6 +1344,7 @@ export function App() {
       pinned_at: row.pinned_at ?? null,
       archived_at: row.archived_at ?? null,
       trashed_at: row.trashed_at ?? null,
+      privacy: row.privacy ?? "public",
       tagged_profiles: tagMap.get(row.id) ?? [],
       reposted: false,
     })));
@@ -1671,12 +1681,14 @@ export function App() {
         content: postText.trim(),
         media_url: mediaUrl,
         media_type: mediaType,
+        privacy: postPrivacy,
       });
 
       if (saveError) throw saveError;
 
       setPostText("");
       setPostMediaFile(null);
+      setPostPrivacy("public");
       setComposerOpen(false);
       await loadFeed();
       if (view === "profile") await loadProfilePosts();
@@ -2121,6 +2133,7 @@ export function App() {
         media_type: shareTarget.media_type ?? null,
         shared_post_id: shareTarget.shared_post_id ?? shareTarget.id,
         share_caption: caption || null,
+        privacy: sharePrivacy,
       })
       .select("id, author_id, content, media_url, media_type, created_at, shared_post_id, share_caption")
       .single();
@@ -2136,11 +2149,34 @@ export function App() {
       id: data.id, author_id: data.author_id, content: data.content, media_url: data.media_url,
       created_at: data.created_at, profile: profile ?? undefined, likes: 0, liked: false,
       liked_at: null, comments: 0, reposts: 0, shares: (shareTarget.shares ?? 0) + 1, reposted: false, shared_post_id: data.shared_post_id,
-      share_caption: data.share_caption, shared_original: sharedOriginal,
+      share_caption: data.share_caption, privacy: data.privacy ?? sharePrivacy, shared_original: sharedOriginal,
     };
     setPosts((current) => [sharedPost, ...current]);
-    setShareOpen(false); setShareTarget(null); setShareCaption("");
+    setShareOpen(false); setShareTarget(null); setShareCaption(""); setSharePrivacy("public");
     setMessage("Post shared to your feed.");
+  }
+
+  async function updatePostPrivacy(post: Post, privacy: "public" | "friends" | "only_me") {
+    if (!supabase || !session?.user || post.author_id !== session.user.id || post.shared_post_id) return;
+    setPrivacyBusy(true);
+    const { data, error } = await supabase
+      .from("posts")
+      .update({ privacy })
+      .eq("id", post.id)
+      .eq("author_id", session.user.id)
+      .select("id, privacy")
+      .single();
+    setPrivacyBusy(false);
+    if (error || !data) {
+      setMessage(error?.message || "Could not update post privacy.");
+      return;
+    }
+    const patch = (item: Post): Post => item.id === post.id ? { ...item, privacy: data.privacy } : item;
+    setPosts((items) => items.map(patch));
+    setProfilePosts((items) => items.map(patch));
+    setPublicProfilePosts((items) => items.map(patch));
+    setPostActionTarget(null);
+    setMessage("Post privacy updated.");
   }
 
   async function managePostAction(action: "pin" | "archive" | "trash" | "copy") {
@@ -3806,7 +3842,7 @@ export function App() {
       )}
 
       {shareOpen && shareTarget && session && profile && (
-        <div className="sheet-backdrop" role="presentation" onClick={() => setShareOpen(false)}>
+        <div className="sheet-backdrop" role="presentation" onClick={() => { setShareOpen(false); setSharePrivacy("public"); }}>
           <section className="auth-sheet glass share-sheet" role="dialog" aria-modal="true" aria-labelledby="share-title" onClick={(event) => event.stopPropagation()}>
             <div className="sheet-header"><div><p className="eyebrow">SHARE</p><h2 id="share-title">Share this post.</h2></div><button className="icon-button" type="button" aria-label="Close" onClick={() => setShareOpen(false)}><X size={18} /></button></div>
             <div className="share-preview">
@@ -3817,6 +3853,14 @@ export function App() {
               <p>{shareTarget.shared_original?.content ?? shareTarget.content}</p>
               {renderPostMedia(shareTarget.shared_original?.media_url ?? shareTarget.media_url, shareTarget.shared_original?.media_type ?? shareTarget.media_type)}
             </div>
+            <label className="post-privacy-picker">
+              <span><Globe2 size={15} /> Who can see your shared post?</span>
+              <select value={sharePrivacy} onChange={(event) => setSharePrivacy(event.target.value as "public" | "friends" | "only_me")}>
+                <option value="public">Public</option>
+                <option value="friends">Friends</option>
+                <option value="only_me">Only me</option>
+              </select>
+            </label>
             <label className="share-caption-field">
               <span>Add a caption <small>optional</small></span>
               <div className="input-wrap textarea-wrap"><textarea value={shareCaption} onChange={(event) => setShareCaption(event.target.value)} placeholder="Say something about this post…" maxLength={2000} rows={4} /></div>
@@ -3904,6 +3948,12 @@ export function App() {
                 <Tag size={18} /><span>Tag</span>
               </button>
               <button type="button" onClick={() => { const target = postActionTarget; setPostActionTarget(null); openEditPost(target); }}>
+                <Pencil size={18} /><span>Edit post</span>
+              </button>
+              <button type="button" onClick={() => void updatePostPrivacy(postActionTarget, postActionTarget.privacy === "public" ? "friends" : postActionTarget.privacy === "friends" ? "only_me" : "public")} disabled={privacyBusy}>
+                {postActionTarget.privacy === "public" ? <Globe2 size={18} /> : postActionTarget.privacy === "friends" ? <Users size={18} /> : <LockKeyhole size={18} />}
+                <span>{privacyBusy ? "Saving…" : `Privacy · ${postActionTarget.privacy === "public" ? "Public" : postActionTarget.privacy === "friends" ? "Friends" : "Only me"}`}</span>
+              </button>
                 <Pencil size={18} /><span>Edit post</span>
               </button>
               <button type="button" onClick={() => void managePostAction("archive")} disabled={postActionBusy}>
@@ -4029,6 +4079,15 @@ export function App() {
                     setPostMediaFile(file);
                   }}
                 />
+              </label>
+
+              <label className="post-privacy-picker">
+                <span><Globe2 size={15} /> Who can see this?</span>
+                <select value={postPrivacy} onChange={(event) => setPostPrivacy(event.target.value as "public" | "friends" | "only_me")}>
+                  <option value="public">Public</option>
+                  <option value="friends">Friends</option>
+                  <option value="only_me">Only me</option>
+                </select>
               </label>
 
               {postMediaFile && (
