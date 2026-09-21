@@ -19,7 +19,7 @@ using (
   and (
     -- Storage returns metadata after upload. Allow the uploader to read
     -- their own object while it is being linked to a post.
-    owner_id = (select auth.uid())::text
+    owner_id = (select auth.uid())
     or
     -- New media: the second path segment is the owning post id.
     exists (
