@@ -145,9 +145,15 @@ type Comment = {
   parent_id: string | null;
   media_url: string | null;
   media_type: string | null;
+  updated_at?: string;
+  edited_at?: string | null;
+  is_deleted?: boolean;
+  is_hidden?: boolean;
+  is_pinned?: boolean;
   profile?: Profile;
   reactionCount: number;
   reactionType: string | null;
+  reactionCounts?: Record<string, number>;
 };
 
 function readTheme(): ThemeId {
@@ -357,6 +363,8 @@ export function App() {
   const [commentMediaFiles, setCommentMediaFiles] = useState<Record<string, File | null>>({});
   const [openTimestamp, setOpenTimestamp] = useState<string | null>(null);
   const [collapsedReplyIds, setCollapsedReplyIds] = useState<Set<string>>(new Set());
+  const [commentMentionQuery, setCommentMentionQuery] = useState<Record<string, string | null>>({});
+  const [commentMentionStart, setCommentMentionStart] = useState<Record<string, number | null>>({});
   const [viewAs, setViewAs] = useState(false);
   const [publicProfile, setPublicProfile] = useState<Profile | null>(null);
   const [publicProfilePosts, setPublicProfilePosts] = useState<Post[]>([]);
@@ -2508,7 +2516,7 @@ export function App() {
     const nestedResult = await supabase
       .from("post_comments")
       .select(
-        "id, post_id, author_id, content, created_at, parent_id, media_url, media_type",
+        "id, post_id, author_id, content, created_at, updated_at, edited_at, parent_id, media_url, media_type, is_deleted, is_hidden, is_pinned",
       )
       .eq("post_id", postId)
       .order("created_at", { ascending: true });
@@ -2554,6 +2562,7 @@ export function App() {
         media_type: row.media_type ?? null,
         reactionCount: 0,
         reactionType: null as string | null,
+        reactionCounts: {},
         profile: undefined as Profile | undefined,
       })),
     }));
@@ -2586,6 +2595,7 @@ export function App() {
     }[];
 
     const reactionCounts = new Map<string, number>();
+    const reactionBreakdown = new Map<string, Record<string, number>>();
     const reactionTypes = new Map<string, string>();
 
     reactionRows.forEach((reaction) => {
@@ -2593,6 +2603,9 @@ export function App() {
         reaction.comment_id,
         (reactionCounts.get(reaction.comment_id) ?? 0) + 1,
       );
+      const breakdown = reactionBreakdown.get(reaction.comment_id) ?? {};
+      breakdown[reaction.reaction_type] = (breakdown[reaction.reaction_type] ?? 0) + 1;
+      reactionBreakdown.set(reaction.comment_id, breakdown);
       if (reaction.user_id === session.user.id) {
         reactionTypes.set(reaction.comment_id, reaction.reaction_type);
       }
@@ -2614,6 +2627,7 @@ export function App() {
         media_type: row.media_type ?? null,
         reactionCount: reactionCounts.get(row.id) ?? 0,
         reactionType: reactionTypes.get(row.id) ?? null,
+        reactionCounts: reactionBreakdown.get(row.id) ?? {},
         profile: profileMap.get(row.author_id),
       })),
     }));
@@ -2757,21 +2771,31 @@ export function App() {
     );
   }
 
-  async function manageComment(postId: string, comment: Comment, action: "edit" | "delete", content = "") {
+  async function manageComment(postId: string, comment: Comment, action: "edit" | "delete" | "pin" | "hide", content = "") {
     if (!supabase || !session?.user || comment.author_id !== session.user.id) return;
     setCommentActionBusy(comment.id);
     try {
       if (action === "edit") {
         const nextContent = content.trim();
         if (!nextContent && !comment.media_url) throw new Error("Comment cannot be empty.");
-        const { error } = await supabase.from("post_comments").update({ content: nextContent }).eq("id", comment.id).eq("author_id", session.user.id);
+        const editedAt = new Date().toISOString();
+        const { error } = await supabase.from("post_comments").update({ content: nextContent, edited_at: editedAt }).eq("id", comment.id).eq("author_id", session.user.id);
         if (error) throw error;
-        setCommentsByPost((current) => ({ ...current, [postId]: (current[postId] ?? []).map((item) => item.id === comment.id ? { ...item, content: nextContent } : item) }));
+        setCommentsByPost((current) => ({ ...current, [postId]: (current[postId] ?? []).map((item) => item.id === comment.id ? { ...item, content: nextContent, edited_at: editedAt, updated_at: editedAt } : item) }));
         setCommentEditId(null);
-      } else {
-        const { error } = await supabase.from("post_comments").delete().eq("id", comment.id).eq("author_id", session.user.id);
+      } else if (action === "delete") {
+        const { error } = await supabase.from("post_comments").update({ is_deleted: true, content: "" }).eq("id", comment.id).eq("author_id", session.user.id);
         if (error) throw error;
-        setCommentsByPost((current) => ({ ...current, [postId]: (current[postId] ?? []).filter((item) => item.id !== comment.id && item.parent_id !== comment.id) }));
+        setCommentsByPost((current) => ({ ...current, [postId]: (current[postId] ?? []).map((item) => item.id === comment.id ? { ...item, is_deleted: true, content: "", media_url: null } : item) }));
+      } else if (action === "pin") {
+        if (comment.parent_id) throw new Error("Only top-level comments can be pinned.");
+        const { error } = await supabase.from("post_comments").update({ is_pinned: !comment.is_pinned }).eq("id", comment.id);
+        if (error) throw error;
+        setCommentsByPost((current) => ({ ...current, [postId]: (current[postId] ?? []).map((item) => item.id === comment.id ? { ...item, is_pinned: !comment.is_pinned } : item) }));
+      } else if (action === "hide") {
+        const { error } = await supabase.from("post_comments").update({ is_hidden: !comment.is_hidden }).eq("id", comment.id);
+        if (error) throw error;
+        setCommentsByPost((current) => ({ ...current, [postId]: (current[postId] ?? []).map((item) => item.id === comment.id ? { ...item, is_hidden: !comment.is_hidden } : item) }));
       }
       setCommentActionTarget(null);
     } catch (error) {
