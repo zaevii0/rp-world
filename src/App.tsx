@@ -4255,10 +4255,10 @@ export function App() {
                     }
                   }}
                 />
+                <button className="message-send-button" type="submit" disabled={!messageDraft.trim()} aria-label="Send message" title="Send message">
+                  <ArrowUp size={18} strokeWidth={2.5} />
+                </button>
               </div>
-              <button className="message-send-button" type="submit" disabled={!messageDraft.trim()} aria-label="Send message" title="Send message">
-                <ArrowUp size={18} strokeWidth={2.5} />
-              </button>
             </form>
           </section>
         </div>
