@@ -1098,12 +1098,51 @@ h1 { margin:3px 0 0; font-size:17px; letter-spacing:-.03em; }
 }
 
 @media (max-width: 680px) {
+  .discover-section {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    padding: 0;
+    overflow-x: hidden;
+  }
+
   .discover-heading {
+    width: 100%;
+    min-width: 0;
     align-items: stretch;
+    gap: 10px;
+  }
+
+  .discover-heading > div:first-child {
+    min-width: 0;
   }
 
   .discover-search-wrap {
+    box-sizing: border-box;
     width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    min-height: 44px;
+    padding-left: 14px;
+    padding-right: 8px;
+  }
+
+  .discover-search-input {
+    width: 100%;
+    min-width: 0;
+    font-size: 16px;
+  }
+
+  .discover-list,
+  .discover-card {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+
+  .discover-card {
+    grid-template-columns: 42px minmax(0, 1fr) auto;
   }
 }
 .discover-list {
