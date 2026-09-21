@@ -3262,14 +3262,6 @@ export function App() {
                           <Sparkles size={13} />
                           {profile.rp_id}
                         </span>
-
-                        <span>
-                          <MapPin size={13} />
-                          RP WORLD
-                        </span>
-                      </div>
-
-                      <div className="profile-meta profile-stats-pills" aria-label="Profile statistics">
                         <span>
                           <User size={13} />
                           {profileStats.followers} {profileStats.followers === 1 ? "follower" : "followers"}
@@ -3279,8 +3271,8 @@ export function App() {
                           {profileStats.likes} {profileStats.likes === 1 ? "like" : "likes"}
                         </span>
                         <span>
-                          <Image size={13} />
-                          {profilePosts.length} {profilePosts.length === 1 ? "post" : "posts"}
+                          <MapPin size={13} />
+                          RP WORLD
                         </span>
                       </div>
                     </div>
