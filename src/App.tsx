@@ -219,6 +219,11 @@ function exactTime(value: string) {
   }).format(new Date(value));
 }
 
+function isVideoMedia(value: string | null | undefined) {
+  if (!value) return false;
+  return /\.(mp4|webm|mov)(?:[?#].*)?$/i.test(value);
+}
+
 export function App() {
   const [theme, setTheme] = useState<ThemeId>(readTheme);
   const [appearance, setAppearance] =
@@ -4828,17 +4833,22 @@ export function App() {
               <X size={20} />
             </button>
 
-            <div
-              className="highlight-viewer-image"
-              style={
-                activeHighlight.image_url
-                  ? {
-                      backgroundImage: `url(${activeHighlight.image_url})`,
-                    }
-                  : undefined
-              }
-            >
-              {!activeHighlight.image_url && <Sparkles size={38} />}
+            <div className="highlight-viewer-image">
+              {activeHighlight.image_url ? (
+                isVideoMedia(activeHighlight.image_url) ? (
+                  <video
+                    src={activeHighlight.image_url}
+                    controls
+                    autoPlay
+                    playsInline
+                    preload="metadata"
+                  />
+                ) : (
+                  <img src={activeHighlight.image_url} alt={activeHighlight.title} />
+                )
+              ) : (
+                <Sparkles size={38} />
+              )}
             </div>
 
             <div className="highlight-viewer-caption">
