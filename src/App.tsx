@@ -2847,7 +2847,7 @@ export function App() {
                         <div className="discover-info">
                           <button className="profile-name-link" type="button" onClick={() => void loadPublicProfile(person.id)}>{person.display_name}</button>
                           <span>@{person.username}</span>
-                          <p>{person.bio || "RP WORLD member"}</p>
+                          {person.bio ? <p>{person.bio}</p> : null}
                         </div>
                         <button className="profile-action-button" type="button" onClick={() => void loadPublicProfile(person.id)}>View</button>
                       </article>
@@ -2905,10 +2905,7 @@ export function App() {
                         </div>
                       </div>
 
-                      <p className="profile-bio">
-                        {profile.bio ||
-                          "No bio yet. Tell the world who you are."}
-                      </p>
+                      {profile.bio ? <p className="profile-bio">{profile.bio}</p> : null}
 
                       <div className="profile-actions profile-social-actions">
                         {!viewAs ? (
@@ -3329,7 +3326,7 @@ export function App() {
                     <div className="profile-avatar-wrap"><div className="profile-avatar avatar" style={publicProfile.avatar_url ? { backgroundImage: `url(${publicProfile.avatar_url})` } : undefined}>{!publicProfile.avatar_url && initials(publicProfile.display_name)}</div></div>
                     <div className="profile-identity">
                       <div className="profile-name-row"><div><h2>{publicProfile.display_name}{publicProfile.username === "zaevii" && <span className="verified-badge" aria-label="Verified">✓</span>}</h2><span>@{publicProfile.username}</span></div></div>
-                      <p className="profile-bio">{publicProfile.bio || "No bio yet. Tell the world who you are."}</p>
+                      {publicProfile.bio ? <p className="profile-bio">{publicProfile.bio}</p> : null}
                       <div className="profile-actions profile-social-actions">
                         <button className="profile-action-button follow-button" type="button" onClick={() => void toggleFollowPublicProfile()}><UserPlus size={14} />{publicProfileFriend ? "Friends" : followingPublicProfile ? "Following" : "Follow"}</button>
                         <button
