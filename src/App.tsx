@@ -2907,7 +2907,7 @@ export function App() {
       ) : (
         <main className="social-shell">
           <section className="feed-column">
-            <div className="page-heading">
+            <div className={`page-heading ${view === "home" ? "home-page-heading" : ""}`}>
               <div>
                 {view === "home" && (
                   <p className="eyebrow">
