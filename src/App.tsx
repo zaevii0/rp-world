@@ -2764,7 +2764,7 @@ export function App() {
 
   return (
     <div className={isDark ? "app dark" : "app light"}>
-      <header className="topbar glass">
+      <header className={`topbar glass ${view === "home" ? "home-topbar" : ""}`}>
         <button
           className="brand-button"
           type="button"
