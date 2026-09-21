@@ -3037,9 +3037,27 @@ export function App() {
     setMessage("Post privacy updated.");
   }
 
-  async function managePostAction(action: "pin" | "archive" | "trash" | "copy") {
+  async function managePostAction(action: "pin" | "archive" | "trash" | "copy" | "delete_shared") {
     const post = postActionTarget;
-    if (!supabase || !session?.user || !post || post.author_id !== session.user.id || post.shared_post_id) return;
+    if (!supabase || !session?.user || !post || post.author_id !== session.user.id) return;
+
+    if (action === "delete_shared") {
+      if (!post.shared_post_id) return;
+      setPostActionBusy(true);
+      const { error: deleteError } = await supabase.from("posts").delete().eq("id", post.id).eq("author_id", session.user.id).not("shared_post_id", "is", null);
+      setPostActionBusy(false);
+      if (deleteError) { setMessage(deleteError.message || "Could not delete the shared post."); return; }
+      const removeShared = (items: Post[]) => items.filter((item) => item.id !== post.id);
+      setPosts(removeShared);
+      setProfilePosts(removeShared);
+      setPublicProfilePosts(removeShared);
+      setProfileReposts(removeShared);
+      setPostActionTarget(null);
+      setMessage("Shared post deleted.");
+      return;
+    }
+
+    if (post.shared_post_id) return;
 
     if (action === "copy") {
       const url = new URL(window.location.href);
@@ -4991,6 +5009,17 @@ export function App() {
               <button className="icon-button" type="button" aria-label="Close" onClick={() => setPostActionTarget(null)} disabled={postActionBusy}><X size={18} /></button>
             </div>
             <div className="post-action-menu">
+              {postActionTarget.shared_post_id ? (
+                <>
+                  <button className="post-action-destructive" type="button" onClick={() => void managePostAction("delete_shared")} disabled={postActionBusy}>
+                    <Trash2 size={18} /><span>{postActionBusy ? "Deleting…" : "Delete shared post"}</span>
+                  </button>
+                  <button type="button" onClick={() => void managePostAction("copy")} disabled={postActionBusy}>
+                    <Link2 size={18} /><span>Copy link</span>
+                  </button>
+                </>
+              ) : (
+              <>
               <button type="button" onClick={() => void managePostAction("pin")} disabled={postActionBusy}>
                 <Pin size={18} /><span>{postActionTarget.pinned_at ? "Unpin post" : "Pin post"}</span>
               </button>
@@ -5013,6 +5042,8 @@ export function App() {
               <button type="button" onClick={() => void managePostAction("copy")} disabled={postActionBusy}>
                 <Link2 size={18} /><span>Copy link</span>
               </button>
+              </>
+              )}
             </div>
           </section>
         </div>
