@@ -3454,7 +3454,7 @@ export function App() {
             aria-label="Messages"
             onClick={() => void openMessageInbox()}
           >
-            <MessageCircle size={22} />
+            <Mail size={22} />
           </button>
 
           <button
