@@ -5105,3 +5105,28 @@ body {
     margin-top: max(8px, env(safe-area-inset-top));
   }
 }
+
+
+/* Final status-bar/header balance for edge-to-edge mobile layouts. */
+.topbar,
+.home-topbar {
+  margin-top: max(16px, calc(env(safe-area-inset-top) + 8px));
+}
+
+@media (max-width: 560px) {
+  .topbar,
+  .home-topbar {
+    margin-top: max(14px, calc(env(safe-area-inset-top) + 6px));
+  }
+}
+
+/* Extend the active app surface through the system status-bar area. */
+html,
+body,
+#root {
+  background: transparent !important;
+}
+
+.app {
+  background-color: transparent;
+}
