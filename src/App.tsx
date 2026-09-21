@@ -3061,10 +3061,10 @@ export function App() {
 
             {view === "home" && (
               <>
-                <button
-                  <Stories session={session} profile={profile} />
+                <Stories session={session} profile={profile} />
 
-                                className="composer glass"
+                <button
+                  className="composer glass"
                   type="button"
                   onClick={() =>
                     setComposerOpen(true)
