@@ -2642,6 +2642,7 @@ export function App() {
       commentDrafts[postId] ?? ""
     ).trim();
     const mediaFile = commentMediaFiles[postId] ?? null;
+    let mediaErrorMessage: string | null = null;
 
     if (!content && !mediaFile) return;
 
@@ -2703,7 +2704,7 @@ export function App() {
         void signPostMediaUrls([mediaPath]);
       } catch (mediaError) {
         await supabase.from("post_comments").delete().eq("id", data.id).eq("author_id", session.user.id);
-        saveError = mediaError as { message?: string };
+        mediaErrorMessage = mediaError instanceof Error ? mediaError.message : "Could not attach the comment image.";
         data = null;
       }
     }
@@ -2713,7 +2714,8 @@ export function App() {
     if (saveError || !data) {
       console.error("RP WORLD comment could not be posted", saveError);
       setFeedError(
-        saveError?.message ||
+        mediaErrorMessage ||
+          saveError?.message ||
           (parentId
             ? "This reply could not be posted. Please make sure the nested-reply database migration is applied."
             : "This comment could not be posted. Please try again."),
