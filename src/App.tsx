@@ -1195,6 +1195,19 @@ export function App() {
     return null;
   }
 
+  async function uploadCommentMedia(file: File, postId: string) {
+    if (!supabase || !session?.user) throw new Error("You must be signed in to upload media.");
+    if (!file.type.startsWith("image/")) throw new Error("Comments and replies support images only.");
+    if (file.size > 10 * 1024 * 1024) throw new Error("Comment images must be 10 MB or smaller.");
+    const extension = file.name.split(".").pop()?.toLowerCase() || "jpg";
+    const filePath = `${session.user.id}/${postId}/comments/${crypto.randomUUID()}.${extension}`;
+    const { error } = await supabase.storage.from("post-media").upload(filePath, file, {
+      cacheControl: "3600", contentType: file.type, upsert: false,
+    });
+    if (error) throw error;
+    return filePath;
+  }
+
   function getPostMediaPath(value: string | null | undefined) {
     if (!value) return null;
     const marker = "/storage/v1/object/public/post-media/";
