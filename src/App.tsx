@@ -2708,9 +2708,7 @@ export function App() {
 
   async function sharePostExternally(post: Post) {
     const original = post.shared_original ?? post;
-    const shareText = post.share_caption?.trim() ? post.share_caption.trim() + "
-
-" + original.content : original.content;
+    const shareText = post.share_caption?.trim() ? post.share_caption.trim() + "\n\n" + original.content : original.content;
     const shareData = {
       title: original.profile?.display_name ? original.profile.display_name + " on RP WORLD" : "RP WORLD post",
       text: shareText,
@@ -2718,9 +2716,7 @@ export function App() {
     };
     try {
       if (navigator.share) { await navigator.share(shareData); return; }
-      if (navigator.clipboard) { await navigator.clipboard.writeText(shareText + "
-
-" + shareData.url); setMessage("Post link copied to clipboard."); return; }
+      if (navigator.clipboard) { await navigator.clipboard.writeText(shareText + "\n\n" + shareData.url); setMessage("Post link copied to clipboard."); return; }
       setMessage("Sharing is not available in this browser.");
     } catch (shareError) {
       if (shareError instanceof DOMException && shareError.name === "AbortError") return;
