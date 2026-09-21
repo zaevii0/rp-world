@@ -4584,3 +4584,64 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
   .follower-actions { flex-direction: column; align-items: stretch; }
   .follower-action { min-height: 30px; padding-inline: 8px; }
 }
+
+
+/* Friend actions — compact iOS-style relationship menu */
+.friend-button {
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 28%, transparent);
+  background: var(--accent-soft);
+}
+.friend-actions-popover {
+  display: grid;
+  gap: 6px;
+  width: min(100%, 300px);
+  margin: 8px 0 4px;
+  padding: 8px;
+  border: 1px solid color-mix(in srgb, var(--text-primary) 10%, transparent);
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--text-primary) 6%, transparent);
+  box-shadow: 0 12px 30px rgba(0,0,0,.14), inset 0 1px 0 rgba(255,255,255,.08);
+  backdrop-filter: blur(22px) saturate(150%);
+  -webkit-backdrop-filter: blur(22px) saturate(150%);
+}
+.friend-actions-title {
+  padding: 4px 8px 5px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  opacity: .48;
+}
+.friend-actions-popover button {
+  min-height: 38px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 12px;
+  color: var(--text-primary);
+  background: transparent;
+  text-align: left;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+.friend-actions-popover button:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--text-primary) 7%, transparent);
+}
+.friend-actions-popover button:disabled {
+  cursor: default;
+  opacity: .5;
+}
+.friend-actions-popover .friend-action-danger {
+  color: #d95757;
+}
+.friend-actions-popover .friend-action-danger:hover:not(:disabled) {
+  background: color-mix(in srgb, #d95757 10%, transparent);
+}
+.friend-actions-popover .friend-action-danger svg {
+  color: currentColor;
+}
