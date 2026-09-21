@@ -344,6 +344,7 @@ export function App() {
   const [followedByPublicProfile, setFollowedByPublicProfile] = useState(false);
   const [publicProfileFriend, setPublicProfileFriend] = useState(false);
   const [discoverProfiles, setDiscoverProfiles] = useState<Profile[]>([]);
+  const [discoverSearch, setDiscoverSearch] = useState("");
   const [activeConversation, setActiveConversation] = useState<string | null>(() => {
     try {
       return sessionStorage.getItem(MESSAGE_CONVERSATION_KEY);
@@ -3415,14 +3416,50 @@ export function App() {
 
             {view === "discover" && (
               <section className="discover-section">
-                <div className="section-heading">
+                <div className="section-heading discover-heading">
                   <div><p className="eyebrow">RP WORLD</p><h3>Discover people</h3></div>
+                  <div className="discover-search-wrap">
+                    <Search size={16} aria-hidden="true" />
+                    <input
+                      className="discover-search-input"
+                      type="search"
+                      value={discoverSearch}
+                      onChange={(event) => setDiscoverSearch(event.target.value)}
+                      placeholder="Search people"
+                      aria-label="Search people"
+                      autoComplete="off"
+                    />
+                    {discoverSearch && (
+                      <button
+                        className="discover-search-clear"
+                        type="button"
+                        onClick={() => setDiscoverSearch("")}
+                        aria-label="Clear search"
+                      >
+                        <X size={15} />
+                      </button>
+                    )}
+                  </div>
                 </div>
-                {discoverProfiles.length === 0 ? (
-                  <div className="empty-state glass"><Search size={24} /><strong>No other profiles yet.</strong><span>New RP WORLD members will appear here.</span></div>
+                {discoverProfiles.filter((person) => {
+                  const query = discoverSearch.trim().toLowerCase();
+                  if (!query) return true;
+                  return [person.display_name, person.username, person.bio ?? ""]
+                    .some((value) => value.toLowerCase().includes(query));
+                }).length === 0 ? (
+                  <div className="empty-state glass">
+                    <Search size={24} />
+                    <strong>{discoverSearch.trim() ? "No matching profiles." : "No other profiles yet."}</strong>
+                    <span>{discoverSearch.trim() ? "Try another name or username." : "New RP WORLD members will appear here."}</span>
+                  </div>
                 ) : (
                   <div className="discover-list">
-                    {discoverProfiles.map((person) => (
+                    {discoverProfiles.filter((person) => {
+                      const query = discoverSearch.trim().toLowerCase();
+                      if (!query) return true;
+                      return [person.display_name, person.username, person.bio ?? ""]
+                        .some((value) => value.toLowerCase().includes(query));
+                    }).map((person) => (
                       <article className="discover-card glass" key={person.id}>
                         <button className="avatar profile-link-button" type="button" onClick={() => void loadPublicProfile(person.id)} aria-label={`Open ${person.display_name} profile`} style={person.avatar_url ? { backgroundImage: `url(${person.avatar_url})` } : undefined}>
                           {!person.avatar_url && initials(person.display_name)}
