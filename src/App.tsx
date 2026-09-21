@@ -5208,8 +5208,6 @@ export function App() {
           </section>
         </div>
       )}
-
-      )}
     </div>
   );
 }
