@@ -35,6 +35,7 @@ import {
   User,
   UserPlus,
   X,
+  RefreshCw,
 } from "lucide-react";
 import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from "react";
 import type { Session } from "@supabase/supabase-js";
@@ -547,6 +548,72 @@ export function App() {
       void loadHighlights();
     }
   }, [view, session, profile]);
+
+  useEffect(() => {
+    if (!supabase || !session?.user || !activeConversation) return;
+
+    const conversationId = activeConversation;
+    let active = true;
+
+    const refreshMessages = async () => {
+      if (!active) return;
+      await loadConversationMessages(conversationId);
+    };
+
+    const messageChannel = supabase
+      .channel(`rp-world-messages-${conversationId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "messages",
+          filter: `conversation_id=eq.${conversationId}`,
+        },
+        (payload) => {
+          const incoming = payload.new as {
+            id: string;
+            conversation_id: string;
+            sender_id: string;
+            content: string;
+            created_at: string;
+          };
+
+          if (incoming.conversation_id !== conversationId) return;
+
+          setMessagesByConversation((current) => {
+            const existing = current[conversationId] ?? [];
+            if (existing.some((item) => item.id === incoming.id)) return current;
+
+            return {
+              ...current,
+              [conversationId]: [...existing, {
+                id: incoming.id,
+                sender_id: incoming.sender_id,
+                content: incoming.content,
+                created_at: incoming.created_at,
+              }],
+            };
+          });
+
+          void loadMessageInbox();
+        },
+      );
+
+    void messageChannel.subscribe();
+
+    // Realtime is the primary path. A lightweight fallback refresh also
+    // keeps the conversation current if the realtime connection is delayed.
+    const fallbackRefresh = window.setInterval(() => {
+      void refreshMessages();
+    }, 10000);
+
+    return () => {
+      active = false;
+      window.clearInterval(fallbackRefresh);
+      void supabase.removeChannel(messageChannel);
+    };
+  }, [session, activeConversation]);
 
   useEffect(() => {
     if (session?.user && profile) {
@@ -3939,10 +4006,15 @@ export function App() {
                   </span>
                 )}
               </div>
-              <button className="icon-button" type="button" aria-label="Close messages" onClick={() => {
-                setActiveConversation(null);
-                setActiveConversationProfile(null);
-              }}><X size={18} /></button>
+              <button
+                className="icon-button"
+                type="button"
+                aria-label="Refresh messages"
+                title="Refresh messages"
+                onClick={() => void loadConversationMessages(activeConversation)}
+              >
+                <RefreshCw size={18} />
+              </button>
             </div>
             <div className="message-list">
               {(messagesByConversation[activeConversation] ?? []).map((item) => {
