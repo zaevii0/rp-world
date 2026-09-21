@@ -56,6 +56,7 @@ import {
   Mic,
 
 } from "lucide-react";
+import html2canvas from "html2canvas";
 import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent, type ReactNode } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { ThemePicker } from "./components/ThemePicker";
@@ -382,6 +383,140 @@ export function App() {
   const [messageSettingsOpen, setMessageSettingsOpen] = useState(false);
   const [chatNickname, setChatNickname] = useState("");
   const messageMediaRef = useRef<HTMLInputElement | null>(null);
+  const screenshotLongPressRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const screenshotLongPressTriggeredRef = useRef(false);
+  const [screenshotOpen, setScreenshotOpen] = useState(false);
+  const [screenshotDataUrl, setScreenshotDataUrl] = useState<string | null>(null);
+  const [screenshotEditing, setScreenshotEditing] = useState(false);
+  const [screenshotDrawing, setScreenshotDrawing] = useState(false);
+  const [screenshotBusy, setScreenshotBusy] = useState(false);
+  const screenshotCanvasRef = useRef<HTMLCanvasElement | null>(null);
+
+  async function captureCurrentScreen() {
+    if (screenshotBusy) return;
+    setScreenshotBusy(true);
+    try {
+      const target = document.querySelector(".app") as HTMLElement | null;
+      if (!target) throw new Error("App screen is unavailable.");
+      const canvas = await html2canvas(target, {
+        backgroundColor: null,
+        scale: Math.min(window.devicePixelRatio || 1, 2),
+        useCORS: true,
+        logging: false,
+        ignoreElements: (element) => element.classList.contains("screenshot-editor"),
+      });
+      setScreenshotDataUrl(canvas.toDataURL("image/png"));
+      setScreenshotOpen(true);
+      setScreenshotEditing(false);
+      setScreenshotDrawing(false);
+    } catch (captureError) {
+      console.error("RP WORLD screenshot capture failed", captureError);
+      setMessage("Could not capture the screen. Please try again.");
+    } finally {
+      setScreenshotBusy(false);
+    }
+  }
+
+  function startScreenshotLongPress() {
+    screenshotLongPressTriggeredRef.current = false;
+    if (screenshotLongPressRef.current) clearTimeout(screenshotLongPressRef.current);
+    screenshotLongPressRef.current = setTimeout(() => {
+      screenshotLongPressTriggeredRef.current = true;
+      void captureCurrentScreen();
+    }, 550);
+  }
+
+  function cancelScreenshotLongPress() {
+    if (screenshotLongPressRef.current) {
+      clearTimeout(screenshotLongPressRef.current);
+      screenshotLongPressRef.current = null;
+    }
+  }
+
+  function finishScreenshotPress(action: () => void) {
+    const wasLongPress = screenshotLongPressTriggeredRef.current;
+    cancelScreenshotLongPress();
+    if (!wasLongPress) action();
+    screenshotLongPressTriggeredRef.current = false;
+  }
+
+  function replaceScreenshotCanvas(canvas: HTMLCanvasElement) {
+    setScreenshotDataUrl(canvas.toDataURL("image/png"));
+  }
+
+  function cropScreenshot(ratio: number | null) {
+    if (!screenshotDataUrl) return;
+    const image = new window.Image();
+    image.onload = () => {
+      const sourceRatio = image.width / image.height;
+      let width = image.width;
+      let height = image.height;
+      if (ratio) {
+        if (sourceRatio > ratio) width = Math.round(image.height * ratio);
+        else height = Math.round(image.width / ratio);
+      }
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      const context = canvas.getContext("2d");
+      if (!context) return;
+      context.drawImage(image, Math.round((image.width - width) / 2), Math.round((image.height - height) / 2), width, height, 0, 0, width, height);
+      replaceScreenshotCanvas(canvas);
+    };
+    image.src = screenshotDataUrl;
+  }
+
+  function drawOnScreenshot(event: React.PointerEvent<HTMLCanvasElement>) {
+    if (!screenshotDrawing) return;
+    const canvas = screenshotCanvasRef.current;
+    const context = canvas?.getContext("2d");
+    if (!canvas || !context) return;
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    context.strokeStyle = "rgba(215,38,61,.95)";
+    context.lineWidth = 5 * Math.max(scaleX, scaleY);
+    context.lineCap = "round";
+    context.lineJoin = "round";
+    const x = (event.clientX - rect.left) * scaleX;
+    const y = (event.clientY - rect.top) * scaleY;
+    if (event.type === "pointerdown") {
+      canvas.setPointerCapture(event.pointerId);
+      context.beginPath();
+      context.moveTo(x, y);
+    } else {
+      context.lineTo(x, y);
+      context.stroke();
+    }
+    replaceScreenshotCanvas(canvas);
+  }
+
+  async function saveScreenshot() {
+    if (!screenshotDataUrl) return;
+    const response = await fetch(screenshotDataUrl);
+    const blob = await response.blob();
+    const filename = `rp-world-screenshot-${new Date().toISOString().replace(/[:.]/g, "-")}.png`;
+    try {
+      if ("showSaveFilePicker" in window) {
+        const picker = (window as Window & { showSaveFilePicker?: (options: unknown) => Promise<{ createWritable: () => Promise<{ write: (data: Blob) => Promise<void>; close: () => Promise<void> }> }> }).showSaveFilePicker;
+        if (picker) {
+          const handle = await picker({ suggestedName: filename, types: [{ description: "PNG image", accept: { "image/png": [".png"] } }] });
+          const writable = await handle.createWritable();
+          await writable.write(blob);
+          await writable.close();
+        }
+      } else {
+        const link = document.createElement("a");
+        link.href = screenshotDataUrl;
+        link.download = filename;
+        link.click();
+      }
+      setScreenshotOpen(false);
+    } catch (saveError) {
+      console.error("RP WORLD screenshot save failed", saveError);
+      setMessage("Screenshot was not saved.");
+    }
+  }
 
   function chatNicknameKey(otherUserId: string) {
     return `rpw-chat-nickname-${session?.user.id ?? "anonymous"}-${otherUserId}`;
@@ -4189,7 +4324,10 @@ export function App() {
                 : "nav-item"
             }
             type="button"
-            onClick={() => setView("home")}
+            onPointerDown={startScreenshotLongPress}
+            onPointerUp={() => finishScreenshotPress(() => setView("home"))}
+            onPointerCancel={cancelScreenshotLongPress}
+            onPointerLeave={cancelScreenshotLongPress}
           >
             <Home size={19} />
             <span>Home</span>
@@ -4202,9 +4340,10 @@ export function App() {
                 : "nav-item"
             }
             type="button"
-            onClick={() =>
-              setView("discover")
-            }
+            onPointerDown={startScreenshotLongPress}
+            onPointerUp={() => finishScreenshotPress(() => setView("discover"))}
+            onPointerCancel={cancelScreenshotLongPress}
+            onPointerLeave={cancelScreenshotLongPress}
           >
             <LayoutGrid size={19} />
             <span>Discover</span>
@@ -4214,7 +4353,10 @@ export function App() {
             className="nav-create"
             type="button"
             aria-label="Messages"
-            onClick={() => void openMessageInbox()}
+            onPointerDown={startScreenshotLongPress}
+            onPointerUp={() => finishScreenshotPress(() => void openMessageInbox())}
+            onPointerCancel={cancelScreenshotLongPress}
+            onPointerLeave={cancelScreenshotLongPress}
           >
             <Send size={22} strokeWidth={1.9} />
           </button>
@@ -4226,9 +4368,10 @@ export function App() {
                 : "nav-item"
             }
             type="button"
-            onClick={() =>
-              setView("profile")
-            }
+            onPointerDown={startScreenshotLongPress}
+            onPointerUp={() => finishScreenshotPress(() => setView("profile"))}
+            onPointerCancel={cancelScreenshotLongPress}
+            onPointerLeave={cancelScreenshotLongPress}
           >
             <User size={19} />
             <span>Profile</span>
@@ -4241,12 +4384,49 @@ export function App() {
                 : "nav-item"
             }
             type="button"
-            onClick={openMenu}
+            onPointerDown={startScreenshotLongPress}
+            onPointerUp={() => finishScreenshotPress(openMenu)}
+            onPointerCancel={cancelScreenshotLongPress}
+            onPointerLeave={cancelScreenshotLongPress}
           >
             <Menu size={19} />
             <span>Menu</span>
           </button>
         </nav>
+      )}
+
+      {screenshotOpen && screenshotDataUrl && (
+        <div className="screenshot-editor" role="presentation" onClick={() => setScreenshotOpen(false)}>
+          <section className="screenshot-editor-card glass" role="dialog" aria-modal="true" aria-labelledby="screenshot-title" onClick={(event) => event.stopPropagation()}>
+            <div className="sheet-header">
+              <div><p className="eyebrow">RP WORLD</p><h2 id="screenshot-title">Screenshot</h2></div>
+              <button className="icon-button" type="button" aria-label="Discard screenshot" onClick={() => setScreenshotOpen(false)}><X size={18}/></button>
+            </div>
+            <div className="screenshot-preview">
+              <img src={screenshotDataUrl} alt="RP WORLD screenshot preview" />
+              <canvas
+                ref={screenshotCanvasRef}
+                className="screenshot-draw-canvas"
+                aria-hidden={!screenshotDrawing}
+                onPointerDown={drawOnScreenshot}
+                onPointerMove={drawOnScreenshot}
+              />
+            </div>
+            {screenshotEditing && (
+              <div className="screenshot-edit-tools">
+                <button type="button" className={screenshotDrawing ? "screenshot-tool active" : "screenshot-tool"} onClick={() => setScreenshotDrawing((value) => !value)}><Pencil size={16}/>Draw</button>
+                <button type="button" className="screenshot-tool" onClick={() => cropScreenshot(1)}><span>1:1</span>Crop</button>
+                <button type="button" className="screenshot-tool" onClick={() => cropScreenshot(4/5)}><span>4:5</span>Crop</button>
+                <button type="button" className="screenshot-tool" onClick={() => cropScreenshot(16/9)}><span>16:9</span>Crop</button>
+              </div>
+            )}
+            <div className="screenshot-actions">
+              <button className="mode-switch screenshot-discard" type="button" onClick={() => setScreenshotOpen(false)}>Discard</button>
+              <button className="mode-switch" type="button" onClick={() => setScreenshotEditing((value) => !value)}><Pencil size={15}/> {screenshotEditing ? "Done editing" : "Edit"}</button>
+              <button className="primary-button" type="button" onClick={() => void saveScreenshot()}>Save screenshot</button>
+            </div>
+          </section>
+        </div>
       )}
 
       {messageInboxOpen && (
