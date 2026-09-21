@@ -827,7 +827,7 @@ export function App() {
         {isVideo ? (
           <video
             className="post-media post-video"
-            src={mediaUrl}
+            src={signedUrl}
             controls
             playsInline
             preload="metadata"
@@ -891,7 +891,7 @@ export function App() {
     const extension =
       file.name.split(".").pop()?.toLowerCase() ||
       (file.type.startsWith("video/") ? "mp4" : "jpg");
-    const filePath = `${session.user.id}/${postId/${crypto.randomUUID()}.${extension}`;
+    const filePath = `${session.user.id}/${postId}/${crypto.randomUUID()}.${extension}`;
     const { error: uploadError } = await supabase.storage
       .from("post-media")
       .upload(filePath, file, {
