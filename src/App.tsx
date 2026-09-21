@@ -396,21 +396,22 @@ export function App() {
     if (screenshotBusy) return;
     setScreenshotBusy(true);
     try {
-      const target = document.querySelector(".app") as HTMLElement | null;
+      const target = document.documentElement;
       if (!target) throw new Error("App screen is unavailable.");
       const canvas = await html2canvas(target, {
         backgroundColor: null,
         scale: Math.min(window.devicePixelRatio || 1, 2),
         useCORS: true,
         logging: false,
-        // Capture only what is currently visible in the viewport, including
-        // the current page, current scroll position, and fixed navigation.
+        // Render the browser viewport only, rather than the whole page.
         x: window.scrollX,
         y: window.scrollY,
         width: window.innerWidth,
         height: window.innerHeight,
         windowWidth: window.innerWidth,
         windowHeight: window.innerHeight,
+        scrollX: window.scrollX,
+        scrollY: window.scrollY,
         ignoreElements: (element) => element.classList.contains("screenshot-editor"),
       });
       setScreenshotDataUrl(canvas.toDataURL("image/png"));
@@ -4348,7 +4349,7 @@ export function App() {
             onPointerDown={startScreenshotLongPress}
             onPointerUp={() => finishScreenshotPress(() => setView("home"))}
             onPointerCancel={cancelScreenshotLongPress}
-            onPointerLeave={cancelScreenshotLongPress}
+            onContextMenu={(event) => event.preventDefault()}
           >
             <Home size={19} />
             <span>Home</span>
