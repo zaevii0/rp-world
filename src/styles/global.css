@@ -319,7 +319,7 @@ h1 { margin:3px 0 0; font-size:17px; letter-spacing:-.03em; }
 
 .profile-social-actions {
   width:100%;
-  margin-top:0;
+  margin-top:8px;
   justify-content:center;
 }
 
