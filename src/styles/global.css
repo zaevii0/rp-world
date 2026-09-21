@@ -5146,3 +5146,111 @@ nav.bottom-nav {
 nav.bottom-nav {
   bottom: max(18px, calc(env(safe-area-inset-bottom) + 8px));
 }
+
+
+/* Refined Facebook-style comment architecture. */
+.comment-thread {
+  margin-bottom: 14px;
+}
+.comment-thread-reply {
+  margin-left: 40px;
+  padding-left: 14px;
+  border-left: 1px solid color-mix(in srgb, var(--text-primary) 10%, transparent);
+}
+.comment-avatar {
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
+}
+.comment-avatar-reply {
+  width: 27px;
+  height: 27px;
+  flex-basis: 27px;
+}
+.comment-bubble {
+  border-radius: 18px;
+  padding: 9px 12px;
+  background: color-mix(in srgb, var(--accent) 5%, var(--text-primary) 6%);
+  box-shadow: none;
+}
+.comment-meta,
+.comment-actions {
+  align-items: center;
+}
+.comment-timestamp {
+  font-size: 10px;
+  opacity: .42;
+}
+.comment-reaction-summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin: 1px 0 0 9px;
+  padding: 2px 6px;
+  border: 0;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--text-primary) 6%, transparent);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 10px;
+  cursor: pointer;
+}
+.comment-reaction-summary strong {
+  margin-left: 3px;
+  font-size: 9px;
+}
+.comment-pinned {
+  font-size: 9px;
+  color: var(--accent);
+  font-weight: 700;
+}
+.comment-deleted {
+  opacity: .45;
+  font-style: italic;
+}
+.comment-form {
+  align-items: flex-end;
+}
+.comment-form textarea {
+  min-height: 34px;
+  max-height: 140px;
+  resize: none;
+  overflow-y: auto;
+  line-height: 1.35;
+  border-radius: 18px;
+  padding: 8px 12px;
+}
+.comment-mention-popover {
+  margin: 5px 0 0 8px;
+  padding: 7px 10px;
+  border-radius: 12px;
+  font-size: 10px;
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+}
+.comment-action-sheet h3 {
+  margin: 2px 0 10px;
+  font-size: 18px;
+}
+.comment-action-sheet button {
+  min-height: 44px;
+}
+.comment-action-sheet .danger {
+  color: #d94b4b;
+}
+@media (max-width: 560px) {
+  .comment-thread-reply {
+    margin-left: 28px;
+    padding-left: 10px;
+  }
+  .comment-avatar {
+    width: 30px;
+    height: 30px;
+    flex-basis: 30px;
+  }
+  .comment-avatar-reply {
+    width: 25px;
+    height: 25px;
+    flex-basis: 25px;
+  }
+}
