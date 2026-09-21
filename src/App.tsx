@@ -2816,7 +2816,23 @@ export function App() {
                           <div className="post-status-label"><Pin size={12} /> Pinned</div>
                         )}
                         {post.tagged_profiles?.length ? (
-                          <div className="post-tag-label"><Tag size={12} /> {post.tagged_profiles.map((item) => `@${item.username}`).join(", ")}</div>
+                          <div className="post-tag-label">
+                            <Tag size={12} />
+                            <span>Tagged</span>
+                            <div className="post-tagged-names">
+                              {post.tagged_profiles.map((item) => (
+                                <button
+                                  key={item.id}
+                                  className="post-tagged-name"
+                                  type="button"
+                                  onClick={() => void loadPublicProfile(item.id)}
+                                  aria-label={`Open ${item.display_name} profile`}
+                                >
+                                  @{item.username}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
                         ) : null}
                         <div className="post-actions">
                           <button
