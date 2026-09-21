@@ -1826,7 +1826,7 @@ export function App() {
       if (!legacyResult.error) {
         data = (legacyResult.data ?? []).map((row) => ({
           ...row,
-          parent_id: null,
+          parent_id: null as string | null,
         }));
         loadError = null;
       }
@@ -1969,7 +1969,7 @@ export function App() {
     const newComment = {
       ...(data as Comment),
       reactionCount: 0,
-      reactionType: null,
+      reactionType: null as string | null,
       profile: profile ?? undefined,
     };
 
@@ -2196,7 +2196,7 @@ export function App() {
     }
 
     setPostActionBusy(true);
-    const payload =
+    const payload: { pinned_at?: string | null; archived_at?: string | null; trashed_at?: string | null } =
       action === "pin"
         ? {
             pinned_at: post.pinned_at ? null : new Date().toISOString(),
