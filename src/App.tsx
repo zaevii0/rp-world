@@ -438,7 +438,7 @@ export function App() {
   const [messageVoiceRecording, setMessageVoiceRecording] = useState(false);
   const messageMediaRef = useRef<HTMLInputElement | null>(null);
   const messageListRef = useRef<HTMLDivElement | null>(null);
-  const messageChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+  const messageChannelRef = useRef<ReturnType<NonNullable<typeof supabase>["channel"]> | null>(null);
   const messageTypingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const messageVoiceRecorderRef = useRef<MediaRecorder | null>(null);
   const messageVoiceChunksRef = useRef<Blob[]>([]);
@@ -1993,6 +1993,22 @@ export function App() {
   const MESSAGE_PAGE_SIZE = 30;
   const messageSelect = "id, client_id, conversation_id, sender_id, content, created_at, updated_at, edited_at, unsent_at, delivered_at, read_at, reply_to_id, character_id, media_url, media_type";
 
+  async function signMessageMediaUrls(rows: ChatMessage[]) {
+    if (!supabase) return;
+    const paths = [...new Set(rows.map((row) => row.media_url).filter((value): value is string => Boolean(value) && !value.startsWith("http")))];
+    if (!paths.length) return;
+    const { data } = await supabase.storage.from("message-media").createSignedUrls(paths, 3600);
+    if (!data) return;
+    const signed = Object.fromEntries(data.filter((item) => item.signedUrl).map((item) => [item.path, item.signedUrl]));
+    setMessagesByConversation((current) => {
+      const list = current[activeConversation ?? ""] ?? [];
+      return {
+        ...current,
+        [activeConversation ?? ""]: list.map((item) => signed[item.media_url ?? ""] ? { ...item, media_url: signed[item.media_url ?? ""] } : item),
+      };
+    });
+  }
+
   async function loadConversationMessages(conversationId: string, before?: string) {
     if (!supabase || !session?.user) return;
     let query = supabase.from("messages").select(messageSelect).eq("conversation_id", conversationId).order("created_at", { ascending: false }).limit(MESSAGE_PAGE_SIZE);
@@ -2000,10 +2016,22 @@ export function App() {
     const { data, error } = await query;
     if (error) { setMessage("Could not load messages. Please try again."); return; }
     const rows = ((data ?? []) as ChatMessage[]).reverse();
+    const messageIds = rows.map((row) => row.id);
+    const { data: reactionRows } = messageIds.length
+      ? await supabase.from("message_reactions").select("message_id, user_id, reaction_type").in("message_id", messageIds)
+      : { data: [] as MessageReaction[] };
+    const reactionMap = new Map<string, MessageReaction[]>();
+    for (const reaction of (reactionRows ?? []) as Array<MessageReaction & { message_id: string }>) {
+      const list = reactionMap.get(reaction.message_id) ?? [];
+      list.push({ user_id: reaction.user_id, reaction_type: reaction.reaction_type });
+      reactionMap.set(reaction.message_id, list);
+    }
+    const hydrated = rows.map((row) => ({ ...row, reactions: reactionMap.get(row.id) ?? [], status: (row.read_at ? "read" : row.delivered_at ? "delivered" : row.sender_id === session.user.id ? "sent" : "delivered") as MessageStatus }));
     setMessagesByConversation((current) => ({
       ...current,
-      [conversationId]: before ? [...rows, ...(current[conversationId] ?? [])] : rows,
+      [conversationId]: before ? [...hydrated, ...(current[conversationId] ?? [])] : hydrated,
     }));
+    void signMessageMediaUrls(hydrated);
     setMessageHasMore((current) => ({ ...current, [conversationId]: rows.length === MESSAGE_PAGE_SIZE }));
     if (!before) {
       requestAnimationFrame(() => {
@@ -5065,7 +5093,8 @@ export function App() {
                         {replyTarget && <button className="message-reply-preview" type="button" onClick={() => setExpandedMessageTimestamps((current) => ({ ...current, [replyTarget.id]: true }))}><span>Replying to</span><strong>{replyTarget.content || "Attachment"}</strong></button>}
                         {item.unsent_at ? <span className="message-unsent">Message unsent</span> : (
                           <>
-                            {item.media_url && item.media_type?.startsWith("image/") && <img className="message-media-preview" src={item.media_url} alt="Message attachment" />}
+                            {item.media_url && item.media_type?.startsWith("image/") && <img className="message-media-preview" src={item.media_url} alt="Message attachment" loading="lazy" />}
+                            {item.media_url && item.media_type?.startsWith("video/") && <video className="message-media-preview" controls playsInline preload="metadata" src={item.media_url} />}
                             {item.media_url && item.media_type?.startsWith("audio/") && <audio className="message-audio" controls src={item.media_url} />}
                             {item.content && <span>{item.content}</span>}
                           </>
