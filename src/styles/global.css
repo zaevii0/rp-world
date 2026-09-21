@@ -4645,3 +4645,183 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
 .friend-actions-popover .friend-action-danger svg {
   color: currentColor;
 }
+
+
+/* Facebook-style comments: compact bubbles, threaded replies, and reactions. */
+.comment-thread {
+  display: block;
+  margin-bottom: 12px;
+}
+.comment-thread-reply {
+  margin-left: 42px;
+  margin-top: 6px;
+}
+.comment-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  width: 100%;
+}
+.comment-body {
+  min-width: 0;
+  max-width: min(88%, 620px);
+}
+.comment-bubble {
+  width: fit-content;
+  max-width: 100%;
+  padding: 8px 11px;
+  border-radius: 17px;
+  background: color-mix(in srgb, var(--text-primary) 7%, transparent);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.035);
+}
+.comment-bubble .profile-name-link {
+  display: block;
+  margin-bottom: 2px;
+  font-size: 11px;
+  font-weight: 700;
+}
+.comment-bubble p {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.38;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.comment-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 3px 0 0 9px;
+  min-height: 20px;
+}
+.comment-action {
+  min-height: 20px;
+  padding: 1px 0;
+  border: 0;
+  color: var(--text-primary);
+  background: transparent;
+  opacity: .55;
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 700;
+}
+.comment-action:hover,
+.comment-action:focus-visible {
+  color: var(--accent);
+  opacity: 1;
+  outline: none;
+}
+.comment-action.reaction-active {
+  color: var(--accent);
+}
+.comment-reaction-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+.comment-reaction-count {
+  margin-left: -7px;
+  padding: 1px 5px;
+  border-radius: 999px;
+  color: var(--text-primary);
+  background: color-mix(in srgb, var(--surface, #111) 88%, transparent);
+  font-size: 9px;
+  line-height: 15px;
+  box-shadow: 0 1px 4px rgba(0,0,0,.12);
+}
+.comment-reaction-emoji {
+  font-size: 13px;
+  line-height: 1;
+}
+.comment-reaction-picker {
+  position: absolute;
+  z-index: 50;
+  left: -5px;
+  bottom: calc(100% + 5px);
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 7px;
+  border: 1px solid color-mix(in srgb, var(--text-primary) 12%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--surface, #111) 92%, transparent);
+  box-shadow: 0 8px 28px rgba(0,0,0,.2), inset 0 1px 0 rgba(255,255,255,.08);
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  animation: reaction-picker-in .16s ease-out;
+}
+.comment-reaction-option {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+  font-size: 19px;
+  line-height: 1;
+  transition: transform .14s ease, background .14s ease;
+}
+.comment-reaction-option:hover,
+.comment-reaction-option:focus-visible {
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  transform: scale(1.22);
+  outline: none;
+}
+.comment-reaction-option.active {
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+}
+.comment-replies-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin: 2px 0 0 9px;
+  padding: 2px 0;
+  border: 0;
+  color: var(--text-primary);
+  background: transparent;
+  opacity: .55;
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 700;
+}
+.comment-replies-toggle:hover {
+  color: var(--accent);
+  opacity: 1;
+}
+.comment-replies-line {
+  width: 17px;
+  height: 1px;
+  background: currentColor;
+  opacity: .5;
+}
+.comment-timestamp {
+  font-weight: 500;
+  opacity: .4;
+}
+.reply-target .comment-bubble {
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 35%, transparent);
+}
+@media (max-width: 560px) {
+  .comment-thread-reply {
+    margin-left: 30px;
+  }
+  .comment-body {
+    max-width: calc(100% - 2px);
+  }
+  .comment-reaction-picker {
+    max-width: calc(100vw - 34px);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .comment-reaction-picker::-webkit-scrollbar {
+    display: none;
+  }
+  .comment-reaction-option {
+    width: 30px;
+    height: 30px;
+    font-size: 18px;
+  }
+}
