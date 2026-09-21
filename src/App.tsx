@@ -396,22 +396,28 @@ export function App() {
     if (screenshotBusy) return;
     setScreenshotBusy(true);
     try {
-      const target = document.documentElement;
+      const target = document.body;
       if (!target) throw new Error("App screen is unavailable.");
+
+      // Capture exactly what is visible right now, regardless of the current
+      // RP WORLD view or scroll position. Fixed navigation stays in the frame.
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+      const scrollX = window.scrollX;
+      const scrollY = window.scrollY;
       const canvas = await html2canvas(target, {
         backgroundColor: null,
         scale: Math.min(window.devicePixelRatio || 1, 2),
         useCORS: true,
         logging: false,
-        // Render the browser viewport only, rather than the whole page.
-        x: window.scrollX,
-        y: window.scrollY,
-        width: window.innerWidth,
-        height: window.innerHeight,
-        windowWidth: window.innerWidth,
-        windowHeight: window.innerHeight,
-        scrollX: window.scrollX,
-        scrollY: window.scrollY,
+        x: scrollX,
+        y: scrollY,
+        width: viewportWidth,
+        height: viewportHeight,
+        windowWidth: viewportWidth,
+        windowHeight: viewportHeight,
+        scrollX,
+        scrollY,
         ignoreElements: (element) => element.classList.contains("screenshot-editor"),
       });
       setScreenshotDataUrl(canvas.toDataURL("image/png"));
