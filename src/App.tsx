@@ -1721,9 +1721,12 @@ export function App() {
     setPostBusy(true);
     setFeedError("");
 
+    let uploadedMediaPath: string | null = null;
+
     try {
       const postId = crypto.randomUUID();
       const mediaUrl = postMediaFile ? await uploadPostMedia(postMediaFile, postId) : null;
+      uploadedMediaPath = mediaUrl;
       const mediaType = postMediaFile?.type || null;
 
       const { error: saveError } = await supabase.from("posts").insert({
@@ -1744,6 +1747,9 @@ export function App() {
       await loadFeed();
       if (view === "profile") await loadProfilePosts();
     } catch (saveError) {
+      if (uploadedMediaPath && supabase) {
+        await supabase.storage.from("post-media").remove([uploadedMediaPath]).catch(() => undefined);
+      }
       setFeedError(
         saveError instanceof Error
           ? saveError.message
@@ -1791,6 +1797,8 @@ export function App() {
     setEditPostBusy(true);
     setFeedError("");
 
+    let uploadedEditMediaPath: string | null = null;
+
     try {
       let mediaUrl = editPostTarget.media_url;
       let mediaType = editPostTarget.media_type ?? (mediaUrl ? "image/*" : null);
@@ -1800,6 +1808,7 @@ export function App() {
         mediaType = null;
       } else if (editPostMediaFile) {
         mediaUrl = await uploadPostMedia(editPostMediaFile, editPostTarget.id);
+        uploadedEditMediaPath = mediaUrl;
         mediaType = editPostMediaFile.type;
       }
 
@@ -1837,6 +1846,9 @@ export function App() {
       setEditPostMediaRemove(false);
       setMessage("Post updated.");
     } catch (updateError) {
+      if (uploadedEditMediaPath && supabase) {
+        await supabase.storage.from("post-media").remove([uploadedEditMediaPath]).catch(() => undefined);
+      }
       setFeedError(
         updateError instanceof Error
           ? updateError.message
