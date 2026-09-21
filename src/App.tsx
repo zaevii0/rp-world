@@ -55,7 +55,6 @@ import {
   Mic,
 
 } from "lucide-react";
-import html2canvas from "html2canvas";
 import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent, type ReactNode } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { ThemePicker } from "./components/ThemePicker";
@@ -405,6 +404,10 @@ export function App() {
       const viewportHeight = window.innerHeight;
       const scrollX = window.scrollX;
       const scrollY = window.scrollY;
+      // Load the screenshot library only when this feature is actually used.
+      // This keeps html2canvas out of the initial application bundle and avoids
+      // making every RP WORLD visit pay the screenshot feature's startup cost.
+      const { default: html2canvas } = await import("html2canvas");
       const canvas = await html2canvas(target, {
         backgroundColor: null,
         scale: Math.min(window.devicePixelRatio || 1, 2),
