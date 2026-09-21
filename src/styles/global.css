@@ -2985,8 +2985,8 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
 
 .message-chat-header {
   position: relative;
-  min-height: 92px;
-  padding: 8px 12px 9px;
+  min-height: 112px;
+  padding: 26px 12px 10px;
   display: flex;
   align-items: flex-end;
   justify-content: center;
@@ -3239,6 +3239,9 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
   border-radius: 28px;
   overflow: hidden;
   border-color: color-mix(in srgb, var(--accent) 22%, transparent);
+  background: rgba(255,255,255,.065);
+  backdrop-filter: blur(32px) saturate(165%);
+  -webkit-backdrop-filter: blur(32px) saturate(165%);
   box-shadow:
     0 28px 90px rgba(0,0,0,.30),
     0 12px 38px color-mix(in srgb, var(--accent) 12%, transparent);
