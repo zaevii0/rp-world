@@ -269,6 +269,13 @@ export function App() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
+  const [staySignedIn, setStaySignedIn] = useState(() => {
+    try {
+      return localStorage.getItem("rpw-stay-signed-in") !== "false";
+    } catch {
+      return true;
+    }
+  });
 
   const [profileOpen, setProfileOpen] = useState(false);
   const [composerOpen, setComposerOpen] = useState(false);
@@ -484,7 +491,22 @@ export function App() {
 
     supabase.auth
       .getSession()
-      .then(({ data }) => setSession(data.session));
+      .then(async ({ data }) => {
+        let shouldStaySignedIn = true;
+        try {
+          shouldStaySignedIn = localStorage.getItem("rpw-stay-signed-in") !== "false";
+        } catch {
+          // Default to keeping the Supabase session when storage is unavailable.
+        }
+
+        if (data.session && !shouldStaySignedIn) {
+          await supabase.auth.signOut();
+          setSession(null);
+          return;
+        }
+
+        setSession(data.session);
+      });
 
     const { data: listener } = supabase.auth.onAuthStateChange(
       (_event, nextSession) => setSession(nextSession),
@@ -1056,6 +1078,12 @@ export function App() {
 
     setBusy(true);
     resetAuthMessages();
+
+    try {
+      localStorage.setItem("rpw-stay-signed-in", String(staySignedIn));
+    } catch {
+      // Storage can be unavailable in privacy-restricted environments.
+    }
 
     const normalizedEmail = email.trim().toLowerCase();
 
@@ -4784,6 +4812,17 @@ export function App() {
                     </button>
                   </div>
                 </label>
+
+                {authMode === "login" && (
+                  <label className="stay-signed-in-option">
+                    <input
+                      type="checkbox"
+                      checked={staySignedIn}
+                      onChange={(event) => setStaySignedIn(event.target.checked)}
+                    />
+                    <span>Stay signed in</span>
+                  </label>
+                )}
 
                 {error && (
                   <p className="form-message error">
