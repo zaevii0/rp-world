@@ -10,6 +10,16 @@ import {
   LockKeyhole,
   LayoutGrid,
   Users,
+  UsersRound,
+  PenLine,
+  Gamepad2,
+  Phone,
+  Camera,
+  BookOpen,
+  Newspaper,
+  TrendingUp,
+  Sparkles,
+  Trophy,
   Heart,
   Home,
   Image,
@@ -71,12 +81,12 @@ const VIEW_KEY = "rpw-current-view";
 const PUBLIC_PROFILE_KEY = "rpw-current-public-profile";
 const MESSAGE_CONVERSATION_KEY = "rpw-active-message-conversation";
 
-type AppView = "home" | "discover" | "profile" | "public" | "menu" | "suggestions" | "admin";
+type AppView = "home" | "search" | "discover" | "profile" | "public" | "menu" | "suggestions" | "admin";
 
 function readStoredView(): AppView {
   try {
     const saved = sessionStorage.getItem(VIEW_KEY);
-    return saved === "home" || saved === "discover" || saved === "profile" || saved === "public" || saved === "menu" || saved === "suggestions" || saved === "admin"
+    return saved === "home" || saved === "search" || saved === "discover" || saved === "profile" || saved === "public" || saved === "menu" || saved === "suggestions" || saved === "admin"
       ? saved
       : "home";
   } catch {
@@ -624,7 +634,7 @@ export function App() {
   }, [tagPostTarget, session]);
 
   useEffect(() => {
-    if (view === "discover" && session?.user && profile) {
+    if (view === "search" && session?.user && profile) {
       void loadDiscoverProfiles();
     }
   }, [view, session, profile]);
@@ -925,6 +935,7 @@ export function App() {
   const isDark = appearance !== "light";
 
   const title = useMemo(() => {
+    if (view === "search") return "Search RP WORLD";
     if (view === "discover") return "Discover";
     if (view === "profile") return "Your profile";
     if (view === "public") return publicProfile?.display_name ?? "Profile";
@@ -3033,7 +3044,7 @@ export function App() {
                   type="button"
                   aria-label="Search"
                   onClick={() =>
-                    setView("discover")
+                    setView("search")
                   }
                 >
                   <Search size={17} />
@@ -3415,66 +3426,46 @@ export function App() {
               </>
             )}
 
+            {view === "search" && (
+              <section className="discover-section search-page">
+                <div className="section-heading discover-heading"><div><p className="eyebrow">RP WORLD</p><h3>Search</h3></div></div>
+                <div className="discover-search-wrap search-page-bar">
+                  <Search size={16} aria-hidden="true" />
+                  <input className="discover-search-input" type="search" value={discoverSearch} onChange={(event) => setDiscoverSearch(event.target.value)} placeholder="Search people, usernames, or bios" aria-label="Search RP WORLD" autoComplete="off" autoFocus />
+                  {discoverSearch && <button className="discover-search-clear" type="button" onClick={() => setDiscoverSearch("")} aria-label="Clear search"><X size={15} /></button>}
+                </div>
+                {discoverProfiles.filter((person) => { const query = discoverSearch.trim().toLowerCase(); return !query || [person.display_name, person.username, person.bio ?? ""].some((value) => value.toLowerCase().includes(query)); }).length === 0 ? (
+                  <div className="empty-state glass"><Search size={24} /><strong>{discoverSearch.trim() ? "No matching profiles." : "No other profiles yet."}</strong><span>{discoverSearch.trim() ? "Try another name or username." : "Search RP WORLD members by name or username."}</span></div>
+                ) : (
+                  <div className="discover-list">{discoverProfiles.filter((person) => { const query = discoverSearch.trim().toLowerCase(); return !query || [person.display_name, person.username, person.bio ?? ""].some((value) => value.toLowerCase().includes(query)); }).map((person) => (
+                    <article className="discover-card glass" key={person.id}>
+                      <button className="avatar profile-link-button" type="button" onClick={() => void loadPublicProfile(person.id)} aria-label="Open profile" style={person.avatar_url ? { backgroundImage: `url(${person.avatar_url})` } : undefined}>{!person.avatar_url && initials(person.display_name)}</button>
+                      <div className="discover-info"><button className="profile-name-link" type="button" onClick={() => void loadPublicProfile(person.id)}>{person.display_name}</button><span>@{person.username}</span>{person.bio ? <p>{person.bio}</p> : null}</div>
+                      <button className="profile-action-button" type="button" onClick={() => void loadPublicProfile(person.id)}>View</button>
+                    </article>
+                  ))}</div>
+                )}
+              </section>
+            )}
+
             {view === "discover" && (
               <section className="discover-section">
-                <div className="section-heading discover-heading">
-                  <div><p className="eyebrow">RP WORLD</p><h3>Discover people</h3></div>
-                  <div className="discover-search-wrap">
-                    <Search size={16} aria-hidden="true" />
-                    <input
-                      className="discover-search-input"
-                      type="search"
-                      value={discoverSearch}
-                      onChange={(event) => setDiscoverSearch(event.target.value)}
-                      placeholder="Search people"
-                      aria-label="Search people"
-                      autoComplete="off"
-                    />
-                    {discoverSearch && (
-                      <button
-                        className="discover-search-clear"
-                        type="button"
-                        onClick={() => setDiscoverSearch("")}
-                        aria-label="Clear search"
-                      >
-                        <X size={15} />
-                      </button>
-                    )}
-                  </div>
+                <div className="section-heading discover-heading"><div><p className="eyebrow">RP WORLD</p><h3>Explore RP WORLD</h3><span className="discover-subtitle">Communities, activities, stories, people, and everything happening inside RP WORLD.</span></div></div>
+                <div className="discover-category-groups">
+                  <section className="discover-category-group"><div className="discover-category-heading"><UsersRound size={18}/><div><strong>Communities & Hoods</strong><span>RP spaces and communities.</span></div></div>
+                    <div className="discover-category-grid">{[["Arena / Gang","Competitive RP arenas and gangs."],["University / Academy","School and academy RP."],["Family","RP family circles."],["Sister Hood","Sisterhood communities."],["Brother Hood","Brotherhood communities."],["Music Hood","Music communities."],["Dance Hood","Dance communities."],["Ranter Hood","Rant and discussion communities."],["Writer Hood","Writer communities."],["Seller Hood","Seller communities."],["Buy & Sell","Marketplace spaces."],["Gaming Hood","Gaming communities."],["Call Groups","Call communities."],["Models","Model communities."],["Editor Hoods","Editing communities."],["Academic Commissioner","Academic-focused communities."]].map(([name,description]) => <button className="discover-category-card glass" type="button" key={name}><span className="discover-category-icon"><UsersRound size={18}/></span><span className="discover-category-copy"><strong>{name}</strong><small>{description}</small></span></button>)}</div>
+                  </section>
+                  <section className="discover-category-group"><div className="discover-category-heading"><Sparkles size={18}/><div><strong>Activities & Events</strong><span>Things members can do together.</span></div></div>
+                    <div className="discover-category-grid discover-category-grid-three">{[["Arena Games","Games and activities hosted inside arenas.",Gamepad2],["Community Activities","Member-led activities and interactions.",Users],["Events","RP WORLD events and special activities.",Sparkles],["Call Groups","Live call-based activities.",Phone],["Writing","Writing activities and events.",PenLine],["Editing","Creative editing activities.",Camera]].map(([name,description,Icon]) => { const CategoryIcon = Icon as typeof Gamepad2; return <button className="discover-category-card glass" type="button" key={name as string}><span className="discover-category-icon"><CategoryIcon size={18}/></span><span className="discover-category-copy"><strong>{name as string}</strong><small>{description as string}</small></span></button>; })}</div>
+                  </section>
+                  <section className="discover-category-group"><div className="discover-category-heading"><BookOpen size={18}/><div><strong>Library & Stories</strong><span>RPW writing and saved stories.</span></div></div>
+                    <div className="discover-category-grid discover-category-grid-three">{[["Trending Stories","Stories getting attention.",TrendingUp],["New Stories","Recently published stories.",Sparkles],["Most Read","Stories with the most reads.",Trophy],["Most Saved","Stories saved most often.",BookOpen],["Writers","Explore RPW writers.",PenLine],["Your Library","Your saved reading list.",BookOpen]].map(([name,description,Icon]) => { const CategoryIcon = Icon as typeof BookOpen; return <button className="discover-category-card glass" type="button" key={name as string}><span className="discover-category-icon"><CategoryIcon size={18}/></span><span className="discover-category-copy"><strong>{name as string}</strong><small>{description as string}</small></span></button>; })}</div>
+                  </section>
+                  <section className="discover-category-group"><div className="discover-category-heading"><TrendingUp size={18}/><div><strong>RPW Rankings & Trends</strong><span>Organic discovery from RP WORLD activity.</span></div></div>
+                    <div className="discover-category-grid discover-category-grid-three">{[["Trending Role Players","Role players gaining attention."],["Rising Role Players","Role players growing in activity."],["Most Followed","Role players with the most followers."],["Trending Hoods","Hoods gaining attention."],["Most Active Hoods","Hoods with the most activity."],["Longest-Running Hoods","Hoods with the longest RP history."],["Most Read Writers","Writers whose stories are read most."],["Most Saved Writers","Writers whose stories are saved most."],["Trending Writers","Writers currently trending."]].map(([name,description]) => <button className="discover-category-card glass" type="button" key={name}><span className="discover-category-icon"><TrendingUp size={18}/></span><span className="discover-category-copy"><strong>{name}</strong><small>{description}</small></span></button>)}</div>
+                  </section>
+                  <section className="discover-category-group"><div className="discover-category-heading"><Newspaper size={18}/><div><strong>RPW News</strong><span>Updates and news from the RP WORLD community.</span></div></div><button className="discover-feature-card glass" type="button"><span className="discover-category-icon"><Newspaper size={20}/></span><span className="discover-category-copy"><strong>RPW News</strong><small>Community updates, announcements, featured moments, and platform news.</small></span></button></section>
                 </div>
-                {discoverProfiles.filter((person) => {
-                  const query = discoverSearch.trim().toLowerCase();
-                  if (!query) return true;
-                  return [person.display_name, person.username, person.bio ?? ""]
-                    .some((value) => value.toLowerCase().includes(query));
-                }).length === 0 ? (
-                  <div className="empty-state glass">
-                    <Search size={24} />
-                    <strong>{discoverSearch.trim() ? "No matching profiles." : "No other profiles yet."}</strong>
-                    <span>{discoverSearch.trim() ? "Try another name or username." : "New RP WORLD members will appear here."}</span>
-                  </div>
-                ) : (
-                  <div className="discover-list">
-                    {discoverProfiles.filter((person) => {
-                      const query = discoverSearch.trim().toLowerCase();
-                      if (!query) return true;
-                      return [person.display_name, person.username, person.bio ?? ""]
-                        .some((value) => value.toLowerCase().includes(query));
-                    }).map((person) => (
-                      <article className="discover-card glass" key={person.id}>
-                        <button className="avatar profile-link-button" type="button" onClick={() => void loadPublicProfile(person.id)} aria-label={`Open ${person.display_name} profile`} style={person.avatar_url ? { backgroundImage: `url(${person.avatar_url})` } : undefined}>
-                          {!person.avatar_url && initials(person.display_name)}
-                        </button>
-                        <div className="discover-info">
-                          <button className="profile-name-link" type="button" onClick={() => void loadPublicProfile(person.id)}>{person.display_name}</button>
-                          <span>@{person.username}</span>
-                          {person.bio ? <p>{person.bio}</p> : null}
-                        </div>
-                        <button className="profile-action-button" type="button" onClick={() => void loadPublicProfile(person.id)}>View</button>
-                      </article>
-                    ))}
-                  </div>
-                )}
               </section>
             )}
 
