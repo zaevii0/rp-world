@@ -2687,6 +2687,26 @@ export function App() {
       }
     }
 
+    if (!saveError && data && mediaFile) {
+      try {
+        const mediaPath = await uploadCommentMedia(mediaFile, postId);
+        const { data: updatedComment, error: mediaError } = await supabase
+          .from("post_comments")
+          .update({ media_url: mediaPath, media_type: mediaFile.type })
+          .eq("id", data.id)
+          .eq("author_id", session.user.id)
+          .select("id, post_id, author_id, content, created_at, parent_id, media_url, media_type")
+          .single();
+        if (mediaError || !updatedComment) throw mediaError ?? new Error("Could not attach image.");
+        data = updatedComment as typeof data;
+        void signPostMediaUrls([mediaPath]);
+      } catch (mediaError) {
+        await supabase.from("post_comments").delete().eq("id", data.id).eq("author_id", session.user.id);
+        saveError = mediaError as { message?: string };
+        data = null;
+      }
+    }
+
     setCommentBusy(null);
 
     if (saveError || !data) {
@@ -2702,6 +2722,8 @@ export function App() {
 
     const newComment = {
       ...(data as Comment),
+      media_url: (data as Comment).media_url ?? null,
+      media_type: (data as Comment).media_type ?? null,
       reactionCount: 0,
       reactionType: null as string | null,
       profile: profile ?? undefined,
@@ -2715,10 +2737,8 @@ export function App() {
       ],
     }));
 
-    setCommentDrafts((current) => ({
-      ...current,
-      [postId]: "",
-    }));
+    setCommentDrafts((current) => ({ ...current, [postId]: "" }));
+    setCommentMediaFiles((current) => ({ ...current, [postId]: null }));
     setReplyTo(null);
     setFeedError("");
 
