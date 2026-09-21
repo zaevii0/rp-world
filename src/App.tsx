@@ -320,6 +320,9 @@ export function App() {
   const [messagesByConversation, setMessagesByConversation] = useState<Record<string, Array<{ id: string; sender_id: string; content: string; created_at: string }>>>({});
   const [messageDraft, setMessageDraft] = useState("");
   const [messageNoticeOpen, setMessageNoticeOpen] = useState(false);
+  const [onlineUserIds, setOnlineUserIds] = useState<Set<string>>(new Set());
+  const [activeConversationProfile, setActiveConversationProfile] = useState<Profile | null>(null);
+  const [expandedMessageTimestamps, setExpandedMessageTimestamps] = useState<Record<string, boolean>>({});
   const [profileStats, setProfileStats] = useState({ followers: 0, likes: 0 });
 
   const commentReactionOptions = [
@@ -372,6 +375,37 @@ export function App() {
       // Ignore unavailable session storage; normal navigation still works.
     }
   }, [view, publicProfile, session]);
+
+  useEffect(() => {
+    if (!supabase || !session?.user) {
+      setOnlineUserIds(new Set());
+      return;
+    }
+
+    const presenceChannel = supabase.channel("rp-world-presence", {
+      config: { presence: { key: session.user.id } },
+    });
+
+    const syncPresence = () => {
+      const state = presenceChannel.presenceState();
+      setOnlineUserIds(new Set(Object.keys(state)));
+    };
+
+    presenceChannel.on("presence", { event: "sync" }, syncPresence);
+    presenceChannel.on("presence", { event: "join" }, syncPresence);
+    presenceChannel.on("presence", { event: "leave" }, syncPresence);
+
+    void presenceChannel.subscribe(async (status) => {
+      if (status === "SUBSCRIBED") {
+        await presenceChannel.track({ online_at: new Date().toISOString() });
+      }
+    });
+
+    return () => {
+      void presenceChannel.untrack();
+      void supabase.removeChannel(presenceChannel);
+    };
+  }, [session]);
 
   useEffect(() => {
     if (!supabase) return;
@@ -1340,6 +1374,23 @@ export function App() {
     setDiscoverProfiles((data ?? []) as Profile[]);
   }
 
+  function formatMessageDateTime(value: string) {
+    return new Intl.DateTimeFormat("en-US", {
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: true,
+    }).format(new Date(value));
+  }
+
+  function getActiveConversationProfile(conversationId: string) {
+    return messageConversations.find((item) => item.id === conversationId)?.otherProfile
+      ?? activeConversationProfile;
+  }
+
   async function loadMessageInbox() {
     if (!supabase || !session?.user) return;
     const { data: conversations, error: conversationError } = await supabase
@@ -1425,12 +1476,16 @@ export function App() {
     }
 
     setMessageInboxOpen(false);
+    setActiveConversationProfile(publicProfile);
+    setExpandedMessageTimestamps({});
     setActiveConversation(conversation.id);
     await loadConversationMessages(conversation.id);
   }
 
   async function openConversationById(conversationId: string) {
     setMessageInboxOpen(false);
+    setActiveConversationProfile(getActiveConversationProfile(conversationId));
+    setExpandedMessageTimestamps({});
     setActiveConversation(conversationId);
     await loadConversationMessages(conversationId);
   }
@@ -3694,13 +3749,58 @@ export function App() {
       {activeConversation && (
         <div className="sheet-backdrop" role="presentation" onClick={() => setActiveConversation(null)}>
           <section className="message-sheet glass" role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
-            <div className="sheet-header"><div><p className="eyebrow">FRIENDS</p><h2>Messages</h2></div><button className="icon-button" type="button" aria-label="Close messages" onClick={() => setActiveConversation(null)}><X size={18} /></button></div>
-            <div className="message-list">
-              {(messagesByConversation[activeConversation] ?? []).map((item) => (
-                <div className={item.sender_id === session?.user.id ? "message-bubble mine" : "message-bubble"} key={item.id}><span>{item.content}</span><small>{timeAgo(item.created_at)}</small></div>
-              ))}
+            <div className="message-chat-header">
+              <button className="message-back-button" type="button" aria-label="Back to messages" onClick={() => {
+                setActiveConversation(null);
+                setActiveConversationProfile(null);
+              }}>
+                <ArrowLeft size={18} />
+              </button>
+              {activeConversationProfile && (
+                <span
+                  className="avatar message-header-avatar"
+                  style={activeConversationProfile.avatar_url ? { backgroundImage: `url(${activeConversationProfile.avatar_url})` } : undefined}
+                >
+                  {!activeConversationProfile.avatar_url && initials(activeConversationProfile.display_name)}
+                </span>
+              )}
+              <div className="message-chat-identity">
+                <strong>{activeConversationProfile?.display_name ?? "Messages"}</strong>
+                {activeConversationProfile && (
+                  <span className={onlineUserIds.has(activeConversationProfile.id) ? "message-online" : "message-offline"}>
+                    <i aria-hidden="true" />
+                    {onlineUserIds.has(activeConversationProfile.id) ? "Active now" : "Offline"}
+                  </span>
+                )}
+              </div>
+              <button className="icon-button" type="button" aria-label="Close messages" onClick={() => {
+                setActiveConversation(null);
+                setActiveConversationProfile(null);
+              }}><X size={18} /></button>
             </div>
-            <form className="message-form" onSubmit={sendMessage}><input value={messageDraft} onChange={(event) => setMessageDraft(event.target.value)} placeholder="Write a message…" maxLength={2000} autoFocus /><button type="submit" disabled={!messageDraft.trim()}>Send</button></form>
+            <div className="message-list">
+              {(messagesByConversation[activeConversation] ?? []).map((item) => {
+                const expanded = expandedMessageTimestamps[item.id] ?? false;
+                return (
+                  <div className={item.sender_id === session?.user.id ? "message-bubble mine" : "message-bubble"} key={item.id}>
+                    <span>{item.content}</span>
+                    <button
+                      className="message-time"
+                      type="button"
+                      onClick={() => setExpandedMessageTimestamps((current) => ({ ...current, [item.id]: !expanded }))}
+                      aria-expanded={expanded}
+                      title="Show exact date and time"
+                    >
+                      {expanded ? formatMessageDateTime(item.created_at) : timeAgo(item.created_at)}
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+            <form className="message-form" onSubmit={sendMessage}>
+              <input value={messageDraft} onChange={(event) => setMessageDraft(event.target.value)} placeholder="Write a message…" maxLength={2000} autoFocus />
+              <button type="submit" disabled={!messageDraft.trim()}><Send size={16} /></button>
+            </form>
           </section>
         </div>
       )}
