@@ -5013,6 +5013,32 @@ export function App() {
         </div>
       )}
 
+      {commentActionTarget && commentActionPostId && session && profile && (
+        <div className="sheet-backdrop comment-action-backdrop" role="presentation" onClick={() => !commentActionBusy && setCommentActionTarget(null)}>
+          <section className="comment-action-sheet glass" role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
+            <p className="eyebrow">COMMENT</p>
+            <h3>Comment options</h3>
+            <button type="button" onClick={() => { setCommentEditId(commentActionTarget.id); setCommentEditDraft(commentActionTarget.content); setCommentActionTarget(null); }}>
+              <Pencil size={16} /> Edit comment/reply
+            </button>
+            <button type="button" onClick={() => { void navigator.clipboard?.writeText(commentActionTarget.content); setCommentActionTarget(null); }}>
+              <Link2 size={16} /> Copy
+            </button>
+            {!commentActionTarget.parent_id && (
+              <button type="button" onClick={() => void manageComment(commentActionPostId, commentActionTarget, "pin")}>
+                <Pin size={16} /> {commentActionTarget.is_pinned ? "Unpin comment" : "Pin comment"}
+              </button>
+            )}
+            <button type="button" onClick={() => void manageComment(commentActionPostId, commentActionTarget, "hide")}>
+              <EyeOff size={16} /> {commentActionTarget.is_hidden ? "Show comment" : "Hide comment"}
+            </button>
+            <button className="danger" type="button" onClick={() => void manageComment(commentActionPostId, commentActionTarget, "delete")}>
+              <Trash2 size={16} /> Delete comment
+            </button>
+          </section>
+        </div>
+      )}
+
       {postActionTarget && session && profile && (
         <div className="sheet-backdrop" role="presentation" onClick={() => !postActionBusy && setPostActionTarget(null)}>
           <section className="post-action-sheet glass" role="dialog" aria-modal="true" aria-labelledby="post-action-title" onClick={(event) => event.stopPropagation()}>
