@@ -38,6 +38,10 @@ import {
   X,
   RefreshCw,
   CheckCheck,
+  Phone,
+  Settings,
+  Mic,
+
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent, type ReactNode } from "react";
 import type { Session } from "@supabase/supabase-js";
@@ -352,6 +356,45 @@ export function App() {
   const [onlineUserIds, setOnlineUserIds] = useState<Set<string>>(new Set());
   const [activeConversationProfile, setActiveConversationProfile] = useState<Profile | null>(null);
   const [expandedMessageTimestamps, setExpandedMessageTimestamps] = useState<Record<string, boolean>>({});
+  const [messageSettingsOpen, setMessageSettingsOpen] = useState(false);
+  const [chatNickname, setChatNickname] = useState("");
+  const messageMediaRef = useRef<HTMLInputElement | null>(null);
+
+  function chatNicknameKey(otherUserId: string) {
+    return `rpw-chat-nickname-${session?.user.id ?? "anonymous"}-${otherUserId}`;
+  }
+
+  function getChatDisplayName(otherProfile: Profile | null) {
+    if (!otherProfile) return "Messages";
+    try {
+      return localStorage.getItem(chatNicknameKey(otherProfile.id))?.trim() || otherProfile.display_name;
+    } catch {
+      return otherProfile.display_name;
+    }
+  }
+
+  function openMessageSettings() {
+    if (!activeConversationProfile) return;
+    try {
+      setChatNickname(localStorage.getItem(chatNicknameKey(activeConversationProfile.id)) ?? "");
+    } catch {
+      setChatNickname("");
+    }
+    setMessageSettingsOpen(true);
+  }
+
+  function saveMessageSettings(event: FormEvent) {
+    event.preventDefault();
+    if (!activeConversationProfile) return;
+    const nickname = chatNickname.trim().slice(0, 40);
+    try {
+      if (nickname) localStorage.setItem(chatNicknameKey(activeConversationProfile.id), nickname);
+      else localStorage.removeItem(chatNicknameKey(activeConversationProfile.id));
+    } catch {
+      // Ignore unavailable local storage.
+    }
+    setMessageSettingsOpen(false);
+  }
   const [profileStats, setProfileStats] = useState({ followers: 0, likes: 0 });
 
   const commentReactionOptions = [
@@ -4198,7 +4241,7 @@ export function App() {
                 </span>
               )}
               <div className="message-chat-identity">
-                <strong>{activeConversationProfile?.display_name ?? "Messages"}</strong>
+                <strong>{getChatDisplayName(activeConversationProfile)}</strong>
                 {activeConversationProfile && (
                   <span className={onlineUserIds.has(activeConversationProfile.id) ? "message-online" : "message-offline"}>
                     <i aria-hidden="true" />
@@ -4206,15 +4249,14 @@ export function App() {
                   </span>
                 )}
               </div>
-              <button
-                className="icon-button message-refresh-button"
-                type="button"
-                aria-label="Refresh messages"
-                title="Refresh messages"
-                onClick={() => void loadConversationMessages(activeConversation)}
-              >
-                <RefreshCw size={17} />
-              </button>
+              <div className="message-chat-actions">
+                <button className="message-header-action" type="button" aria-label="Call" title="Call" onClick={() => setMessage("Voice and video calls are coming soon.")}>
+                  <Phone size={18} />
+                </button>
+                <button className="message-header-action" type="button" aria-label="Chat settings" title="Chat settings" onClick={openMessageSettings}>
+                  <Settings size={18} />
+                </button>
+              </div>
             </div>
             <div className="message-list" role="log" aria-live="polite">
               {(messagesByConversation[activeConversation] ?? []).length === 0 ? (
@@ -4264,8 +4306,28 @@ export function App() {
               )}
             </div>
             <form className="message-form" onSubmit={sendMessage}>
-              <button className="message-attach-button" type="button" aria-label="Add attachment" title="Attachments" disabled>
+              <input
+                ref={messageMediaRef}
+                className="message-media-input"
+                type="file"
+                accept="image/*,video/*"
+                multiple
+                onChange={() => {
+                  setMessage("Media sending will be connected to message storage next.");
+                  if (messageMediaRef.current) messageMediaRef.current.value = "";
+                }}
+              />
+              <button className="message-compose-action" type="button" aria-label="More" title="More">
                 <Plus size={20} strokeWidth={2.2} />
+              </button>
+              <button className="message-compose-action" type="button" aria-label="Camera" title="Camera" onClick={() => setMessage("Camera capture is ready for the next media-upload step.")}>
+                <Camera size={19} strokeWidth={2.1} />
+              </button>
+              <button className="message-compose-action" type="button" aria-label="Photos and videos" title="Photos and videos" onClick={() => messageMediaRef.current?.click()}>
+                <Image size={19} strokeWidth={2.1} />
+              </button>
+              <button className="message-compose-action" type="button" aria-label="Voice message" title="Voice message" onClick={() => setMessage("Voice messages are coming soon.")}>
+                <Mic size={19} strokeWidth={2.1} />
               </button>
               <div className="message-input-shell">
                 <textarea
@@ -4291,6 +4353,28 @@ export function App() {
                 <button className="message-send-button" type="submit" disabled={!messageDraft.trim()} aria-label="Send message" title="Send message">
                   <ArrowUp size={18} strokeWidth={2.5} />
                 </button>
+              </div>
+            </form>
+          </section>
+        </div>
+      )}
+
+      {messageSettingsOpen && activeConversationProfile && (
+        <div className="sheet-backdrop message-settings-backdrop" role="presentation" onClick={() => setMessageSettingsOpen(false)}>
+          <section className="message-settings-sheet glass" role="dialog" aria-modal="true" aria-labelledby="message-settings-title" onClick={(event) => event.stopPropagation()}>
+            <div className="sheet-header">
+              <div><p className="eyebrow">CHAT SETTINGS</p><h2 id="message-settings-title">Conversation</h2></div>
+              <button className="icon-button" type="button" aria-label="Close settings" onClick={() => setMessageSettingsOpen(false)}><X size={18} /></button>
+            </div>
+            <form className="message-settings-form" onSubmit={saveMessageSettings}>
+              <label>
+                <span>Nickname</span>
+                <small>Only you will see this name in this conversation.</small>
+                <input value={chatNickname} onChange={(event) => setChatNickname(event.target.value)} placeholder={activeConversationProfile.display_name} maxLength={40} autoFocus />
+              </label>
+              <div className="message-settings-actions">
+                <button className="mode-switch" type="button" onClick={() => { setChatNickname(""); }}>Clear</button>
+                <button className="primary-button" type="submit">Save</button>
               </div>
             </form>
           </section>
