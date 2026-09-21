@@ -674,7 +674,7 @@ export function App() {
         profile: profileMap.get(row.author_id),
         likes: row.post_likes?.[0]?.count ?? 0,
         liked: false,
-        liked_at: null,
+        liked_at: null as string | null,
         comments: row.post_comments?.[0]?.count ?? 0,
         reposts: 0,
         reposted: false,
@@ -683,11 +683,11 @@ export function App() {
         pinned_at: row.pinned_at ?? null,
         archived_at: row.archived_at ?? null,
         privacy: row.privacy ?? "public",
-        trashed_at: row.trashed_at ?? null,
-        tagged_profiles: [],
+        trashed_at: null as string | null,
+        tagged_profiles: [] as Profile[],
         shared_post_id: row.shared_post_id ?? null,
         share_caption: row.share_caption ?? null,
-        shared_original: null,
+        shared_original: null as Post["shared_original"],
       })),
     );
 
