@@ -3588,3 +3588,28 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
     grid-template-columns: repeat(4, 30px) minmax(0, 1fr) !important;
   }
 }
+
+/* iOS-style stay signed in control */
+.stay-signed-in-option {
+  display: flex !important;
+  grid-template-columns: none !important;
+  align-items: center;
+  gap: 9px !important;
+  min-height: 24px;
+  cursor: pointer;
+  color: inherit;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.stay-signed-in-option input {
+  width: 17px;
+  height: 17px;
+  margin: 0;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.stay-signed-in-option span {
+  opacity: .82;
+}
