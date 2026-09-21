@@ -393,30 +393,6 @@ export function App() {
     }
   }, [view]);
 
-  // Keep an open conversation alive across a browser refresh.
-  useEffect(() => {
-    try {
-      if (activeConversation) sessionStorage.setItem(MESSAGE_CONVERSATION_KEY, activeConversation);
-      else sessionStorage.removeItem(MESSAGE_CONVERSATION_KEY);
-    } catch {
-      // Ignore unavailable session storage.
-    }
-  }, [activeConversation]);
-
-  useEffect(() => {
-    if (!activeConversation || !session?.user) return;
-    void loadMessageInbox();
-  }, [activeConversation, session]);
-
-  useEffect(() => {
-    if (!activeConversation || activeConversationProfile || !messageConversations.length) return;
-    const conversation = messageConversations.find((item) => item.id === activeConversation);
-    if (conversation) {
-      setActiveConversationProfile(conversation.otherProfile);
-      void loadConversationMessages(activeConversation);
-    }
-  }, [activeConversation, activeConversationProfile, messageConversations]);
-
   // Public profiles need their target id restored before their data can be fetched.
   useEffect(() => {
     if (view !== "public" || publicProfile || !session?.user || !supabase) return;
@@ -1670,6 +1646,29 @@ export function App() {
     }));
   }
 
+  useEffect(() => {
+    try {
+      if (activeConversation) sessionStorage.setItem(MESSAGE_CONVERSATION_KEY, activeConversation);
+      else sessionStorage.removeItem(MESSAGE_CONVERSATION_KEY);
+    } catch {
+      // Ignore unavailable session storage.
+    }
+  }, [activeConversation]);
+
+  useEffect(() => {
+    if (!activeConversation || !session?.user) return;
+    void loadMessageInbox();
+  }, [activeConversation, session]);
+
+  useEffect(() => {
+    if (!activeConversation || activeConversationProfile || !messageConversations.length) return;
+    const conversation = messageConversations.find((item) => item.id === activeConversation);
+    if (conversation) {
+      setActiveConversationProfile(conversation.otherProfile);
+      void loadConversationMessages(activeConversation);
+    }
+  }, [activeConversation, activeConversationProfile, messageConversations]);
+
   async function sendMessage(event: FormEvent) {
     event.preventDefault();
     if (!supabase || !session?.user || !activeConversation || !messageDraft.trim()) return;
@@ -2709,7 +2708,9 @@ export function App() {
 
   async function sharePostExternally(post: Post) {
     const original = post.shared_original ?? post;
-    const shareText = post.share_caption?.trim() ? post.share_caption.trim() + "\n\n" + original.content : original.content;
+    const shareText = post.share_caption?.trim() ? post.share_caption.trim() + "
+
+" + original.content : original.content;
     const shareData = {
       title: original.profile?.display_name ? original.profile.display_name + " on RP WORLD" : "RP WORLD post",
       text: shareText,
@@ -2717,7 +2718,9 @@ export function App() {
     };
     try {
       if (navigator.share) { await navigator.share(shareData); return; }
-      if (navigator.clipboard) { await navigator.clipboard.writeText(shareText + "\n\n" + shareData.url); setMessage("Post link copied to clipboard."); return; }
+      if (navigator.clipboard) { await navigator.clipboard.writeText(shareText + "
+
+" + shareData.url); setMessage("Post link copied to clipboard."); return; }
       setMessage("Sharing is not available in this browser.");
     } catch (shareError) {
       if (shareError instanceof DOMException && shareError.name === "AbortError") return;
@@ -4998,3 +5001,251 @@ export function App() {
                 <X size={18} />
               </button>
             </div>
+
+            <form className="auth-form" onSubmit={updateHighlight}>
+              <label>
+                <span>Title</span>
+                <div className="input-wrap">
+                  <Sparkles size={15} />
+                  <input
+                    type="text"
+                    value={highlightEditTitle}
+                    onChange={(event) => setHighlightEditTitle(event.target.value)}
+                    maxLength={24}
+                    required
+                  />
+                </div>
+              </label>
+
+              <label>
+                <span>Photo or video <small>optional</small></span>
+                <div className="input-wrap">
+                  <Image size={15} />
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,video/quicktime"
+                    onChange={(event) => setHighlightEditFile(event.target.files?.[0] ?? null)}
+                  />
+                </div>
+              </label>
+
+              {profileError && <p className="form-message error">{profileError}</p>}
+
+              <button className="primary-button full" type="submit" disabled={highlightEditBusy}>
+                {highlightEditBusy ? "Saving…" : "Save changes"}
+              </button>
+
+              <button
+                className="secondary-button full highlight-delete-button"
+                type="button"
+                disabled={highlightEditBusy}
+                onClick={() => {
+                  setHighlightEditOpen(false);
+                  setHighlightActionsOpen(false);
+                  void deleteHighlight();
+                }}
+              >
+                <Trash2 size={16} />
+                Delete highlight
+              </button>
+            </form>
+          </section>
+        </div>
+      )}
+
+      {profileOpen && session && (
+        <div
+          className="sheet-backdrop"
+          role="presentation"
+        >
+          <section
+            className="profile-sheet glass"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="profile-title"
+          >
+            <div className="sheet-header">
+              <div>
+                <p className="eyebrow">
+                  RP WORLD IDENTITY
+                </p>
+
+                <h2 id="profile-title">
+                  Build your profile.
+                </h2>
+              </div>
+
+              {profile && (
+                <button
+                  className="icon-button"
+                  type="button"
+                  aria-label="Close"
+                  onClick={() =>
+                    setProfileOpen(false)
+                  }
+                >
+                  <X size={18} />
+                </button>
+              )}
+            </div>
+
+            <p className="sheet-copy">
+              Choose the identity people will see
+              inside RP WORLD. Your email stays
+              private and is not your public
+              username.
+            </p>
+
+            <form
+              className="auth-form"
+              onSubmit={handleProfileSubmit}
+            >
+              <label>
+                <span>Username</span>
+
+                <div className="input-wrap">
+                  <span className="input-prefix">
+                    @
+                  </span>
+
+                  <input
+                    type="text"
+                    value={username}
+                    onChange={(event) =>
+                      setUsername(
+                        event.target.value
+                          .replace(
+                            /[^a-zA-Z0-9_]/g,
+                            "",
+                          )
+                          .toLowerCase(),
+                      )
+                    }
+                    placeholder="yourname"
+                    maxLength={24}
+                    required
+                  />
+                </div>
+              </label>
+
+              <label>
+                <span>Display name</span>
+
+                <div className="input-wrap">
+                  <input
+                    type="text"
+                    value={displayName}
+                    onChange={(event) =>
+                      setDisplayName(
+                        event.target.value,
+                      )
+                    }
+                    placeholder="Your RP name"
+                    maxLength={60}
+                    required
+                  />
+                </div>
+              </label>
+
+              <label>
+                <span>
+                  Profile photo{" "}
+                  <small>optional</small>
+                </span>
+
+                <div className="input-wrap">
+                  <Camera size={15} />
+
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,image/gif"
+                    onChange={(event) =>
+                      setAvatarFile(
+                        event.target.files?.[0] ?? null,
+                      )
+                    }
+                  />
+                </div>
+              </label>
+
+              <label>
+                <span>
+                  Cover photo{" "}
+                  <small>optional</small>
+                </span>
+
+                <div className="input-wrap">
+                  <Image size={15} />
+
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,image/gif"
+                    onChange={(event) =>
+                      setCoverFile(
+                        event.target.files?.[0] ?? null,
+                      )
+                    }
+                  />
+                </div>
+              </label>
+
+              <div className="highlight-style-field">
+                <div className="highlight-style-label">
+                  <span>Highlight style</span>
+                  <small>Choose how your highlights appear on your profile.</small>
+                </div>
+                <div className="highlight-style-options" role="radiogroup" aria-label="Highlight style">
+                  <button className={highlightStyle === "circle" ? "highlight-style-option active" : "highlight-style-option"} type="button" role="radio" aria-checked={highlightStyle === "circle"} onClick={() => setHighlightStyle("circle")}>
+                    <span className="style-preview style-preview-circle"><Sparkles size={15} /></span>
+                    <span><strong>Circle</strong><small>Instagram-style</small></span>
+                  </button>
+                  <button className={highlightStyle === "portrait" ? "highlight-style-option active" : "highlight-style-option"} type="button" role="radio" aria-checked={highlightStyle === "portrait"} onClick={() => setHighlightStyle("portrait")}>
+                    <span className="style-preview style-preview-portrait"><Sparkles size={15} /></span>
+                    <span><strong>Portrait</strong><small>Facebook-style</small></span>
+                  </button>
+                </div>
+              </div>
+
+              <label>
+                <span>
+                  Bio{" "}
+                  <small>optional</small>
+                </span>
+
+                <div className="input-wrap textarea-wrap">
+                  <textarea
+                    value={bio}
+                    onChange={(event) =>
+                      setBio(event.target.value)
+                    }
+                    placeholder="A short line about your RP identity."
+                    maxLength={160}
+                    rows={3}
+                  />
+                </div>
+              </label>
+
+              {profileError && (
+                <p className="form-message error">
+                  {profileError}
+                </p>
+              )}
+
+              <button
+                className="primary-button full"
+                type="submit"
+                disabled={profileBusy}
+              >
+                {profileBusy
+                  ? "Saving…"
+                  : profile
+                    ? "Save changes"
+                    : "Continue"}
+              </button>
+            </form>
+          </section>
+        </div>
+      )}
+    </div>
+  );
+}
