@@ -1707,7 +1707,7 @@ export function App() {
     try {
       const { error: updateError } = await supabase.from("profile_highlights").update({ image_url: null }).eq("id", activeHighlight.id).eq("user_id", session.user.id);
       if (updateError) throw updateError;
-      const nextHighlight = { ...activeHighlight, image_url: null };
+      const nextHighlight: Highlight = { ...activeHighlight, image_url: null };
       setActiveHighlight(nextHighlight);
       setHighlights((current) => current.map((item) => item.id === nextHighlight.id ? nextHighlight : item));
       setPublicHighlights((current) => current.map((item) => item.id === nextHighlight.id ? nextHighlight : item));
