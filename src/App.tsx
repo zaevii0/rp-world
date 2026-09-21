@@ -466,6 +466,19 @@ export function App() {
     image.src = screenshotDataUrl;
   }
 
+  useEffect(() => {
+    if (!screenshotDataUrl || !screenshotCanvasRef.current) return;
+    const canvas = screenshotCanvasRef.current;
+    const image = new window.Image();
+    image.onload = () => {
+      canvas.width = image.naturalWidth;
+      canvas.height = image.naturalHeight;
+      const context = canvas.getContext("2d");
+      if (context) context.drawImage(image, 0, 0);
+    };
+    image.src = screenshotDataUrl;
+  }, [screenshotDataUrl]);
+
   function drawOnScreenshot(event: React.PointerEvent<HTMLCanvasElement>) {
     if (!screenshotDrawing) return;
     const canvas = screenshotCanvasRef.current;
@@ -474,7 +487,7 @@ export function App() {
     const rect = canvas.getBoundingClientRect();
     const scaleX = canvas.width / rect.width;
     const scaleY = canvas.height / rect.height;
-    context.strokeStyle = "rgba(215,38,61,.95)";
+    context.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue("--accent").trim() || "#8f8f98";
     context.lineWidth = 5 * Math.max(scaleX, scaleY);
     context.lineCap = "round";
     context.lineJoin = "round";
@@ -4403,11 +4416,10 @@ export function App() {
               <button className="icon-button" type="button" aria-label="Discard screenshot" onClick={() => setScreenshotOpen(false)}><X size={18}/></button>
             </div>
             <div className="screenshot-preview">
-              <img src={screenshotDataUrl} alt="RP WORLD screenshot preview" />
               <canvas
                 ref={screenshotCanvasRef}
                 className="screenshot-draw-canvas"
-                aria-hidden={!screenshotDrawing}
+                aria-label="Screenshot preview"
                 onPointerDown={drawOnScreenshot}
                 onPointerMove={drawOnScreenshot}
               />
