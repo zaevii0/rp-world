@@ -5130,3 +5130,11 @@ body,
 .app {
   background-color: transparent;
 }
+
+
+/* Lift the bottom navigation slightly above the device bottom edge. */
+.bottom-nav,
+.mobile-bottom-nav,
+nav.bottom-nav {
+  bottom: max(10px, env(safe-area-inset-bottom));
+}
