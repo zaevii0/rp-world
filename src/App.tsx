@@ -238,6 +238,10 @@ export function App() {
   const [highlightImage, setHighlightImage] = useState("");
   const [highlightFile, setHighlightFile] = useState<File | null>(null);
   const [highlightBusy, setHighlightBusy] = useState(false);
+  const [highlightEditOpen, setHighlightEditOpen] = useState(false);
+  const [highlightEditTitle, setHighlightEditTitle] = useState("");
+  const [highlightEditFile, setHighlightEditFile] = useState<File | null>(null);
+  const [highlightEditBusy, setHighlightEditBusy] = useState(false);
   const [activeHighlight, setActiveHighlight] = useState<Highlight | null>(null);
   const [activePostMedia, setActivePostMedia] = useState<{ url: string; type: "image" | "video" } | null>(null);
   const [signedMediaUrls, setSignedMediaUrls] = useState<Record<string, string>>({});
@@ -1653,6 +1657,120 @@ export function App() {
       .order("created_at", { ascending: true });
 
     setHighlights((data ?? []) as Highlight[]);
+  }
+
+  function openHighlightEditor(highlight: Highlight) {
+    setHighlightEditTitle(highlight.title);
+    setHighlightEditFile(null);
+    setHighlightEditOpen(true);
+  }
+
+  async function updateHighlight(event: FormEvent) {
+    event.preventDefault();
+    if (!supabase || !session?.user || !activeHighlight) return;
+
+    const title = highlightEditTitle.trim();
+    if (!title) {
+      setProfileError("Please enter a title for the highlight.");
+      return;
+    }
+
+    setHighlightEditBusy(true);
+    setProfileError("");
+
+    try {
+      let imageUrl = activeHighlight.image_url;
+
+      if (highlightEditFile) {
+        const extension = highlightEditFile.name.split(".").pop()?.toLowerCase() || "jpg";
+        const filePath = `${session.user.id}/${crypto.randomUUID()}.${extension}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from("profile-highlights")
+          .upload(filePath, highlightEditFile, {
+            cacheControl: "3600",
+            contentType: highlightEditFile.type || "image/jpeg",
+            upsert: false,
+          });
+
+        if (uploadError) throw new Error(`Media upload failed: ${uploadError.message}`);
+
+        const { data: publicUrl } = supabase.storage
+          .from("profile-highlights")
+          .getPublicUrl(filePath);
+        imageUrl = publicUrl.publicUrl;
+      }
+
+      const { data, error: updateError } = await supabase
+        .from("profile_highlights")
+        .update({ title, image_url: imageUrl })
+        .eq("id", activeHighlight.id)
+        .eq("user_id", session.user.id)
+        .select("id, user_id, title, image_url, created_at")
+        .single();
+
+      if (updateError || !data) {
+        throw new Error(updateError?.message || "Could not update highlight.");
+      }
+
+      const updated = data as Highlight;
+      setHighlights((current) => current.map((item) => item.id === updated.id ? updated : item));
+      setPublicHighlights((current) => current.map((item) => item.id === updated.id ? updated : item));
+      setActiveHighlight(updated);
+      setHighlightEditOpen(false);
+      setHighlightEditFile(null);
+    } catch (highlightError) {
+      console.error("RP WORLD highlight update failed", highlightError);
+      setProfileError(
+        highlightError instanceof Error
+          ? highlightError.message
+          : "Could not update highlight. Please try again.",
+      );
+    } finally {
+      setHighlightEditBusy(false);
+    }
+  }
+
+  async function deleteHighlight() {
+    if (!supabase || !session?.user || !activeHighlight || highlightEditBusy) return;
+
+    const confirmed = window.confirm(`Delete the "${activeHighlight.title}" highlight? This cannot be undone.`);
+    if (!confirmed) return;
+
+    setHighlightEditBusy(true);
+    setProfileError("");
+
+    try {
+      const imageUrl = activeHighlight.image_url;
+      const marker = "/storage/v1/object/public/profile-highlights/";
+      const markerIndex = imageUrl?.indexOf(marker) ?? -1;
+
+      if (markerIndex >= 0) {
+        const filePath = decodeURIComponent(imageUrl!.slice(markerIndex + marker.length));
+        await supabase.storage.from("profile-highlights").remove([filePath]);
+      }
+
+      const { error: deleteError } = await supabase
+        .from("profile_highlights")
+        .delete()
+        .eq("id", activeHighlight.id)
+        .eq("user_id", session.user.id);
+
+      if (deleteError) throw new Error(deleteError.message);
+
+      setHighlights((current) => current.filter((item) => item.id !== activeHighlight.id));
+      setPublicHighlights((current) => current.filter((item) => item.id !== activeHighlight.id));
+      setActiveHighlight(null);
+    } catch (highlightError) {
+      console.error("RP WORLD highlight delete failed", highlightError);
+      setProfileError(
+        highlightError instanceof Error
+          ? highlightError.message
+          : "Could not delete highlight. Please try again.",
+      );
+    } finally {
+      setHighlightEditBusy(false);
+    }
   }
 
   async function createHighlight(event: FormEvent) {
@@ -4620,7 +4738,7 @@ export function App() {
 
                   <input
                     type="file"
-                    accept="image/jpeg,image/png,image/webp,image/gif"
+                    accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,video/quicktime"
                     onChange={(event) =>
                       setHighlightFile(
                         event.target.files?.[0] ?? null,
@@ -4724,11 +4842,87 @@ export function App() {
             </div>
 
             <div className="highlight-viewer-caption">
-              <strong id="active-highlight-title">
-                {activeHighlight.title}
-              </strong>
-              <span>RP WORLD highlight</span>
+              <div className="highlight-viewer-caption-row">
+                <div>
+                  <strong id="active-highlight-title">
+                    {activeHighlight.title}
+                  </strong>
+                  <span>RP WORLD highlight</span>
+                </div>
+
+                {!viewAs && (
+                  <button
+                    className="icon-button highlight-viewer-more"
+                    type="button"
+                    aria-label="Edit highlight"
+                    title="Edit highlight"
+                    onClick={() => openHighlightEditor(activeHighlight)}
+                  >
+                    <Pencil size={17} />
+                  </button>
+                )}
+              </div>
             </div>
+          </section>
+        </div>
+      )}
+
+      {highlightEditOpen && activeHighlight && session && (
+        <div className="sheet-backdrop" role="presentation">
+          <section className="profile-sheet glass highlight-edit-sheet" role="dialog" aria-modal="true" aria-labelledby="highlight-edit-title">
+            <div className="sheet-header">
+              <div>
+                <p className="eyebrow">HIGHLIGHT</p>
+                <h2 id="highlight-edit-title">Edit highlight.</h2>
+              </div>
+              <button className="icon-button" type="button" aria-label="Close" onClick={() => setHighlightEditOpen(false)}>
+                <X size={18} />
+              </button>
+            </div>
+
+            <form className="auth-form" onSubmit={updateHighlight}>
+              <label>
+                <span>Title</span>
+                <div className="input-wrap">
+                  <Sparkles size={15} />
+                  <input
+                    type="text"
+                    value={highlightEditTitle}
+                    onChange={(event) => setHighlightEditTitle(event.target.value)}
+                    maxLength={24}
+                    required
+                  />
+                </div>
+              </label>
+
+              <label>
+                <span>Photo or video <small>optional</small></span>
+                <div className="input-wrap">
+                  <Image size={15} />
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,video/quicktime"
+                    onChange={(event) => setHighlightEditFile(event.target.files?.[0] ?? null)}
+                  />
+                </div>
+              </label>
+
+              {profileError && <p className="form-message error">{profileError}</p>}
+
+              <button className="primary-button full" type="submit" disabled={highlightEditBusy}>
+                {highlightEditBusy ? "Saving…" : "Save changes"}
+              </button>
+
+              <button
+                className="secondary-button full highlight-delete-button"
+                type="button"
+                disabled={highlightEditBusy}
+                onClick={() => void deleteHighlight()}
+              >
+                <Trash2 size={16} />
+                Delete highlight
+              </button>
+            </form>
           </section>
         </div>
       )}
