@@ -601,11 +601,9 @@ export function App() {
     { type: "fire", emoji: "🔥", label: "Fire" },
     { type: "laugh", emoji: "🤣", label: "Laugh" },
     { type: "celebrate", emoji: "🎉", label: "Celebrate" },
+    { type: "money", emoji: "💰", label: "Money" },
   ];
 
-  function reactionEmoji(type: string | null) {
-    return commentReactionOptions.find((reaction) => reaction.type === type)?.emoji ?? "👍";
-  }
 
   useEffect(() => {
     localStorage.setItem(THEME_KEY, theme);
@@ -2782,11 +2780,10 @@ export function App() {
                     type="button"
                     onClick={() => setOpenReactionPicker(openReactionPicker === comment.id ? null : comment.id)}
                     disabled={commentReactionBusy === comment.id}
-                    aria-label={comment.reactionType ? "Change reaction" : "React to comment"}
+                    aria-label="React to comment"
                     aria-expanded={openReactionPicker === comment.id}
                   >
-                    <span className="comment-reaction-emoji">{reactionEmoji(comment.reactionType)}</span>
-                    <span>{comment.reactionType ? (commentReactionOptions.find((item) => item.type === comment.reactionType)?.label ?? "Like") : "Like"}</span>
+                    <span>React</span>
                   </button>
                   {comment.reactionCount > 0 && (
                     <span className="comment-reaction-count" aria-label={`${comment.reactionCount} reactions`}>{comment.reactionCount}</span>
