@@ -582,6 +582,11 @@ export function App() {
     setMessageSettingsOpen(false);
   }
   const [profileStats, setProfileStats] = useState({ followers: 0, likes: 0 });
+  const [followersOpen, setFollowersOpen] = useState(false);
+  const [followersBusy, setFollowersBusy] = useState(false);
+  const [followers, setFollowers] = useState<Array<{ id: string; profile: Profile; followedAt: string; followingBack: boolean }>>([]);
+  const [hiddenFollowerIds, setHiddenFollowerIds] = useState<Set<string>>(new Set());
+  const [followersOwnerName, setFollowersOwnerName] = useState("");
 
   const commentReactionOptions = [
     { type: "like", emoji: "👍", label: "Like" },
@@ -1451,6 +1456,33 @@ export function App() {
       followers: followerCount ?? 0,
       likes: totalLikes,
     });
+  }
+
+  async function openFollowers(userId: string, ownerName: string) {
+    if (!supabase || !session?.user) return;
+    setFollowersOpen(true); setFollowersOwnerName(ownerName); setFollowersBusy(true); setHiddenFollowerIds(new Set());
+    try {
+      const { data: followRows, error: followError } = await supabase.from("user_follows").select("follower_id, created_at").eq("following_id", userId).order("created_at", { ascending: false });
+      if (followError) throw followError;
+      const rows = (followRows ?? []) as Array<{ follower_id: string; created_at: string }>;
+      const followerIds = [...new Set(rows.map((row) => row.follower_id))];
+      if (!followerIds.length) { setFollowers([]); return; }
+      const [{ data: profileRows }, { data: myFollows }] = await Promise.all([
+        supabase.from("profiles").select("*").in("id", followerIds),
+        supabase.from("user_follows").select("following_id").eq("follower_id", session.user.id).in("following_id", followerIds),
+      ]);
+      const profileMap = new Map((profileRows ?? []).map((item) => [item.id, item as Profile]));
+      const followingSet = new Set((myFollows ?? []).map((item) => item.following_id));
+      setFollowers(rows.map((row) => { const followerProfile = profileMap.get(row.follower_id); if (!followerProfile) return null; return { id: row.follower_id, profile: followerProfile, followedAt: row.created_at, followingBack: followingSet.has(row.follower_id) }; }).filter((item): item is { id: string; profile: Profile; followedAt: string; followingBack: boolean } => Boolean(item)));
+    } catch (error) { console.error("RP WORLD followers load failed", error); setFollowers([]); setMessage("Could not load followers. Please try again."); }
+    finally { setFollowersBusy(false); }
+  }
+
+  async function followBackFollower(followerId: string) {
+    if (!supabase || !session?.user || followerId === session.user.id) return;
+    const { error: followError } = await supabase.from("user_follows").insert({ follower_id: session.user.id, following_id: followerId });
+    if (followError && followError.code !== "23505") { setMessage("Could not follow this user. Please try again."); return; }
+    setFollowers((current) => current.map((item) => item.id === followerId ? { ...item, followingBack: true } : item));
   }
 
   async function loadProfilePosts() {
@@ -3758,10 +3790,10 @@ export function App() {
                           <Sparkles size={13} />
                           {profile.rp_id}
                         </span>
-                        <span>
+                        <button className="profile-meta-button" type="button" onClick={() => void openFollowers(session?.user.id ?? profile.id, profile.display_name)} aria-label="View followers">
                           <User size={13} />
                           {profileStats.followers} {profileStats.followers === 1 ? "follower" : "followers"}
-                        </span>
+                        </button>
                         <span>
                           <Heart size={13} />
                           {profileStats.likes} {profileStats.likes === 1 ? "like" : "likes"}
@@ -4137,7 +4169,7 @@ export function App() {
                       </div>
                       <div className="profile-meta">
                         <span><Sparkles size={13} />{publicProfile.rp_id}</span>
-                        <span><User size={13} />{profileStats.followers} {profileStats.followers === 1 ? "follower" : "followers"}</span>
+                        <button className="profile-meta-button" type="button" onClick={() => void openFollowers(publicProfile.id, publicProfile.display_name)} aria-label="View followers"><User size={13} />{profileStats.followers} {profileStats.followers === 1 ? "follower" : "followers"}</button>
                         <span><Heart size={13} />{profileStats.likes} {profileStats.likes === 1 ? "like" : "likes"}</span>
                         <span><MapPin size={13} />RP WORLD</span>
                       </div>
@@ -5229,6 +5261,20 @@ export function App() {
                   : "Add highlight"}
               </button>
             </form>
+          </section>
+        </div>
+      )}
+
+      {followersOpen && (
+        <div className="sheet-backdrop followers-backdrop" role="presentation" onClick={() => setFollowersOpen(false)}>
+          <section className="followers-sheet glass" role="dialog" aria-modal="true" aria-labelledby="followers-title" onClick={(event) => event.stopPropagation()}>
+            <div className="sheet-header"><div><p className="eyebrow">FOLLOWERS</p><h2 id="followers-title">{followersOwnerName}</h2></div><button className="icon-button" type="button" aria-label="Close followers" onClick={() => setFollowersOpen(false)}><X size={18} /></button></div>
+            {followersBusy ? <div className="followers-loading">Loading followers…</div> : followers.filter((item) => !hiddenFollowerIds.has(item.id)).length === 0 ? <div className="followers-empty"><User size={22} /><strong>No followers yet.</strong><span>When people follow this profile, they will appear here.</span></div> : <div className="followers-list">{followers.filter((item) => !hiddenFollowerIds.has(item.id)).map((item) => (
+              <div className="follower-row" key={item.id}>
+                <button className="follower-identity" type="button" onClick={() => void loadPublicProfile(item.id)}><div className="avatar follower-avatar" style={item.profile.avatar_url ? { backgroundImage: "url(" + item.profile.avatar_url + ")" } : undefined}>{!item.profile.avatar_url && initials(item.profile.display_name)}</div><span><strong>{item.profile.display_name}</strong><small>@{item.profile.username}</small><em>Followed {new Intl.DateTimeFormat(undefined, { dateStyle: "medium" }).format(new Date(item.followedAt))}</em></span></button>
+                <div className="follower-actions">{item.id !== session?.user.id && <button className={item.followingBack ? "follower-action following" : "follower-action"} type="button" onClick={() => void followBackFollower(item.id)} disabled={item.followingBack}><UserPlus size={14} />{item.followingBack ? "Following" : "Follow back"}</button>}<button className="follower-action follower-hide" type="button" onClick={() => setHiddenFollowerIds((current) => new Set(current).add(item.id))}>Hide</button></div>
+              </div>
+            ))}</div>}
           </section>
         </div>
       )}
