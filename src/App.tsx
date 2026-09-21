@@ -2507,7 +2507,7 @@ export function App() {
     const nestedResult = await supabase
       .from("post_comments")
       .select(
-        "id, post_id, author_id, content, created_at, parent_id",
+        "id, post_id, author_id, content, created_at, parent_id, media_url, media_type",
       )
       .eq("post_id", postId)
       .order("created_at", { ascending: true });
@@ -2549,6 +2549,8 @@ export function App() {
       ...current,
       [postId]: rows.map((row) => ({
         ...row,
+        media_url: row.media_url ?? null,
+        media_type: row.media_type ?? null,
         reactionCount: 0,
         reactionType: null as string | null,
         profile: undefined as Profile | undefined,
@@ -2556,6 +2558,8 @@ export function App() {
     }));
 
     if (!rows.length) return;
+
+    void signPostMediaUrls(rows.map((row) => row.media_url));
 
     const commentIds = rows.map((row) => row.id);
     const authorIds = [...new Set(rows.map((row) => row.author_id))];
@@ -2605,6 +2609,8 @@ export function App() {
       ...current,
       [postId]: rows.map((row) => ({
         ...row,
+        media_url: row.media_url ?? null,
+        media_type: row.media_type ?? null,
         reactionCount: reactionCounts.get(row.id) ?? 0,
         reactionType: reactionTypes.get(row.id) ?? null,
         profile: profileMap.get(row.author_id),
@@ -2634,8 +2640,9 @@ export function App() {
     const content = (
       commentDrafts[postId] ?? ""
     ).trim();
+    const mediaFile = commentMediaFiles[postId] ?? null;
 
-    if (!content) return;
+    if (!content && !mediaFile) return;
 
     setCommentBusy(postId);
 
