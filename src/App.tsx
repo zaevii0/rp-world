@@ -54,7 +54,7 @@ import {
   Mic,
 } from "lucide-react";
 import { lazy, Suspense, useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent, type ReactNode } from "react";
-import type { Session } from "@supabase/supabase-js";
+import type { RealtimeChannel, Session } from "@supabase/supabase-js";
 import { ThemePicker } from "./components/ThemePicker";
 import { supabase, supabaseConfigured } from "./lib/supabase";
 import { themes, type Appearance, type ThemeId } from "./types/theme";
@@ -439,7 +439,7 @@ export function App() {
   const [messageVoiceRecording, setMessageVoiceRecording] = useState(false);
   const messageMediaRef = useRef<HTMLInputElement | null>(null);
   const messageListRef = useRef<HTMLDivElement | null>(null);
-  const messageChannelRef = useRef<ReturnType<NonNullable<typeof supabase>["channel"]> | null>(null);
+  const messageChannelRef = useRef<RealtimeChannel | null>(null);
   const messageTypingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const messageVoiceRecorderRef = useRef<MediaRecorder | null>(null);
   const messageVoiceChunksRef = useRef<Blob[]>([]);
