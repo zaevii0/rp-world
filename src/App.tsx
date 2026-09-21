@@ -640,7 +640,7 @@ export function App() {
     } catch {
       // Ignore unavailable session storage; normal navigation still works.
     }
-  }, [view, publicProfile, session]);
+  }, [view, publicProfile, session?.user?.id]);
 
   useEffect(() => {
     if (!supabase || !session?.user) {
@@ -671,7 +671,7 @@ export function App() {
       void presenceChannel.untrack();
       if (supabase) void supabase.removeChannel(presenceChannel);
     };
-  }, [session]);
+  }, [session?.user?.id]);
 
   useEffect(() => {
     if (!supabase) return;
@@ -807,13 +807,13 @@ export function App() {
     return () => {
       active = false;
     };
-  }, [tagPostTarget, session]);
+  }, [tagPostTarget, session?.user?.id]);
 
   useEffect(() => {
     if (view === "search" && session?.user && profile) {
       void loadDiscoverProfiles();
     }
-  }, [view, session, profile]);
+  }, [view, session?.user?.id, profile]);
 
   useEffect(() => {
     if (view === "profile" && session?.user && profile) {
