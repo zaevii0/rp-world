@@ -3762,6 +3762,10 @@ export function App() {
                                 aria-label="Write a reply"
                               />
 
+                              <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" hidden id={`comment-media-${post.id}`} onChange={(event) => setCommentMediaFiles((current) => ({ ...current, [post.id]: event.target.files?.[0] ?? null }))} />
+                              <button type="button" className="comment-media-trigger" aria-label="Add photo to comment" onClick={() => document.getElementById(`comment-media-${post.id}`)?.click()}><Image size={16} /></button>
+                              {commentMediaFiles[post.id] && <span className="comment-media-selected">{commentMediaFiles[post.id]?.name}</span>}
+
                               <button
                                 type="submit"
                                 disabled={
