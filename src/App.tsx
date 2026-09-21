@@ -11,6 +11,12 @@ import {
   LayoutGrid,
   Users,
   UsersRound,
+  UserRound,
+  GraduationCap,
+  Music,
+  MessageCircle,
+  ShoppingBag,
+  Video,
   PenLine,
   Gamepad2,
   Phone,
@@ -3452,13 +3458,13 @@ export function App() {
                 <div className="discover-category-groups">
                   {[
                     {name:"Communities & Hoods",description:"RP spaces, groups, and communities.",icon:UsersRound,items:[
-                      ["Arena / Gang","Competitive RP arenas and gangs."],["University / Academy","School and academy RP."],["Family","RP family circles."],["Sister Hood","Sisterhood communities."],["Brother Hood","Brotherhood communities."],["Music Hood","Music communities."],["Dance Hood","Dance communities."],["Ranter Hood","Rant and discussion communities."],["Writer Hood","Writer communities."],["Seller Hood","Seller communities."],["Buy & Sell","Marketplace spaces."],["Gaming Hood","Gaming communities."],["Call Groups","Call communities."],["Models","Model communities."],["Editor Hoods","Editing communities."],["Academic Commissioner","Academic-focused communities."]]},
+                      ["Arena / Gang","Competitive RP arenas and gangs.",UsersRound],["University / Academy","School and academy RP.",GraduationCap],["Family","RP family circles.",Users],["Sister Hood","Sisterhood communities.",Heart],["Brother Hood","Brotherhood communities.",UserRound],["Music Hood","Music communities.",Music],["Dance Hood","Dance communities.",Sparkles],["Ranter Hood","Rant and discussion communities.",MessageCircle],["Writer Hood","Writer communities.",PenLine],["Seller Hood","Seller communities.",ShoppingBag],["Buy & Sell","Marketplace spaces.",ShoppingBag],["Gaming Hood","Gaming communities.",Gamepad2],["Call Groups","Call communities.",Phone],["Models","Model communities.",UserRound],["Editor Hoods","Editing communities.",Camera],["Academic Commissioner","Academic-focused communities.",GraduationCap]]},
                     {name:"Activities & Events",description:"Games, events, and member-led activities.",icon:Sparkles,items:[
                       ["Arena Games","Games and activities hosted inside arenas.",Gamepad2],["Falling Game","Falling Game activities and rounds.",Gamepad2],["Community Activities","Member-led activities and interactions.",Users],["Events","RP WORLD events and special activities.",Sparkles],["Call Groups","Live call-based activities.",Phone],["Writing","Writing activities and events.",PenLine],["Editing","Creative editing activities.",Camera]]},
                     {name:"Library & Stories",description:"Stories, writers, reading, and saved content.",icon:BookOpen,items:[
                       ["Trending Stories","Stories getting attention.",TrendingUp],["New Stories","Recently published stories.",Sparkles],["Most Read","Stories with the most reads.",Trophy],["Most Saved","Stories saved most often.",BookOpen],["Writers","Explore RPW writers.",PenLine],["Your Library","Your saved reading list.",BookOpen]]},
                     {name:"RPW Rankings & Trends",description:"Organic discovery based on RP WORLD activity.",icon:TrendingUp,items:[
-                      ["Trending Role Players","Role players gaining attention."],["Rising Role Players","Role players growing in activity."],["Most Followed","Role players with the most followers."],["Trending Hoods","Hoods gaining attention."],["Most Active Hoods","Hoods with the most activity."],["Longest-Running Hoods","Hoods with the longest RP history."],["Most Read Writers","Writers whose stories are read most."],["Most Saved Writers","Writers whose stories are saved most."],["Trending Writers","Writers currently trending."]]},
+                      ["Trending Role Players","Role players gaining attention.",TrendingUp],["Rising Role Players","Role players growing in activity.",Sparkles],["Most Followed","Role players with the most followers.",Users],["Trending Hoods","Hoods gaining attention.",TrendingUp],["Most Active Hoods","Hoods with the most activity.",Trophy],["Longest-Running Hoods","Hoods with the longest RP history.",Clock],["Most Read Writers","Writers whose stories are read most.",BookOpen],["Most Saved Writers","Writers whose stories are saved most.",Heart],["Trending Writers","Writers currently trending.",PenLine]]},
                   ].map((category) => {
                     const CategoryIcon = category.icon;
                     const isOpen = openDiscoverCategory === category.name;
