@@ -38,7 +38,7 @@ import {
   RefreshCw,
   CheckCheck,
 } from "lucide-react";
-import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { ThemePicker } from "./components/ThemePicker";
 import { supabase, supabaseConfigured } from "./lib/supabase";
@@ -247,6 +247,8 @@ export function App() {
   const [highlightEditTitle, setHighlightEditTitle] = useState("");
   const [highlightEditFile, setHighlightEditFile] = useState<File | null>(null);
   const [highlightEditBusy, setHighlightEditBusy] = useState(false);
+  const [highlightActionsOpen, setHighlightActionsOpen] = useState(false);
+  const highlightAddFileRef = useRef<HTMLInputElement | null>(null);
   const [activeHighlight, setActiveHighlight] = useState<Highlight | null>(null);
   const [activePostMedia, setActivePostMedia] = useState<{ url: string; type: "image" | "video" } | null>(null);
   const [signedMediaUrls, setSignedMediaUrls] = useState<Record<string, string>>({});
@@ -1665,6 +1667,59 @@ export function App() {
   }
 
   function openHighlightEditor(highlight: Highlight) {
+    setHighlightActionsOpen(false);
+    setHighlightEditTitle(highlight.title);
+    setHighlightEditFile(null);
+    setHighlightEditOpen(true);
+  }
+
+  async function addHighlightMedia(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0] ?? null;
+    event.target.value = "";
+    if (!supabase || !session?.user || !activeHighlight || !file || highlightEditBusy) return;
+    setHighlightEditBusy(true);
+    setProfileError("");
+    try {
+      const extension = file.name.split(".").pop()?.toLowerCase() || "bin";
+      const filePath = session.user.id + "/highlights/" + activeHighlight.id + "/" + crypto.randomUUID() + "." + extension;
+      const { error: uploadError } = await supabase.storage.from("profile-highlights").upload(filePath, file, { upsert: false, contentType: file.type || undefined });
+      if (uploadError) throw uploadError;
+      const { data: publicUrl } = supabase.storage.from("profile-highlights").getPublicUrl(filePath);
+      const { error: updateError } = await supabase.from("profile_highlights").update({ image_url: publicUrl.publicUrl }).eq("id", activeHighlight.id).eq("user_id", session.user.id);
+      if (updateError) throw updateError;
+      const nextHighlight = { ...activeHighlight, image_url: publicUrl.publicUrl };
+      setActiveHighlight(nextHighlight);
+      setHighlights((current) => current.map((item) => item.id === nextHighlight.id ? nextHighlight : item));
+      setPublicHighlights((current) => current.map((item) => item.id === nextHighlight.id ? nextHighlight : item));
+      setHighlightActionsOpen(false);
+    } catch (caught) {
+      setProfileError(caught instanceof Error ? caught.message : "Could not add the highlight photo.");
+    } finally {
+      setHighlightEditBusy(false);
+    }
+  }
+
+  async function removeHighlightMedia() {
+    if (!supabase || !session?.user || !activeHighlight || highlightEditBusy || !activeHighlight.image_url) return;
+    if (!window.confirm("Remove the photo/video from this highlight?")) return;
+    setHighlightEditBusy(true);
+    setProfileError("");
+    try {
+      const { error: updateError } = await supabase.from("profile_highlights").update({ image_url: null }).eq("id", activeHighlight.id).eq("user_id", session.user.id);
+      if (updateError) throw updateError;
+      const nextHighlight = { ...activeHighlight, image_url: null };
+      setActiveHighlight(nextHighlight);
+      setHighlights((current) => current.map((item) => item.id === nextHighlight.id ? nextHighlight : item));
+      setPublicHighlights((current) => current.map((item) => item.id === nextHighlight.id ? nextHighlight : item));
+      setHighlightActionsOpen(false);
+    } catch (caught) {
+      setProfileError(caught instanceof Error ? caught.message : "Could not remove the highlight photo.");
+    } finally {
+      setHighlightEditBusy(false);
+    }
+  }
+
+
     setHighlightEditTitle(highlight.title);
     setHighlightEditFile(null);
     setHighlightEditOpen(true);
@@ -4864,15 +4919,39 @@ export function App() {
                   <button
                     className="icon-button highlight-viewer-more"
                     type="button"
-                    aria-label="Edit highlight"
-                    title="Edit highlight"
-                    onClick={() => openHighlightEditor(activeHighlight)}
+                    aria-label="Highlight options"
+                    title="Highlight options"
+                    onClick={() => setHighlightActionsOpen((open) => !open)}
                   >
-                    <Pencil size={17} />
+                    <MoreVertical size={18} />
                   </button>
                 )}
               </div>
             </div>
+
+            {highlightActionsOpen && !viewAs && (
+              <div className="highlight-actions-sheet" role="menu" aria-label="Highlight options">
+                <button type="button" onClick={() => openHighlightEditor(activeHighlight)} disabled={highlightEditBusy}>
+                  <Pencil size={16} /> Edit highlight title
+                </button>
+                <button type="button" onClick={() => highlightAddFileRef.current?.click()} disabled={highlightEditBusy}>
+                  <Plus size={16} /> Add highlight photo
+                </button>
+                <button type="button" onClick={() => void removeHighlightMedia()} disabled={highlightEditBusy || !activeHighlight.image_url}>
+                  <Trash2 size={16} /> Remove highlight photo
+                </button>
+                <button type="button" className="danger" onClick={() => void deleteHighlight()} disabled={highlightEditBusy}>
+                  <Trash2 size={16} /> Delete entire highlight
+                </button>
+                <input
+                  ref={highlightAddFileRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,video/quicktime"
+                  hidden
+                  onChange={addHighlightMedia}
+                />
+              </div>
+            )}
           </section>
         </div>
       )}
@@ -4927,7 +5006,11 @@ export function App() {
                 className="secondary-button full highlight-delete-button"
                 type="button"
                 disabled={highlightEditBusy}
-                onClick={() => void deleteHighlight()}
+                onClick={() => {
+                  setHighlightEditOpen(false);
+                  setHighlightActionsOpen(false);
+                  void deleteHighlight();
+                }}
               >
                 <Trash2 size={16} />
                 Delete highlight
