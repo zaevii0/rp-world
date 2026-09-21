@@ -55,15 +55,15 @@ import {
   Mic,
 
 } from "lucide-react";
-import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent, type ReactNode } from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent, type ReactNode } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { ThemePicker } from "./components/ThemePicker";
 import { supabase, supabaseConfigured } from "./lib/supabase";
 import { themes, type Appearance, type ThemeId } from "./types/theme";
 import type { Profile } from "./types/profile";
-import { SuggestionsPage } from "./components/SuggestionsPage";
-import { Stories } from "./components/Stories";
-import { AdminPanelPage } from "./components/AdminPanelPage";
+const Stories = lazy(() => import("./components/Stories").then((module) => ({ default: module.Stories })));
+const SuggestionsPage = lazy(() => import("./components/SuggestionsPage").then((module) => ({ default: module.SuggestionsPage })));
+const AdminPanelPage = lazy(() => import("./components/AdminPanelPage").then((module) => ({ default: module.AdminPanelPage })));
 
 function RPWorldMark() {
   return (
@@ -3296,7 +3296,7 @@ export function App() {
 
             {view === "home" && (
               <>
-                <Stories session={session} profile={profile} />
+                <Suspense fallback={<div className="stories-loading" aria-label="Loading stories" /> }><Stories session={session} profile={profile} /></Suspense>
 
                 <button
                   className="composer glass"
@@ -4330,11 +4330,11 @@ export function App() {
             )}
 
             {view === "suggestions" && session && profile && (
-              <SuggestionsPage session={session} />
+              <Suspense fallback={<div className="page-loading" aria-label="Loading suggestions" /> }><SuggestionsPage session={session} /></Suspense>
             )}
 
             {view === "admin" && session && profile && isAdmin && (
-              <AdminPanelPage />
+              <Suspense fallback={<div className="page-loading" aria-label="Loading admin" /> }><AdminPanelPage /></Suspense>
             )}
 
             {view === "menu" && (
