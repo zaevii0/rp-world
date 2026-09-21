@@ -238,6 +238,7 @@ export function App() {
   const [highlightBusy, setHighlightBusy] = useState(false);
   const [activeHighlight, setActiveHighlight] = useState<Highlight | null>(null);
   const [activePostMedia, setActivePostMedia] = useState<{ url: string; type: "image" | "video" } | null>(null);
+  const [signedMediaUrls, setSignedMediaUrls] = useState<Record<string, string>>({});
   const [highlightStyle, setHighlightStyle] = useState<HighlightStyle>("circle");
 
   const [view, setView] = useState<AppView>(readStoredView);
@@ -760,13 +761,11 @@ export function App() {
           : null,
       })),
     );
+    void signPostMediaUrls([
+      ...rows.map((row) => row.media_url),
+      ...rows.map((row) => row.shared_post_id ? sharedMap.get(row.shared_post_id)?.media_url : null),
+    ]);
   }
-
-  useEffect(() => {
-    if (session?.user && profile) {
-      void cleanupExpiredTrash();
-    }
-  }, [session, profile]);
 
   const isDark = appearance !== "light";
 
@@ -814,12 +813,15 @@ export function App() {
 
   function renderPostMedia(mediaUrl: string | null | undefined, mediaType?: string | null) {
     if (!mediaUrl) return null;
+    const mediaPath = getPostMediaPath(mediaUrl);
+    const signedUrl = mediaPath ? signedMediaUrls[mediaPath] : null;
+    if (!signedUrl) return null;
     const isVideo = mediaType?.startsWith("video/") ?? false;
     return (
       <button
         className="post-media-button"
         type="button"
-        onClick={() => setActivePostMedia({ url: mediaUrl, type: isVideo ? "video" : "image" })}
+        onClick={() => setActivePostMedia({ url: signedUrl, type: isVideo ? "video" : "image" })}
         aria-label={isVideo ? "Open video" : "Open image"}
       >
         {isVideo ? (
@@ -832,7 +834,7 @@ export function App() {
             onClick={(event) => event.stopPropagation()}
           />
         ) : (
-          <img className="post-media" src={mediaUrl} alt="" loading="lazy" />
+          <img className="post-media" src={signedUrl} alt="" loading="lazy" />
         )}
       </button>
     );
@@ -853,14 +855,43 @@ export function App() {
     return null;
   }
 
-  async function uploadPostMedia(file: File) {
+  function getPostMediaPath(value: string | null | undefined) {
+    if (!value) return null;
+    const marker = "/storage/v1/object/public/post-media/";
+    const markerIndex = value.indexOf(marker);
+    if (markerIndex >= 0) return decodeURIComponent(value.slice(markerIndex + marker.length));
+    return value.includes("/") ? value : null;
+  }
+
+  async function signPostMediaUrls(values: Array<string | null | undefined>) {
+    if (!supabase) return;
+    const paths = [...new Set(values.map(getPostMediaPath).filter((value): value is string => Boolean(value)))];
+    if (!paths.length) return;
+
+    const { data, error } = await supabase.storage
+      .from("post-media")
+      .createSignedUrls(paths, 3600);
+
+    if (error || !data?.signedUrls) return;
+
+    const nextUrls: Record<string, string> = {};
+    data.signedUrls.forEach((item) => {
+      if (item.signedUrl) {
+        nextUrls[item.path] = item.signedUrl;
+      }
+    });
+
+    setSignedMediaUrls((current) => ({ ...current, ...nextUrls }));
+  }
+
+  async function uploadPostMedia(file: File, postId: string) {
     if (!supabase || !session?.user) {
       throw new Error("You must be signed in to upload media.");
     }
     const extension =
       file.name.split(".").pop()?.toLowerCase() ||
       (file.type.startsWith("video/") ? "mp4" : "jpg");
-    const filePath = `${session.user.id}/post-${crypto.randomUUID()}.${extension}`;
+    const filePath = `${session.user.id}/${postId/${crypto.randomUUID()}.${extension}`;
     const { error: uploadError } = await supabase.storage
       .from("post-media")
       .upload(filePath, file, {
@@ -869,9 +900,7 @@ export function App() {
         upsert: false,
       });
     if (uploadError) throw uploadError;
-    return supabase.storage
-      .from("post-media")
-      .getPublicUrl(filePath).data.publicUrl;
+    return filePath;
   }
 
   function resetAuthMessages() {
@@ -1151,6 +1180,7 @@ export function App() {
         reposted: false,
       })),
     );
+    void signPostMediaUrls(rows.map((row) => row.media_url));
   }
 
   async function loadProfileReposts() {
@@ -1252,6 +1282,8 @@ export function App() {
           reposted_at: repostedAtMap.get(row.id) ?? null,
         })),
     );
+    void signPostMediaUrls(rows.map((row) => row.media_url));
+
   }
 
   async function loadPublicProfile(userId: string) {
@@ -1690,10 +1722,12 @@ export function App() {
     setFeedError("");
 
     try {
-      const mediaUrl = postMediaFile ? await uploadPostMedia(postMediaFile) : null;
+      const postId = crypto.randomUUID();
+      const mediaUrl = postMediaFile ? await uploadPostMedia(postMediaFile, postId) : null;
       const mediaType = postMediaFile?.type || null;
 
       const { error: saveError } = await supabase.from("posts").insert({
+        id: postId,
         author_id: session.user.id,
         content: postText.trim(),
         media_url: mediaUrl,
@@ -1765,7 +1799,7 @@ export function App() {
         mediaUrl = null;
         mediaType = null;
       } else if (editPostMediaFile) {
-        mediaUrl = await uploadPostMedia(editPostMediaFile);
+        mediaUrl = await uploadPostMedia(editPostMediaFile, editPostTarget.id);
         mediaType = editPostMediaFile.type;
       }
 
