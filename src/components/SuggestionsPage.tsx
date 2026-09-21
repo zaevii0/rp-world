@@ -1,4 +1,4 @@
-import { ArrowLeft, Lightbulb, Send } from "lucide-react";
+import { Lightbulb, Send } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "../lib/supabase";
