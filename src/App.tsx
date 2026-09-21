@@ -751,7 +751,7 @@ export function App() {
         comments: row.post_comments?.[0]?.count ?? 0,
         reposts: 0,
         reposted: false,
-        reposted_at: null,
+        reposted_at: null as string | null,
         shares: shareCounts.get(row.id) ?? 0,
         pinned_at: row.pinned_at ?? null,
         archived_at: row.archived_at ?? null,
