@@ -5469,6 +5469,33 @@ export function App() {
         </div>
       )}
 
+      {commentActionTarget && commentActionPostId && (
+        <div className="sheet-backdrop comment-action-backdrop" role="presentation" onClick={() => setCommentActionTarget(null)}>
+          <section className="comment-action-sheet glass" role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
+            <p className="eyebrow">COMMENT</p>
+            {commentActionTarget.author_id === session?.user.id ? (
+              <>
+                <button type="button" onClick={() => { setCommentEditId(commentActionTarget.id); setCommentEditDraft(commentActionTarget.content); setCommentActionTarget(null); }}><Pencil size={16} /> Edit comment/reply</button>
+                <button type="button" onClick={() => { navigator.clipboard?.writeText(commentActionTarget.content); setCommentActionTarget(null); }}><Link2 size={16} /> Copy</button>
+                <button type="button" className="danger" disabled={commentActionBusy === commentActionTarget.id} onClick={() => void manageComment(commentActionPostId, commentActionTarget, "delete")}><Trash2 size={16} /> Delete</button>
+              </>
+            ) : (
+              <button type="button" onClick={() => { navigator.clipboard?.writeText(commentActionTarget.content); setCommentActionTarget(null); }}><Link2 size={16} /> Copy</button>
+            )}
+            <button type="button" onClick={() => setCommentActionTarget(null)}><X size={16} /> Back</button>
+          </section>
+        </div>
+      )}
+
+      {commentReactionUsersOpen && (
+        <div className="sheet-backdrop comment-reaction-users-backdrop" role="presentation" onClick={() => setCommentReactionUsersOpen(false)}>
+          <section className="comment-reaction-users-sheet glass" role="dialog" aria-modal="true" aria-labelledby="comment-reaction-users-title" onClick={(event) => event.stopPropagation()}>
+            <div className="sheet-header"><div><p className="eyebrow">REACTIONS</p><h2 id="comment-reaction-users-title">People who reacted</h2></div><button className="icon-button" type="button" onClick={() => setCommentReactionUsersOpen(false)}><X size={18} /></button></div>
+            {commentReactionUsersBusy ? <div className="followers-loading">Loading reactions…</div> : commentReactionUsers.length === 0 ? <div className="followers-empty"><span>No reactions yet.</span></div> : <div className="followers-list">{commentReactionUsers.map((item) => <div className="follower-row" key={item.id}><button className="follower-identity" type="button" onClick={() => void loadPublicProfile(item.id)}><div className="avatar follower-avatar" style={item.profile.avatar_url ? { backgroundImage: `url(${item.profile.avatar_url})` } : undefined}>{!item.profile.avatar_url && initials(item.profile.display_name)}</div><span><strong>{item.profile.display_name}</strong><small>@{item.profile.username}</small><em>{commentReactionOptions.find((reaction) => reaction.type === item.reactionType)?.label ?? item.reactionType}</em></span></button></div>)}</div>}
+          </section>
+        </div>
+      )}
+
       {activePostMedia && (
         <div
           className="post-media-viewer"
