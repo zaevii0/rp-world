@@ -158,6 +158,7 @@ type Comment = {
 
 type MessageStatus = "sending" | "sent" | "delivered" | "read" | "failed";
 type MessageReaction = {
+  message_id?: string;
   user_id: string;
   reaction_type: string;
 };
