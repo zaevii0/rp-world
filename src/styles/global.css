@@ -5138,3 +5138,11 @@ body,
 nav.bottom-nav {
   bottom: max(10px, env(safe-area-inset-bottom));
 }
+
+
+/* Restore the bottom navigation's balanced floating position. */
+.bottom-nav,
+.mobile-bottom-nav,
+nav.bottom-nav {
+  bottom: max(18px, calc(env(safe-area-inset-bottom) + 8px));
+}
