@@ -396,11 +396,8 @@ export function App() {
   // Keep an open conversation alive across a browser refresh.
   useEffect(() => {
     try {
-      if (activeConversation) {
-        sessionStorage.setItem(MESSAGE_CONVERSATION_KEY, activeConversation);
-      } else {
-        sessionStorage.removeItem(MESSAGE_CONVERSATION_KEY);
-      }
+      if (activeConversation) sessionStorage.setItem(MESSAGE_CONVERSATION_KEY, activeConversation);
+      else sessionStorage.removeItem(MESSAGE_CONVERSATION_KEY);
     } catch {
       // Ignore unavailable session storage.
     }
@@ -416,6 +413,7 @@ export function App() {
     const conversation = messageConversations.find((item) => item.id === activeConversation);
     if (conversation) {
       setActiveConversationProfile(conversation.otherProfile);
+      void loadConversationMessages(activeConversation);
     }
   }, [activeConversation, activeConversationProfile, messageConversations]);
 
@@ -731,6 +729,7 @@ export function App() {
     const sharedPostIds = [...new Set(
       rows.map((row) => row.shared_post_id).filter(Boolean),
     )] as string[];
+
     // Author profiles are the only dependency for the first paint.
     const { data: profiles } = authorIds.length
       ? await supabase.from("profiles").select("*").in("id", authorIds)
@@ -1429,7 +1428,8 @@ export function App() {
           .eq("author_id", userId)
           .is("archived_at", null)
           .is("trashed_at", null)
-          .order("pinned_at", { ascending: false, nullsFirst: false })          .order("created_at", { ascending: false })
+          .order("pinned_at", { ascending: false, nullsFirst: false })
+          .order("created_at", { ascending: false })
           .limit(50),
         supabase
           .from("profile_highlights")
@@ -2128,7 +2128,8 @@ export function App() {
         .single();
 
       if (updateError || !data) {
-        throw new Error(updateError?.message || "We could not update that post.");      }
+        throw new Error(updateError?.message || "We could not update that post.");
+      }
 
       const updatePost = (items: Post[]): Post[] =>
         items.map((item) =>
@@ -2827,7 +2828,8 @@ export function App() {
                 : "Switch to dark mode"
             }
             onClick={() =>
-              setAppearance(                isDark ? "light" : "dark",
+              setAppearance(
+                isDark ? "light" : "dark",
               )
             }
           >
@@ -3526,7 +3528,8 @@ export function App() {
                               : undefined
                           }
                         >
-                          {!item.image_url && (                            <Sparkles size={20} />
+                          {!item.image_url && (
+                            <Sparkles size={20} />
                           )}
                         </span>
 
@@ -4229,3 +4232,1017 @@ export function App() {
                 </div>
               ) : (
                 (messagesByConversation[activeConversation] ?? []).map((item, index, items) => {
+                  const expanded = expandedMessageTimestamps[item.id] ?? false;
+                  const previous = items[index - 1];
+                  const sameSender = previous?.sender_id === item.sender_id;
+                  return (
+                    <div className={`message-row ${item.sender_id === session?.user.id ? "mine" : ""}`} key={item.id}>
+                      {!sameSender && item.sender_id !== session?.user.id && (
+                        <span className="message-row-avatar avatar">
+                          {activeConversationProfile?.avatar_url ? (
+                            <span style={{ backgroundImage: `url(${activeConversationProfile.avatar_url})` }} />
+                          ) : initials(activeConversationProfile?.display_name ?? "RP")}
+                        </span>
+                      )}
+                      <div className={sameSender ? "message-bubble grouped" : "message-bubble"}>
+                        <span>{item.content}</span>
+                        <div className="message-bubble-meta">
+                          <button
+                            className="message-time"
+                            type="button"
+                            onClick={() => setExpandedMessageTimestamps((current) => ({ ...current, [item.id]: !expanded }))}
+                            aria-expanded={expanded}
+                            title="Show exact date and time"
+                          >
+                            {expanded ? formatMessageDateTime(item.created_at) : timeAgo(item.created_at)}
+                          </button>
+                          {item.sender_id === session?.user.id && <CheckCheck size={12} aria-label="Sent" />}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+            <form className="message-form" onSubmit={sendMessage}>
+              <button className="message-attach-button" type="button" aria-label="Add attachment" title="Attachments" disabled>
+                <Plus size={20} strokeWidth={2.2} />
+              </button>
+              <div className="message-input-shell">
+                <textarea
+                  value={messageDraft}
+                  onChange={(event) => {
+                    setMessageDraft(event.target.value);
+                    const target = event.currentTarget;
+                    target.style.height = "auto";
+                    target.style.height = `${Math.min(target.scrollHeight, 120)}px`;
+                  }}
+                  placeholder="iMessage"
+                  maxLength={2000}
+                  rows={1}
+                  autoFocus
+                  aria-label="Write a message"
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" && !event.shiftKey) {
+                      event.preventDefault();
+                      if (messageDraft.trim()) void sendMessage(event as unknown as FormEvent);
+                    }
+                  }}
+                />
+                <button className="message-send-button" type="submit" disabled={!messageDraft.trim()} aria-label="Send message" title="Send message">
+                  <ArrowUp size={18} strokeWidth={2.5} />
+                </button>
+              </div>
+            </form>
+          </section>
+        </div>
+      )}
+
+      {shareOpen && shareTarget && session && profile && (
+        <div className="sheet-backdrop" role="presentation" onClick={() => { setShareOpen(false); setSharePrivacy("public"); }}>
+          <section className="auth-sheet glass share-sheet" role="dialog" aria-modal="true" aria-labelledby="share-title" onClick={(event) => event.stopPropagation()}>
+            <div className="sheet-header"><div><p className="eyebrow">SHARE</p><h2 id="share-title">Share this post.</h2></div><button className="icon-button" type="button" aria-label="Close" onClick={() => setShareOpen(false)}><X size={18} /></button></div>
+            <div className="share-preview">
+              <div className="share-preview-author">
+                <div className="avatar small-avatar" style={shareTarget.profile?.avatar_url ? { backgroundImage: `url(${shareTarget.profile.avatar_url})` } : undefined}>{!shareTarget.profile?.avatar_url && initials(shareTarget.profile?.display_name ?? "RP")}</div>
+                <div><strong>{shareTarget.profile?.display_name ?? "RP WORLD member"}</strong><span>@{shareTarget.profile?.username ?? "member"}</span></div>
+              </div>
+              <p>{shareTarget.shared_original?.content ?? shareTarget.content}</p>
+              {renderPostMedia(shareTarget.shared_original?.media_url ?? shareTarget.media_url, shareTarget.shared_original?.media_type ?? shareTarget.media_type)}
+            </div>
+            <label className="post-privacy-picker">
+              <span><Globe2 size={15} /> Who can see your shared post?</span>
+              <select value={sharePrivacy} onChange={(event) => setSharePrivacy(event.target.value as "public" | "friends" | "only_me")}>
+                <option value="public">Public</option>
+                <option value="friends">Friends</option>
+                <option value="only_me">Only me</option>
+              </select>
+            </label>
+            <label className="share-caption-field">
+              <span>Add a caption <small>optional</small></span>
+              <div className="input-wrap textarea-wrap"><textarea value={shareCaption} onChange={(event) => setShareCaption(event.target.value)} placeholder="Say something about this post…" maxLength={2000} rows={4} /></div>
+            </label>
+            <div className="share-sheet-actions">
+              <button className="mode-switch" type="button" onClick={() => void sharePostExternally(shareTarget)}>Share outside RP WORLD</button>
+              <button className="primary-button full" type="button" disabled={shareBusy} onClick={() => void sharePostToFeed()}>{shareBusy ? "Sharing…" : "Share to RP WORLD"}</button>
+            </div>
+          </section>
+        </div>
+      )}
+
+      {editPostOpen && editPostTarget && session && profile && (
+        <div className="sheet-backdrop" role="presentation" onClick={() => setEditPostOpen(false)}>
+          <section className="auth-sheet glass edit-post-sheet" role="dialog" aria-modal="true" aria-labelledby="edit-post-title" onClick={(event) => event.stopPropagation()}>
+            <div className="sheet-header">
+              <div><p className="eyebrow">EDIT POST</p><h2 id="edit-post-title">Update your post.</h2></div>
+              <button className="icon-button" type="button" aria-label="Close" onClick={() => setEditPostOpen(false)}><X size={18} /></button>
+            </div>
+            <p className="sheet-copy">Edit your text and save when you're ready. Your post date and engagement stay unchanged.</p>
+            <form className="auth-form" onSubmit={saveEditedPost}>
+              <div className="input-wrap textarea-wrap"><textarea value={editPostText} onChange={(event) => setEditPostText(event.target.value)} placeholder="Edit your post…" maxLength={2000} rows={7} autoFocus /></div>
+
+              {editPostTarget.media_url && !editPostMediaRemove && (
+                <div className="post-media-selected current">
+                  <span>Current {editPostTarget.media_type?.startsWith("video/") ? "video" : "photo"}</span>
+                  <button type="button" className="post-media-remove" onClick={() => setEditPostMediaRemove(true)} aria-label="Remove current media"><X size={14} /></button>
+                </div>
+              )}
+
+              {editPostMediaRemove && (
+                <div className="post-media-selected">
+                  <span>Media will be removed</span>
+                  <button type="button" className="post-media-remove" onClick={() => setEditPostMediaRemove(false)} aria-label="Keep current media"><X size={14} /></button>
+                </div>
+              )}
+
+              <label className="post-media-picker">
+                <span className="post-media-picker-label"><Image size={16} /> {editPostTarget.media_url ? "Replace photo/video" : "Add photo or video"}</span>
+                <input
+                  type="file"
+                  accept="image/*,video/*"
+                  onChange={(event) => {
+                    const file = event.target.files?.[0] ?? null;
+                    if (file) {
+                      const mediaError = validatePostMedia(file);
+                      if (mediaError) {
+                        setFeedError(mediaError);
+                        event.currentTarget.value = "";
+                        return;
+                      }
+                    }
+                    setFeedError("");
+                    setEditPostMediaFile(file);
+                    if (file) setEditPostMediaRemove(false);
+                  }}
+                />
+              </label>
+
+              {editPostMediaFile && (
+                <div className="post-media-selected">
+                  <span>New {editPostMediaFile.type.startsWith("video/") ? "video" : "photo"} · {editPostMediaFile.name}</span>
+                  <button type="button" className="post-media-remove" onClick={() => setEditPostMediaFile(null)} aria-label="Remove selected media"><X size={14} /></button>
+                </div>
+              )}
+
+              <div className="composer-footer"><span>{editPostText.length}/2000</span><button className="primary-button" type="submit" disabled={editPostBusy || (!editPostText.trim() && !editPostMediaFile && (!editPostTarget.media_url || editPostMediaRemove))}>{editPostBusy ? "Saving…" : "Save changes"}</button></div>
+            </form>
+          </section>
+        </div>
+      )}
+
+      {postActionTarget && session && profile && (
+        <div className="sheet-backdrop" role="presentation" onClick={() => !postActionBusy && setPostActionTarget(null)}>
+          <section className="post-action-sheet glass" role="dialog" aria-modal="true" aria-labelledby="post-action-title" onClick={(event) => event.stopPropagation()}>
+            <div className="sheet-header">
+              <div><p className="eyebrow">POST OPTIONS</p><h2 id="post-action-title">Manage this post.</h2></div>
+              <button className="icon-button" type="button" aria-label="Close" onClick={() => setPostActionTarget(null)} disabled={postActionBusy}><X size={18} /></button>
+            </div>
+            <div className="post-action-menu">
+              <button type="button" onClick={() => void managePostAction("pin")} disabled={postActionBusy}>
+                <Pin size={18} /><span>{postActionTarget.pinned_at ? "Unpin post" : "Pin post"}</span>
+              </button>
+              <button type="button" onClick={() => void openTagPost(postActionTarget)}>
+                <Tag size={18} /><span>Tag</span>
+              </button>
+              <button type="button" onClick={() => { const target = postActionTarget; setPostActionTarget(null); openEditPost(target); }}>
+                <Pencil size={18} /><span>Edit post</span>
+              </button>
+              <button type="button" onClick={() => void updatePostPrivacy(postActionTarget, postActionTarget.privacy === "public" ? "friends" : postActionTarget.privacy === "friends" ? "only_me" : "public")} disabled={privacyBusy}>
+                {postActionTarget.privacy === "public" ? <Globe2 size={18} /> : postActionTarget.privacy === "friends" ? <Users size={18} /> : <LockKeyhole size={18} />}
+                <span>{privacyBusy ? "Saving…" : `Privacy · ${postActionTarget.privacy === "public" ? "Public" : postActionTarget.privacy === "friends" ? "Friends" : "Only me"}`}</span>
+              </button>
+              <button type="button" onClick={() => void managePostAction("archive")} disabled={postActionBusy}>
+                <Archive size={18} /><span>Move to archive</span>
+              </button>
+              <button className="post-action-destructive" type="button" onClick={() => void managePostAction("trash")} disabled={postActionBusy}>
+                <Trash2 size={18} /><span>Move to trash</span><small>Deleted after 30 days</small>
+              </button>
+              <button type="button" onClick={() => void managePostAction("copy")} disabled={postActionBusy}>
+                <Link2 size={18} /><span>Copy link</span>
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
+
+      {tagPostTarget && session && profile && (
+        <div className="sheet-backdrop" role="presentation" onClick={() => !tagBusy && setTagPostTarget(null)}>
+          <section className="auth-sheet glass tag-post-sheet" role="dialog" aria-modal="true" aria-labelledby="tag-post-title" onClick={(event) => event.stopPropagation()}>
+            <div className="sheet-header">
+              <div><p className="eyebrow">POST TAGS</p><h2 id="tag-post-title">Tag people.</h2></div>
+              <button className="icon-button" type="button" aria-label="Close" onClick={() => setTagPostTarget(null)} disabled={tagBusy}><X size={18} /></button>
+            </div>
+            <div className="input-wrap">
+              <Search size={15} />
+              <input value={tagSearch} onChange={(event) => setTagSearch(event.target.value)} placeholder="Search people…" autoFocus />
+            </div>
+            <div className="tag-people-list">
+              {tagProfiles
+                .filter((person) => {
+                  const query = tagSearch.trim().toLowerCase();
+                  return !query || person.display_name.toLowerCase().includes(query) || person.username.toLowerCase().includes(query);
+                })
+                .slice(0, 30)
+                .map((person) => (
+                  <button className={taggedUserIds.has(person.id) ? "tag-person active" : "tag-person"} type="button" key={person.id} onClick={() => toggleTagUser(person.id)}>
+                    <span className="avatar small-avatar" style={person.avatar_url ? { backgroundImage: `url(${person.avatar_url})` } : undefined}>{!person.avatar_url && initials(person.display_name)}</span>
+                    <span><strong>{person.display_name}</strong><small>@{person.username}</small></span>
+                    {taggedUserIds.has(person.id) && <span className="tag-check">✓</span>}
+                  </button>
+                ))}
+            </div>
+            <div className="composer-footer"><span>{taggedUserIds.size} selected</span><button className="primary-button" type="button" onClick={() => void savePostTags()} disabled={tagBusy}>{tagBusy ? "Saving…" : "Save tags"}</button></div>
+          </section>
+        </div>
+      )}
+
+
+      {composerOpen && (
+        <div
+          className="sheet-backdrop"
+          role="presentation"
+          onClick={() =>
+            setComposerOpen(false)
+          }
+        >
+          <section
+            className="auth-sheet glass"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="composer-title"
+            onClick={(event) =>
+              event.stopPropagation()
+            }
+          >
+            <div className="sheet-header">
+              <div>
+                <p className="eyebrow">CREATE</p>
+                <h2 id="composer-title">
+                  Drop a post.
+                </h2>
+              </div>
+
+              <button
+                className="icon-button"
+                type="button"
+                aria-label="Close"
+                onClick={() =>
+                  setComposerOpen(false)
+                }
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <p className="sheet-copy">
+              Share a thought, scene, update,
+              character moment, or anything your
+              RP world wants to say.
+            </p>
+
+            <form
+              className="auth-form"
+              onSubmit={createPost}
+            >
+              <div className="input-wrap textarea-wrap">
+                <textarea
+                  value={postText}
+                  onChange={(event) => setPostText(event.target.value)}
+                  placeholder="What's happening in your world?"
+                  maxLength={2000}
+                  rows={7}
+                  autoFocus
+                />
+              </div>
+
+              <label className="post-media-picker">
+                <span className="post-media-picker-label"><Image size={16} /> Add photo or video</span>
+                <input
+                  type="file"
+                  accept="image/*,video/*"
+                  onChange={(event) => {
+                    const file = event.target.files?.[0] ?? null;
+                    if (file) {
+                      const mediaError = validatePostMedia(file);
+                      if (mediaError) {
+                        setFeedError(mediaError);
+                        event.currentTarget.value = "";
+                        return;
+                      }
+                    }
+                    setFeedError("");
+                    setPostMediaFile(file);
+                  }}
+                />
+              </label>
+
+              <label className="post-privacy-picker">
+                <span><Globe2 size={15} /> Who can see this?</span>
+                <select value={postPrivacy} onChange={(event) => setPostPrivacy(event.target.value as "public" | "friends" | "only_me")}>
+                  <option value="public">Public</option>
+                  <option value="friends">Friends</option>
+                  <option value="only_me">Only me</option>
+                </select>
+              </label>
+
+              {postMediaFile && (
+                <div className="post-media-selected">
+                  <span>{postMediaFile.type.startsWith("video/") ? "Video" : "Photo"} · {postMediaFile.name}</span>
+                  <button type="button" className="post-media-remove" onClick={() => setPostMediaFile(null)} aria-label="Remove selected media"><X size={14} /></button>
+                </div>
+              )}
+
+              <div className="composer-footer">
+                <span>
+                  {postText.length}/2000
+                </span>
+
+                <button
+                  className="primary-button"
+                  type="submit"
+                  disabled={
+                    postBusy ||
+                    (!postText.trim() && !postMediaFile)
+                  }
+                >
+                  {postBusy
+                    ? "Publishing…"
+                    : "Publish post"}
+                </button>
+              </div>
+            </form>
+          </section>
+        </div>
+      )}
+
+      {authOpen && (
+        <div
+          className="sheet-backdrop"
+          role="presentation"
+          onClick={() => setAuthOpen(false)}
+        >
+          <section
+            className="auth-sheet glass"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="auth-title"
+            onClick={(event) =>
+              event.stopPropagation()
+            }
+          >
+            <div className="sheet-header">
+              <div>
+                <p className="eyebrow">
+                  RP WORLD ACCESS
+                </p>
+
+                <h2 id="auth-title">
+                  {authMode === "login"
+                    ? "Welcome back."
+                    : "Create your identity."}
+                </h2>
+              </div>
+
+              <button
+                className="icon-button"
+                type="button"
+                aria-label="Close"
+                onClick={() =>
+                  setAuthOpen(false)
+                }
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <p className="sheet-copy">
+              {authMode === "login"
+                ? "Sign in to continue to RP WORLD."
+                : "Start with your email and a secure password. Your email stays private."}
+            </p>
+
+            {!supabaseConfigured ? (
+              <div className="setup-notice">
+                <strong>
+                  Supabase is not connected yet.
+                </strong>
+
+                <span>
+                  Add the browser-safe Supabase
+                  environment variables.
+                </span>
+              </div>
+            ) : (
+              <>
+              <form
+                className="auth-form"
+                onSubmit={handleAuth}
+              >
+                <label>
+                  <span>Email</span>
+
+                  <div className="input-wrap">
+                    <Mail size={16} />
+
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(event) =>
+                        setEmail(
+                          event.target.value,
+                        )
+                      }
+                      placeholder="you@example.com"
+                      autoComplete="email"
+                      required
+                    />
+                  </div>
+                </label>
+
+                <label>
+                  <span>Password</span>
+
+                  <div className="input-wrap password-input-wrap">
+                    <input
+                      type={passwordVisible ? "text" : "password"}
+                      value={password}
+                      onChange={(event) =>
+                        setPassword(
+                          event.target.value,
+                        )
+                      }
+                      placeholder="At least 6 characters"
+                      autoComplete={
+                        authMode === "login"
+                          ? "current-password"
+                          : "new-password"
+                      }
+                      minLength={6}
+                      required
+                    />
+                    <button
+                      className="password-toggle"
+                      type="button"
+                      aria-label={
+                        passwordVisible
+                          ? "Hide password"
+                          : "Show password"
+                      }
+                      aria-pressed={passwordVisible}
+                      onClick={() =>
+                        setPasswordVisible((visible) => !visible)
+                      }
+                    >
+                      {passwordVisible ? (
+                        <EyeOff size={16} />
+                      ) : (
+                        <Eye size={16} />
+                      )}
+                    </button>
+                  </div>
+                </label>
+
+                {error && (
+                  <p className="form-message error">
+                    {error}
+                  </p>
+                )}
+
+                {message && (
+                  <p className="form-message success">
+                    {message}
+                  </p>
+                )}
+
+                <button
+                  className="primary-button full"
+                  type="submit"
+                  disabled={busy}
+                >
+                  {busy
+                    ? "Please wait…"
+                    : authMode === "login"
+                      ? "Sign in"
+                      : "Create account"}
+                </button>
+              </form>
+              </>
+            )}
+
+            <button
+              className="mode-switch"
+              type="button"
+              onClick={() => {
+                setAuthMode(
+                  authMode === "login"
+                    ? "signup"
+                    : "login",
+                );
+                resetAuthMessages();
+              }}
+            >
+              {authMode === "login"
+                ? "New to RP WORLD? Create an account"
+                : "Already have an account? Sign in"}
+            </button>
+          </section>
+        </div>
+      )}
+
+      {highlightOpen && session && profile && (
+        <div
+          className="sheet-backdrop"
+          role="presentation"
+          onClick={() =>
+            setHighlightOpen(false)
+          }
+        >
+          <section
+            className="auth-sheet glass"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="highlight-title"
+            onClick={(event) =>
+              event.stopPropagation()
+            }
+          >
+            <div className="sheet-header">
+              <div>
+                <p className="eyebrow">
+                  PROFILE HIGHLIGHT
+                </p>
+
+                <h2 id="highlight-title">
+                  Add a moment.
+                </h2>
+              </div>
+
+              <button
+                className="icon-button"
+                type="button"
+                aria-label="Close"
+                onClick={() =>
+                  setHighlightOpen(false)
+                }
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <p className="sheet-copy">
+              Create a highlight for your profile.
+              Choose a photo from your device and
+              give the moment a short title.
+            </p>
+
+            <form
+              className="auth-form"
+              onSubmit={createHighlight}
+            >
+              <label>
+                <span>Title</span>
+
+                <div className="input-wrap">
+                  <input
+                    value={highlightTitle}
+                    onChange={(event) =>
+                      setHighlightTitle(
+                        event.target.value,
+                      )
+                    }
+                    maxLength={24}
+                    placeholder="Scenes, Events, OCs…"
+                    required
+                  />
+                </div>
+              </label>
+
+              <label>
+                <span>
+                  Photo{" "}
+                  <small>optional</small>
+                </span>
+
+                <div className="input-wrap">
+                  <Image size={15} />
+
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,video/quicktime"
+                    onChange={(event) =>
+                      setHighlightFile(
+                        event.target.files?.[0] ?? null,
+                      )
+                    }
+                  />
+                </div>
+              </label>
+
+              {profileError && (
+                <p className="form-message error">
+                  {profileError}
+                </p>
+              )}
+
+              <button
+                className="primary-button full"
+                type="submit"
+                disabled={highlightBusy}
+              >
+                {highlightBusy
+                  ? "Saving…"
+                  : "Add highlight"}
+              </button>
+            </form>
+          </section>
+        </div>
+      )}
+
+      {activePostMedia && (
+        <div
+          className="post-media-viewer"
+          role="presentation"
+          onClick={() => setActivePostMedia(null)}
+        >
+          <section
+            className="post-media-viewer-card"
+            role="dialog"
+            aria-modal="true"
+            aria-label={activePostMedia.type === "video" ? "Video viewer" : "Image viewer"}
+            onClick={(event) => event.stopPropagation()}
+          >
+            <button
+              className="post-media-viewer-close"
+              type="button"
+              aria-label="Close media"
+              onClick={() => setActivePostMedia(null)}
+            >
+              <X size={20} />
+            </button>
+            <div className="post-media-viewer-content">
+              {activePostMedia.type === "video" ? (
+                <video
+                  src={activePostMedia.url}
+                  controls
+                  autoPlay
+                  playsInline
+                  preload="metadata"
+                />
+              ) : (
+                <img src={activePostMedia.url} alt="Post media" />
+              )}
+            </div>
+          </section>
+        </div>
+      )}
+
+      {activeHighlight && (
+        <div
+          className="highlight-viewer"
+          role="presentation"
+          onClick={() => setActiveHighlight(null)}
+        >
+          <section
+            className="highlight-viewer-card"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="active-highlight-title"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <button
+              className="highlight-viewer-close"
+              type="button"
+              aria-label="Close highlight"
+              onClick={() => setActiveHighlight(null)}
+            >
+              <X size={20} />
+            </button>
+
+            <div className="highlight-viewer-image">
+              {activeHighlight.image_url ? (
+                isVideoMedia(activeHighlight.image_url) ? (
+                  <video
+                    src={activeHighlight.image_url}
+                    controls
+                    autoPlay
+                    playsInline
+                    preload="metadata"
+                  />
+                ) : (
+                  <img src={activeHighlight.image_url} alt={activeHighlight.title} />
+                )
+              ) : (
+                <Sparkles size={38} />
+              )}
+            </div>
+
+            <div className="highlight-viewer-caption">
+              <div className="highlight-viewer-caption-row">
+                <div>
+                  <strong id="active-highlight-title">
+                    {activeHighlight.title}
+                  </strong>
+                  <span>RP WORLD highlight</span>
+                </div>
+
+                {!viewAs && (
+                  <button
+                    className="icon-button highlight-viewer-more"
+                    type="button"
+                    aria-label="Highlight options"
+                    title="Highlight options"
+                    onClick={() => setHighlightActionsOpen((open) => !open)}
+                  >
+                    <MoreVertical size={18} />
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {highlightActionsOpen && !viewAs && (
+              <div className="highlight-actions-sheet" role="menu" aria-label="Highlight options">
+                <button type="button" onClick={() => openHighlightEditor(activeHighlight)} disabled={highlightEditBusy}>
+                  <Pencil size={16} /> Edit highlight title
+                </button>
+                <button type="button" onClick={() => highlightAddFileRef.current?.click()} disabled={highlightEditBusy}>
+                  <Plus size={16} /> Add highlight photo
+                </button>
+                <button type="button" onClick={() => void removeHighlightMedia()} disabled={highlightEditBusy || !activeHighlight.image_url}>
+                  <Trash2 size={16} /> Remove highlight photo
+                </button>
+                <button type="button" className="danger" onClick={() => void deleteHighlight()} disabled={highlightEditBusy}>
+                  <Trash2 size={16} /> Delete entire highlight
+                </button>
+                <input
+                  ref={highlightAddFileRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,video/quicktime"
+                  hidden
+                  onChange={addHighlightMedia}
+                />
+              </div>
+            )}
+          </section>
+        </div>
+      )}
+
+      {highlightEditOpen && activeHighlight && session && (
+        <div className="sheet-backdrop" role="presentation">
+          <section className="profile-sheet glass highlight-edit-sheet" role="dialog" aria-modal="true" aria-labelledby="highlight-edit-title">
+            <div className="sheet-header">
+              <div>
+                <p className="eyebrow">HIGHLIGHT</p>
+                <h2 id="highlight-edit-title">Edit highlight.</h2>
+              </div>
+              <button className="icon-button" type="button" aria-label="Close" onClick={() => setHighlightEditOpen(false)}>
+                <X size={18} />
+              </button>
+            </div>
+
+            <form className="auth-form" onSubmit={updateHighlight}>
+              <label>
+                <span>Title</span>
+                <div className="input-wrap">
+                  <Sparkles size={15} />
+                  <input
+                    type="text"
+                    value={highlightEditTitle}
+                    onChange={(event) => setHighlightEditTitle(event.target.value)}
+                    maxLength={24}
+                    required
+                  />
+                </div>
+              </label>
+
+              <label>
+                <span>Photo or video <small>optional</small></span>
+                <div className="input-wrap">
+                  <Image size={15} />
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,video/quicktime"
+                    onChange={(event) => setHighlightEditFile(event.target.files?.[0] ?? null)}
+                  />
+                </div>
+              </label>
+
+              {profileError && <p className="form-message error">{profileError}</p>}
+
+              <button className="primary-button full" type="submit" disabled={highlightEditBusy}>
+                {highlightEditBusy ? "Saving…" : "Save changes"}
+              </button>
+
+              <button
+                className="secondary-button full highlight-delete-button"
+                type="button"
+                disabled={highlightEditBusy}
+                onClick={() => {
+                  setHighlightEditOpen(false);
+                  setHighlightActionsOpen(false);
+                  void deleteHighlight();
+                }}
+              >
+                <Trash2 size={16} />
+                Delete highlight
+              </button>
+            </form>
+          </section>
+        </div>
+      )}
+
+      {profileOpen && session && (
+        <div
+          className="sheet-backdrop"
+          role="presentation"
+        >
+          <section
+            className="profile-sheet glass"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="profile-title"
+          >
+            <div className="sheet-header">
+              <div>
+                <p className="eyebrow">
+                  RP WORLD IDENTITY
+                </p>
+
+                <h2 id="profile-title">
+                  Build your profile.
+                </h2>
+              </div>
+
+              {profile && (
+                <button
+                  className="icon-button"
+                  type="button"
+                  aria-label="Close"
+                  onClick={() =>
+                    setProfileOpen(false)
+                  }
+                >
+                  <X size={18} />
+                </button>
+              )}
+            </div>
+
+            <p className="sheet-copy">
+              Choose the identity people will see
+              inside RP WORLD. Your email stays
+              private and is not your public
+              username.
+            </p>
+
+            <form
+              className="auth-form"
+              onSubmit={handleProfileSubmit}
+            >
+              <label>
+                <span>Username</span>
+
+                <div className="input-wrap">
+                  <span className="input-prefix">
+                    @
+                  </span>
+
+                  <input
+                    type="text"
+                    value={username}
+                    onChange={(event) =>
+                      setUsername(
+                        event.target.value
+                          .replace(
+                            /[^a-zA-Z0-9_]/g,
+                            "",
+                          )
+                          .toLowerCase(),
+                      )
+                    }
+                    placeholder="yourname"
+                    maxLength={24}
+                    required
+                  />
+                </div>
+              </label>
+
+              <label>
+                <span>Display name</span>
+
+                <div className="input-wrap">
+                  <input
+                    type="text"
+                    value={displayName}
+                    onChange={(event) =>
+                      setDisplayName(
+                        event.target.value,
+                      )
+                    }
+                    placeholder="Your RP name"
+                    maxLength={60}
+                    required
+                  />
+                </div>
+              </label>
+
+              <label>
+                <span>
+                  Profile photo{" "}
+                  <small>optional</small>
+                </span>
+
+                <div className="input-wrap">
+                  <Camera size={15} />
+
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,image/gif"
+                    onChange={(event) =>
+                      setAvatarFile(
+                        event.target.files?.[0] ?? null,
+                      )
+                    }
+                  />
+                </div>
+              </label>
+
+              <label>
+                <span>
+                  Cover photo{" "}
+                  <small>optional</small>
+                </span>
+
+                <div className="input-wrap">
+                  <Image size={15} />
+
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,image/gif"
+                    onChange={(event) =>
+                      setCoverFile(
+                        event.target.files?.[0] ?? null,
+                      )
+                    }
+                  />
+                </div>
+              </label>
+
+              <div className="highlight-style-field">
+                <div className="highlight-style-label">
+                  <span>Highlight style</span>
+                  <small>Choose how your highlights appear on your profile.</small>
+                </div>
+                <div className="highlight-style-options" role="radiogroup" aria-label="Highlight style">
+                  <button className={highlightStyle === "circle" ? "highlight-style-option active" : "highlight-style-option"} type="button" role="radio" aria-checked={highlightStyle === "circle"} onClick={() => setHighlightStyle("circle")}>
+                    <span className="style-preview style-preview-circle"><Sparkles size={15} /></span>
+                    <span><strong>Circle</strong><small>Instagram-style</small></span>
+                  </button>
+                  <button className={highlightStyle === "portrait" ? "highlight-style-option active" : "highlight-style-option"} type="button" role="radio" aria-checked={highlightStyle === "portrait"} onClick={() => setHighlightStyle("portrait")}>
+                    <span className="style-preview style-preview-portrait"><Sparkles size={15} /></span>
+                    <span><strong>Portrait</strong><small>Facebook-style</small></span>
+                  </button>
+                </div>
+              </div>
+
+              <label>
+                <span>
+                  Bio{" "}
+                  <small>optional</small>
+                </span>
+
+                <div className="input-wrap textarea-wrap">
+                  <textarea
+                    value={bio}
+                    onChange={(event) =>
+                      setBio(event.target.value)
+                    }
+                    placeholder="A short line about your RP identity."
+                    maxLength={160}
+                    rows={3}
+                  />
+                </div>
+              </label>
+
+              {profileError && (
+                <p className="form-message error">
+                  {profileError}
+                </p>
+              )}
+
+              <button
+                className="primary-button full"
+                type="submit"
+                disabled={profileBusy}
+              >
+                {profileBusy
+                  ? "Saving…"
+                  : profile
+                    ? "Save changes"
+                    : "Continue"}
+              </button>
+            </form>
+          </section>
+        </div>
+      )}
+    </div>
+  );
+}
