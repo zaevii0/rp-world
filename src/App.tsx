@@ -2450,9 +2450,11 @@ export function App() {
           <section className="feed-column">
             <div className="page-heading">
               <div>
-                <p className="eyebrow">
-                  RP WORLD FEED
-                </p>
+                {view === "home" && (
+                  <p className="eyebrow">
+                    RP WORLD FEED
+                  </p>
+                )}
 
                 <h2 className={view === "home" ? `greeting-title greeting-${Math.min(3, Math.max(1, Math.ceil(title.length / 24)))}` : undefined}>{title}</h2>
               </div>
