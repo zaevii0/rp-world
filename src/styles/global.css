@@ -5091,3 +5091,17 @@ body {
     min-height: 100dvh;
   }
 }
+
+
+/* Keep the app header comfortably below the device status indicators. */
+.topbar,
+.home-topbar {
+  margin-top: max(10px, env(safe-area-inset-top));
+}
+
+@media (max-width: 560px) {
+  .topbar,
+  .home-topbar {
+    margin-top: max(8px, env(safe-area-inset-top));
+  }
+}
