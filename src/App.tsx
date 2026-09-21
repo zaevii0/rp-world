@@ -8,6 +8,7 @@ import {
   EyeOff,
   Globe2,
   LockKeyhole,
+  LayoutGrid,
   Users,
   Heart,
   Home,
@@ -4144,7 +4145,7 @@ export function App() {
                     setView("discover")
                   }
                 >
-                  <Search size={18} />
+                  <LayoutGrid size={18} />
                   Discover
                 </button>
 
@@ -4192,7 +4193,7 @@ export function App() {
               setView("discover")
             }
           >
-            <Search size={19} />
+            <LayoutGrid size={19} />
             <span>Discover</span>
           </button>
 
