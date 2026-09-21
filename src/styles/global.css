@@ -206,7 +206,10 @@ h1 { margin:3px 0 0; font-size:17px; letter-spacing:-.03em; }
 .section-heading h3 { margin:4px 0 0; font-size:20px; letter-spacing:-.035em; }
 .highlights-row { display:flex; gap:10px; overflow-x:auto; padding:2px; scrollbar-width:none; }
 .highlights-row::-webkit-scrollbar { display:none; }
-.highlight-card { width:86px; flex:0 0 86px; min-height:114px; padding:6px; display:grid; grid-template-rows:78px auto; gap:6px; border-radius:18px; text-align:center; }
+.highlight-card { width:calc((100vw - 58px) / 4); max-width:86px; flex:0 0 calc((100vw - 58px) / 4); min-height:0; aspect-ratio:0.76; padding:5px; display:grid; grid-template-rows:1fr auto; gap:5px; border-radius:16px; text-align:center; }
+@media (min-width:561px) {
+  .highlight-card { width:86px; flex-basis:86px; }
+}
 .highlight-card strong { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:10px; font-weight:700; }
 .highlight-image { display:grid; place-items:center; border-radius:13px; background:radial-gradient(circle at 50% 0,color-mix(in srgb,var(--accent) 30%,transparent),transparent 72%),rgba(127,127,127,.09); background-size:cover; background-position:center; color:var(--accent); }
 .add-highlight { color:inherit; border-style:dashed; background:transparent; cursor:pointer; }
@@ -226,6 +229,10 @@ h1 { margin:3px 0 0; font-size:17px; letter-spacing:-.03em; }
   .profile-bio { font-size:12px; margin-top:10px; }
   .profile-meta span { font-size:9px; padding:5px 8px; }
   .profile-stats > div { min-height:58px; }
+  .highlights-row { gap:6px; padding:2px 0; }
+  .highlight-card { width:calc((100vw - 44px) / 4); flex-basis:calc((100vw - 44px) / 4); max-width:none; min-height:0; aspect-ratio:0.78; padding:4px; border-radius:14px; grid-template-rows:1fr auto; gap:4px; }
+  .highlight-image { border-radius:10px; }
+  .highlight-card strong { font-size:9px; }
 }
 
 
