@@ -403,6 +403,14 @@ export function App() {
         scale: Math.min(window.devicePixelRatio || 1, 2),
         useCORS: true,
         logging: false,
+        // Capture only what is currently visible in the viewport, including
+        // the current page, current scroll position, and fixed navigation.
+        x: window.scrollX,
+        y: window.scrollY,
+        width: window.innerWidth,
+        height: window.innerHeight,
+        windowWidth: window.innerWidth,
+        windowHeight: window.innerHeight,
         ignoreElements: (element) => element.classList.contains("screenshot-editor"),
       });
       setScreenshotDataUrl(canvas.toDataURL("image/png"));
