@@ -583,41 +583,6 @@ export function App() {
     return map;
   }
 
-  async function cleanupExpiredTrash() {
-    if (!supabase || !session?.user) return;
-
-    const cutoff = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
-    const { data: expired } = await supabase
-      .from("posts")
-      .select("id, media_url")
-      .eq("author_id", session.user.id)
-      .not("trashed_at", "is", null)
-      .lt("trashed_at", cutoff);
-
-    if (!expired?.length) return;
-
-    const mediaPaths = expired
-      .map((post) => post.media_url)
-      .filter((url): url is string => Boolean(url))
-      .map((url) => {
-        const marker = "/storage/v1/object/public/post-media/";
-        const index = url.indexOf(marker);
-        return index >= 0 ? decodeURIComponent(url.slice(index + marker.length)) : null;
-      })
-      .filter((path): path is string => Boolean(path));
-
-    if (mediaPaths.length) {
-      await supabase.storage.from("post-media").remove(mediaPaths);
-    }
-
-    await supabase
-      .from("posts")
-      .delete()
-      .eq("author_id", session.user.id)
-      .not("trashed_at", "is", null)
-      .lt("trashed_at", cutoff);
-  }
-
   async function loadFeed() {
     if (!supabase || !session?.user) return;
 
