@@ -353,6 +353,7 @@ export function App() {
   const [publicProfileFriend, setPublicProfileFriend] = useState(false);
   const [discoverProfiles, setDiscoverProfiles] = useState<Profile[]>([]);
   const [discoverSearch, setDiscoverSearch] = useState("");
+  const [openDiscoverCategory, setOpenDiscoverCategory] = useState("");
   const [activeConversation, setActiveConversation] = useState<string | null>(() => {
     try {
       return sessionStorage.getItem(MESSAGE_CONVERSATION_KEY);
@@ -3447,21 +3448,40 @@ export function App() {
 
             {view === "discover" && (
               <section className="discover-section">
-                <div className="section-heading discover-heading"><div><p className="eyebrow">RP WORLD</p><h3>Explore RP WORLD</h3><span className="discover-subtitle">Communities, activities, stories, people, and everything happening inside RP WORLD.</span></div></div>
+                <div className="section-heading discover-heading"><div><p className="eyebrow">RP WORLD</p><h3>Explore RP WORLD</h3><span className="discover-subtitle">Choose a section to reveal its branches. The main view stays clean and organized.</span></div></div>
                 <div className="discover-category-groups">
-                  <section className="discover-category-group"><div className="discover-category-heading"><UsersRound size={18}/><div><strong>Communities & Hoods</strong><span>RP spaces and communities.</span></div></div>
-                    <div className="discover-category-grid">{[["Arena / Gang","Competitive RP arenas and gangs."],["University / Academy","School and academy RP."],["Family","RP family circles."],["Sister Hood","Sisterhood communities."],["Brother Hood","Brotherhood communities."],["Music Hood","Music communities."],["Dance Hood","Dance communities."],["Ranter Hood","Rant and discussion communities."],["Writer Hood","Writer communities."],["Seller Hood","Seller communities."],["Buy & Sell","Marketplace spaces."],["Gaming Hood","Gaming communities."],["Call Groups","Call communities."],["Models","Model communities."],["Editor Hoods","Editing communities."],["Academic Commissioner","Academic-focused communities."]].map(([name,description]) => <button className="discover-category-card glass" type="button" key={name}><span className="discover-category-icon"><UsersRound size={18}/></span><span className="discover-category-copy"><strong>{name}</strong><small>{description}</small></span></button>)}</div>
+                  {[
+                    {name:"Communities & Hoods",description:"RP spaces, groups, and communities.",icon:UsersRound,items:[
+                      ["Arena / Gang","Competitive RP arenas and gangs."],["University / Academy","School and academy RP."],["Family","RP family circles."],["Sister Hood","Sisterhood communities."],["Brother Hood","Brotherhood communities."],["Music Hood","Music communities."],["Dance Hood","Dance communities."],["Ranter Hood","Rant and discussion communities."],["Writer Hood","Writer communities."],["Seller Hood","Seller communities."],["Buy & Sell","Marketplace spaces."],["Gaming Hood","Gaming communities."],["Call Groups","Call communities."],["Models","Model communities."],["Editor Hoods","Editing communities."],["Academic Commissioner","Academic-focused communities."]]},
+                    {name:"Activities & Events",description:"Games, events, and member-led activities.",icon:Sparkles,items:[
+                      ["Arena Games","Games and activities hosted inside arenas.",Gamepad2],["Falling Game","Falling Game activities and rounds.",Gamepad2],["Community Activities","Member-led activities and interactions.",Users],["Events","RP WORLD events and special activities.",Sparkles],["Call Groups","Live call-based activities.",Phone],["Writing","Writing activities and events.",PenLine],["Editing","Creative editing activities.",Camera]]},
+                    {name:"Library & Stories",description:"Stories, writers, reading, and saved content.",icon:BookOpen,items:[
+                      ["Trending Stories","Stories getting attention.",TrendingUp],["New Stories","Recently published stories.",Sparkles],["Most Read","Stories with the most reads.",Trophy],["Most Saved","Stories saved most often.",BookOpen],["Writers","Explore RPW writers.",PenLine],["Your Library","Your saved reading list.",BookOpen]]},
+                    {name:"RPW Rankings & Trends",description:"Organic discovery based on RP WORLD activity.",icon:TrendingUp,items:[
+                      ["Trending Role Players","Role players gaining attention."],["Rising Role Players","Role players growing in activity."],["Most Followed","Role players with the most followers."],["Trending Hoods","Hoods gaining attention."],["Most Active Hoods","Hoods with the most activity."],["Longest-Running Hoods","Hoods with the longest RP history."],["Most Read Writers","Writers whose stories are read most."],["Most Saved Writers","Writers whose stories are saved most."],["Trending Writers","Writers currently trending."]]},
+                  ].map((category) => {
+                    const CategoryIcon = category.icon;
+                    const isOpen = openDiscoverCategory === category.name;
+                    return <section className={`discover-category-group ${isOpen ? "is-open" : ""}`} key={category.name}>
+                      <button className="discover-category-summary glass" type="button" aria-expanded={isOpen} onClick={() => setOpenDiscoverCategory(isOpen ? "" : category.name)}>
+                        <span className="discover-category-icon"><CategoryIcon size={18}/></span>
+                        <span className="discover-category-copy"><strong>{category.name}</strong><small>{category.description}</small></span>
+                        <span className="discover-category-chevron"><ArrowUp size={15}/></span>
+                      </button>
+                      {isOpen && <div className="discover-category-grid">{category.items.map((item) => {
+                        const [name,description,Icon] = item as [string,string,typeof Gamepad2?];
+                        const ItemIcon = Icon ?? category.icon;
+                        return <button className="discover-category-card glass" type="button" key={name}><span className="discover-category-icon"><ItemIcon size={17}/></span><span className="discover-category-copy"><strong>{name}</strong><small>{description}</small></span></button>;
+                      })}</div>}
+                    </section>;
+                  })}
+                  <section className="discover-category-group">
+                    <button className="discover-category-summary glass" type="button" aria-expanded={openDiscoverCategory === "RPW News"} onClick={() => setOpenDiscoverCategory(openDiscoverCategory === "RPW News" ? "" : "RPW News")}>
+                      <span className="discover-category-icon"><Newspaper size={18}/></span>
+                      <span className="discover-category-copy"><strong>RPW News</strong><small>Updates, announcements, featured moments, and platform news.</small></span>
+                      <span className="discover-category-chevron"><ArrowUp size={15}/></span>
+                    </button>
                   </section>
-                  <section className="discover-category-group"><div className="discover-category-heading"><Sparkles size={18}/><div><strong>Activities & Events</strong><span>Things members can do together.</span></div></div>
-                    <div className="discover-category-grid discover-category-grid-three">{[["Arena Games","Games and activities hosted inside arenas.",Gamepad2],["Community Activities","Member-led activities and interactions.",Users],["Events","RP WORLD events and special activities.",Sparkles],["Call Groups","Live call-based activities.",Phone],["Writing","Writing activities and events.",PenLine],["Editing","Creative editing activities.",Camera]].map(([name,description,Icon]) => { const CategoryIcon = Icon as typeof Gamepad2; return <button className="discover-category-card glass" type="button" key={name as string}><span className="discover-category-icon"><CategoryIcon size={18}/></span><span className="discover-category-copy"><strong>{name as string}</strong><small>{description as string}</small></span></button>; })}</div>
-                  </section>
-                  <section className="discover-category-group"><div className="discover-category-heading"><BookOpen size={18}/><div><strong>Library & Stories</strong><span>RPW writing and saved stories.</span></div></div>
-                    <div className="discover-category-grid discover-category-grid-three">{[["Trending Stories","Stories getting attention.",TrendingUp],["New Stories","Recently published stories.",Sparkles],["Most Read","Stories with the most reads.",Trophy],["Most Saved","Stories saved most often.",BookOpen],["Writers","Explore RPW writers.",PenLine],["Your Library","Your saved reading list.",BookOpen]].map(([name,description,Icon]) => { const CategoryIcon = Icon as typeof BookOpen; return <button className="discover-category-card glass" type="button" key={name as string}><span className="discover-category-icon"><CategoryIcon size={18}/></span><span className="discover-category-copy"><strong>{name as string}</strong><small>{description as string}</small></span></button>; })}</div>
-                  </section>
-                  <section className="discover-category-group"><div className="discover-category-heading"><TrendingUp size={18}/><div><strong>RPW Rankings & Trends</strong><span>Organic discovery from RP WORLD activity.</span></div></div>
-                    <div className="discover-category-grid discover-category-grid-three">{[["Trending Role Players","Role players gaining attention."],["Rising Role Players","Role players growing in activity."],["Most Followed","Role players with the most followers."],["Trending Hoods","Hoods gaining attention."],["Most Active Hoods","Hoods with the most activity."],["Longest-Running Hoods","Hoods with the longest RP history."],["Most Read Writers","Writers whose stories are read most."],["Most Saved Writers","Writers whose stories are saved most."],["Trending Writers","Writers currently trending."]].map(([name,description]) => <button className="discover-category-card glass" type="button" key={name}><span className="discover-category-icon"><TrendingUp size={18}/></span><span className="discover-category-copy"><strong>{name}</strong><small>{description}</small></span></button>)}</div>
-                  </section>
-                  <section className="discover-category-group"><div className="discover-category-heading"><Newspaper size={18}/><div><strong>RPW News</strong><span>Updates and news from the RP WORLD community.</span></div></div><button className="discover-feature-card glass" type="button"><span className="discover-category-icon"><Newspaper size={20}/></span><span className="discover-category-copy"><strong>RPW News</strong><small>Community updates, announcements, featured moments, and platform news.</small></span></button></section>
                 </div>
               </section>
             )}
