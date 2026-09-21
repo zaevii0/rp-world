@@ -3529,6 +3529,119 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
 }
 
 
+
+/* iMessage-style message bubbles */
+.message-row {
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+  margin: 2px 0;
+}
+
+.message-row.mine {
+  justify-content: flex-end;
+}
+
+.message-bubble {
+  position: relative;
+  max-width: min(78%, 520px);
+  padding: 8px 13px 6px;
+  border: 0;
+  border-radius: 19px 19px 19px 6px;
+  box-shadow: none;
+  overflow-wrap: anywhere;
+}
+
+.message-bubble.mine {
+  border-radius: 19px 19px 6px 19px;
+}
+
+.message-bubble.grouped {
+  margin-top: -1px;
+}
+
+.message-bubble.grouped:not(.mine) {
+  border-top-left-radius: 6px;
+}
+
+.message-bubble.grouped.mine {
+  border-top-right-radius: 6px;
+}
+
+.message-bubble > span {
+  display: block;
+  font-size: 16px;
+  line-height: 1.28;
+  white-space: pre-wrap;
+}
+
+.app.dark .message-bubble.mine,
+.app.light .message-bubble.mine {
+  background: var(--accent);
+  color: #fff;
+}
+
+.app.dark .message-bubble:not(.mine) {
+  background: #3a3a3c;
+  color: #fff;
+}
+
+.app.light .message-bubble:not(.mine) {
+  background: #e5e5ea;
+  color: #111;
+}
+
+.message-bubble-meta {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  min-height: 11px;
+  margin-top: 2px;
+}
+
+.message-time {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  opacity: .58;
+  font-size: 9px;
+  line-height: 1.2;
+  cursor: pointer;
+}
+
+.message-bubble:not(.mine) .message-bubble-meta {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.message-time:hover,
+.message-time:focus-visible {
+  opacity: 1;
+  outline: none;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.message-bubble-meta > svg {
+  width: 11px;
+  height: 11px;
+  flex: 0 0 auto;
+  opacity: .7;
+}
+
+@media (max-width: 560px) {
+  .message-bubble {
+    max-width: 84%;
+    padding: 8px 12px 6px;
+  }
+
+  .message-bubble > span {
+    font-size: 16px;
+  }
+}
+
 /* Final chat icon correction */
 .message-header-action,
 .message-compose-action {
