@@ -17,6 +17,10 @@ to authenticated
 using (
   bucket_id = 'post-media'
   and (
+    -- Storage returns metadata after upload. Allow the uploader to read
+    -- their own object while it is being linked to a post.
+    owner_id = (select auth.uid())::text
+    or
     -- New media: the second path segment is the owning post id.
     exists (
       select 1
