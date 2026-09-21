@@ -3560,12 +3560,12 @@ export function App() {
                           </button>
 
                           <div>
-                            {post.author_id === session?.user.id && !post.shared_post_id && (
+                            {post.author_id === session?.user.id && (
                               <button
                                 className="post-more-button"
                                 type="button"
-                                aria-label="Post options"
-                                title="Post options"
+                                aria-label={post.shared_post_id ? "Shared post options" : "Post options"}
+                                title={post.shared_post_id ? "Shared post options" : "Post options"}
                                 onClick={() => setPostActionTarget(post)}
                               >
                                 <MoreVertical size={18} />
