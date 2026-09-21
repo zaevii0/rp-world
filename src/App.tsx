@@ -3944,8 +3944,6 @@ export function App() {
                 {postActionTarget.privacy === "public" ? <Globe2 size={18} /> : postActionTarget.privacy === "friends" ? <Users size={18} /> : <LockKeyhole size={18} />}
                 <span>{privacyBusy ? "Saving…" : `Privacy · ${postActionTarget.privacy === "public" ? "Public" : postActionTarget.privacy === "friends" ? "Friends" : "Only me"}`}</span>
               </button>
-                <Pencil size={18} /><span>Edit post</span>
-              </button>
               <button type="button" onClick={() => void managePostAction("archive")} disabled={postActionBusy}>
                 <Archive size={18} /><span>Move to archive</span>
               </button>
