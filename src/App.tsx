@@ -3331,7 +3331,7 @@ export function App() {
                       <div className="profile-name-row"><div><h2>{publicProfile.display_name}{publicProfile.username === "zaevii" && <span className="verified-badge" aria-label="Verified">✓</span>}</h2><span>@{publicProfile.username}</span></div></div>
                       <p className="profile-bio">{publicProfile.bio || "No bio yet. Tell the world who you are."}</p>
                       <div className="profile-actions profile-social-actions">
-                        <button className="profile-action-button follow-button" type="button" onClick={() => void toggleFollowPublicProfile()}><UserPlus size={14} />{followingPublicProfile ? "Following" : "Follow"}</button>
+                        <button className="profile-action-button follow-button" type="button" onClick={() => void toggleFollowPublicProfile()}><UserPlus size={14} />{publicProfileFriend ? "Friends" : followingPublicProfile ? "Following" : "Follow"}</button>
                         <button
                           className="profile-action-button"
                           type="button"
