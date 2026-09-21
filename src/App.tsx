@@ -3027,9 +3027,33 @@ export function App() {
         setCommentsByPost((current) => ({ ...current, [postId]: (current[postId] ?? []).map((item) => item.id === comment.id ? { ...item, content: nextContent, edited_at: editedAt, updated_at: editedAt } : item) }));
         setCommentEditId(null);
       } else if (action === "delete") {
-        const { error } = await supabase.from("post_comments").update({ is_deleted: true, content: "" }).eq("id", comment.id).eq("author_id", session.user.id);
+        // Comment/reply deletion is a true deletion: remove the database row
+        // instead of leaving a visible "This comment was deleted" placeholder.
+        // The RLS policy restricts DELETE to the comment author.
+        const mediaPath = getPostMediaPath(comment.media_url);
+        const { error } = await supabase
+          .from("post_comments")
+          .delete()
+          .eq("id", comment.id)
+          .eq("author_id", session.user.id);
         if (error) throw error;
-        setCommentsByPost((current) => ({ ...current, [postId]: (current[postId] ?? []).map((item) => item.id === comment.id ? { ...item, is_deleted: true, content: "", media_url: null } : item) }));
+
+        // Remove the author's attached comment image when possible. A storage
+        // cleanup failure must not resurrect the deleted comment.
+        if (mediaPath) {
+          const { error: mediaError } = await supabase.storage
+            .from("post-media")
+            .remove([mediaPath]);
+          if (mediaError) {
+            console.warn("RP WORLD comment media cleanup failed", mediaError);
+          }
+        }
+
+        setCommentsByPost((current) => ({
+          ...current,
+          [postId]: (current[postId] ?? []).filter((item) => item.id !== comment.id),
+        }));
+        setCommentEditId((current) => current === comment.id ? null : current);
       } else if (action === "pin") {
         if (comment.parent_id) throw new Error("Only top-level comments can be pinned.");
         const { error } = await supabase.from("post_comments").update({ is_pinned: !comment.is_pinned }).eq("id", comment.id);
