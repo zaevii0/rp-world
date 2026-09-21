@@ -156,6 +156,32 @@ type Comment = {
   reactionCounts?: Record<string, number>;
 };
 
+type MessageStatus = "sending" | "sent" | "delivered" | "read" | "failed";
+type MessageReaction = {
+  user_id: string;
+  reaction_type: string;
+};
+type ChatMessage = {
+  id: string;
+  client_id?: string | null;
+  conversation_id: string;
+  sender_id: string;
+  content: string;
+  created_at: string;
+  updated_at?: string;
+  edited_at?: string | null;
+  unsent_at?: string | null;
+  delivered_at?: string | null;
+  read_at?: string | null;
+  reply_to_id?: string | null;
+  character_id?: string | null;
+  media_url?: string | null;
+  media_type?: string | null;
+  reactions?: MessageReaction[];
+  status?: MessageStatus;
+  optimistic?: boolean;
+};
+
 function readTheme(): ThemeId {
   const saved = localStorage.getItem(THEME_KEY);
   return themes.some((theme) => theme.id === saved)
@@ -391,7 +417,7 @@ export function App() {
     lastMessage: string;
     lastMessageAt: string;
   }>>([]);
-  const [messagesByConversation, setMessagesByConversation] = useState<Record<string, Array<{ id: string; sender_id: string; content: string; created_at: string }>>>({});
+  const [messagesByConversation, setMessagesByConversation] = useState<Record<string, ChatMessage[]>>({});
   const [messageDraft, setMessageDraft] = useState("");
   const [messageNoticeOpen, setMessageNoticeOpen] = useState(false);
   const [onlineUserIds, setOnlineUserIds] = useState<Set<string>>(new Set());
@@ -399,7 +425,24 @@ export function App() {
   const [expandedMessageTimestamps, setExpandedMessageTimestamps] = useState<Record<string, boolean>>({});
   const [messageSettingsOpen, setMessageSettingsOpen] = useState(false);
   const [chatNickname, setChatNickname] = useState("");
+  const [messageReplyTarget, setMessageReplyTarget] = useState<ChatMessage | null>(null);
+  const [messageEditTarget, setMessageEditTarget] = useState<ChatMessage | null>(null);
+  const [messageEditDraft, setMessageEditDraft] = useState("");
+  const [messageReactionTarget, setMessageReactionTarget] = useState<string | null>(null);
+  const [messageActionTarget, setMessageActionTarget] = useState<ChatMessage | null>(null);
+  const [messageTyping, setMessageTyping] = useState(false);
+  const [messageTypingUsers, setMessageTypingUsers] = useState<Set<string>>(new Set());
+  const [messageHasMore, setMessageHasMore] = useState<Record<string, boolean>>({});
+  const [messageLoadingOlder, setMessageLoadingOlder] = useState(false);
+  const [messageMediaFile, setMessageMediaFile] = useState<File | null>(null);
+  const [messageVoiceRecording, setMessageVoiceRecording] = useState(false);
   const messageMediaRef = useRef<HTMLInputElement | null>(null);
+  const messageListRef = useRef<HTMLDivElement | null>(null);
+  const messageChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+  const messageTypingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const messageVoiceRecorderRef = useRef<MediaRecorder | null>(null);
+  const messageVoiceChunksRef = useRef<Blob[]>([]);
+  const messageLongPressRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const commentLongPressRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const screenshotLongPressRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const screenshotLongPressTriggeredRef = useRef(false);
@@ -1883,56 +1926,34 @@ export function App() {
       .select("id, user_low, user_high, created_at")
       .or(`user_low.eq.${session.user.id},user_high.eq.${session.user.id}`)
       .order("created_at", { ascending: false });
-
-    if (conversationError || !conversations?.length) {
-      setMessageConversations([]);
-      return;
-    }
+    if (conversationError || !conversations?.length) { setMessageConversations([]); return; }
 
     const conversationIds = conversations.map((item) => item.id);
-    const otherIds = [...new Set(conversations.map((item) =>
-      item.user_low === session.user.id ? item.user_high : item.user_low
-    ))];
-
+    const otherIds = [...new Set(conversations.map((item) => item.user_low === session.user.id ? item.user_high : item.user_low))];
     const [{ data: otherProfiles }, { data: messageRows }] = await Promise.all([
       supabase.from("profiles").select("*").in("id", otherIds),
-      supabase.from("messages")
-        .select("id, conversation_id, sender_id, content, created_at")
-        .in("conversation_id", conversationIds)
-        .order("created_at", { ascending: false }),
+      supabase.from("messages").select("id, conversation_id, sender_id, content, created_at, unsent_at, media_type")
+        .in("conversation_id", conversationIds).order("created_at", { ascending: false }),
     ]);
-
     const profileMap = new Map((otherProfiles ?? []).map((item) => [item.id, item as Profile]));
-    const latestByConversation = new Map<string, { content: string; created_at: string }>();
-
+    const latestByConversation = new Map<string, { content: string; created_at: string; media_type?: string | null }>();
     for (const item of messageRows ?? []) {
-      if (!latestByConversation.has(item.conversation_id)) {
-        latestByConversation.set(item.conversation_id, {
-          content: item.content,
-          created_at: item.created_at,
-        });
-      }
+      if (!latestByConversation.has(item.conversation_id)) latestByConversation.set(item.conversation_id, {
+        content: item.unsent_at ? "Message unsent" : item.media_type ? "Attachment" : item.content,
+        created_at: item.created_at,
+        media_type: item.media_type,
+      });
     }
-
-    setMessageConversations(
-      conversations
-        .map((conversation) => {
-          const otherId = conversation.user_low === session.user.id
-            ? conversation.user_high
-            : conversation.user_low;
-          const otherProfile = profileMap.get(otherId);
-          const latest = latestByConversation.get(conversation.id);
-          return otherProfile
-            ? {
-                id: conversation.id,
-                otherProfile,
-                lastMessage: latest?.content ?? "No messages yet.",
-                lastMessageAt: latest?.created_at ?? conversation.created_at,
-              }
-            : null;
-        })
-        .filter((item): item is NonNullable<typeof item> => Boolean(item)),
-    );
+    setMessageConversations(conversations.map((conversation) => {
+      const otherId = conversation.user_low === session.user.id ? conversation.user_high : conversation.user_low;
+      const otherProfile = profileMap.get(otherId);
+      const latest = latestByConversation.get(conversation.id);
+      return otherProfile ? {
+        id: conversation.id, otherProfile,
+        lastMessage: latest?.content ?? "No messages yet.",
+        lastMessageAt: latest?.created_at ?? conversation.created_at,
+      } : null;
+    }).filter((item): item is NonNullable<typeof item> => Boolean(item)));
   }
 
   async function openMessageInbox() {
@@ -1944,22 +1965,16 @@ export function App() {
     if (!supabase || !session?.user || !publicProfile || !publicProfileFriend) return;
     let low = session.user.id, high = publicProfile.id;
     if (low > high) [low, high] = [high, low];
-
     const { data, error: lookupError } = await supabase.from("conversations")
-      .select("id, user_low, user_high")
-      .eq("user_low", low).eq("user_high", high).maybeSingle();
+      .select("id, user_low, user_high").eq("user_low", low).eq("user_high", high).maybeSingle();
     if (lookupError) return;
-
     let conversation = data;
     if (!conversation) {
       const { data: created, error: createError } = await supabase.from("conversations")
-        .insert({ user_low: low, user_high: high })
-        .select("id, user_low, user_high")
-        .single();
+        .insert({ user_low: low, user_high: high }).select("id, user_low, user_high").single();
       if (createError || !created) return;
       conversation = created;
     }
-
     setMessageInboxOpen(false);
     setActiveConversationProfile(publicProfile);
     setExpandedMessageTimestamps({});
@@ -1975,54 +1990,259 @@ export function App() {
     await loadConversationMessages(conversationId);
   }
 
-  async function loadConversationMessages(conversationId: string) {
+  const MESSAGE_PAGE_SIZE = 30;
+  const messageSelect = "id, client_id, conversation_id, sender_id, content, created_at, updated_at, edited_at, unsent_at, delivered_at, read_at, reply_to_id, character_id, media_url, media_type";
+
+  async function loadConversationMessages(conversationId: string, before?: string) {
     if (!supabase || !session?.user) return;
-    const { data } = await supabase.from("messages").select("id, sender_id, content, created_at")
-      .eq("conversation_id", conversationId).order("created_at", { ascending: true });
+    let query = supabase.from("messages").select(messageSelect).eq("conversation_id", conversationId).order("created_at", { ascending: false }).limit(MESSAGE_PAGE_SIZE);
+    if (before) query = query.lt("created_at", before);
+    const { data, error } = await query;
+    if (error) { setMessage("Could not load messages. Please try again."); return; }
+    const rows = ((data ?? []) as ChatMessage[]).reverse();
     setMessagesByConversation((current) => ({
       ...current,
-      [conversationId]: (data ?? []) as Array<{ id: string; sender_id: string; content: string; created_at: string }>,
+      [conversationId]: before ? [...rows, ...(current[conversationId] ?? [])] : rows,
     }));
+    setMessageHasMore((current) => ({ ...current, [conversationId]: rows.length === MESSAGE_PAGE_SIZE }));
+    if (!before) {
+      requestAnimationFrame(() => {
+        const node = messageListRef.current;
+        if (node) node.scrollTop = node.scrollHeight;
+      });
+    }
+    const unread = rows.filter((item) => item.sender_id !== session.user.id && !item.read_at).map((item) => item.id);
+    if (unread.length) {
+      await supabase.from("messages").update({ read_at: new Date().toISOString(), delivered_at: new Date().toISOString() }).in("id", unread);
+    }
+  }
+
+  async function loadOlderMessages() {
+    if (!activeConversation || messageLoadingOlder || !messageHasMore[activeConversation]) return;
+    const list = messageListRef.current;
+    const first = messagesByConversation[activeConversation]?.[0];
+    if (!list || !first) return;
+    setMessageLoadingOlder(true);
+    const previousHeight = list.scrollHeight;
+    const previousTop = list.scrollTop;
+    await loadConversationMessages(activeConversation, first.created_at);
+    requestAnimationFrame(() => {
+      if (messageListRef.current) messageListRef.current.scrollTop = previousTop + (messageListRef.current.scrollHeight - previousHeight);
+    });
+    setMessageLoadingOlder(false);
+  }
+
+  async function toggleMessageReaction(messageId: string, reactionType: string) {
+    if (!supabase || !session?.user) return;
+    const previous = messagesByConversation[activeConversation ?? ""] ?? [];
+    const target = previous.find((item) => item.id === messageId);
+    if (!target) return;
+    const existing = target.reactions?.find((item) => item.user_id === session.user.id)?.reaction_type ?? null;
+    const next = existing === reactionType ? null : reactionType;
+    setMessagesByConversation((current) => ({
+      ...current,
+      [activeConversation ?? ""]: (current[activeConversation ?? ""] ?? []).map((item) => item.id === messageId
+        ? { ...item, reactions: [...(item.reactions ?? []).filter((r) => r.user_id !== session.user.id), ...(next ? [{ user_id: session.user.id, reaction_type: next }] : [])] }
+        : item),
+    }));
+    const result = next
+      ? await supabase.from("message_reactions").upsert({ message_id: messageId, user_id: session.user.id, reaction_type: next })
+      : await supabase.from("message_reactions").delete().eq("message_id", messageId).eq("user_id", session.user.id);
+    if (result.error) {
+      setMessagesByConversation((current) => ({ ...current, [activeConversation ?? ""]: previous }));
+      setMessage("Could not update reaction. Please try again.");
+    }
+  }
+
+  async function saveEditedMessage() {
+    if (!supabase || !session?.user || !messageEditTarget || !messageEditDraft.trim()) return;
+    const target = messageEditTarget;
+    const conversationId = activeConversation;
+    if (!conversationId) return;
+    const original = messagesByConversation[conversationId] ?? [];
+    const optimistic = { ...target, content: messageEditDraft.trim(), edited_at: new Date().toISOString(), updated_at: new Date().toISOString() };
+    setMessagesByConversation((current) => ({ ...current, [conversationId]: (current[conversationId] ?? []).map((item) => item.id === target.id ? optimistic : item) }));
+    setMessageEditTarget(null);
+    const { data, error } = await supabase.from("messages").update({ content: optimistic.content, edited_at: optimistic.edited_at }).eq("id", target.id).eq("sender_id", session.user.id).is("unsent_at", null).select(messageSelect).single();
+    if (error || !data) {
+      setMessagesByConversation((current) => ({ ...current, [conversationId]: original }));
+      setMessage("Could not edit that message. Please try again.");
+      return;
+    }
+    setMessagesByConversation((current) => ({ ...current, [conversationId]: (current[conversationId] ?? []).map((item) => item.id === target.id ? data as ChatMessage : item) }));
+  }
+
+  async function unsendMessage(target: ChatMessage) {
+    if (!supabase || !session?.user || !activeConversation) return;
+    const original = messagesByConversation[activeConversation] ?? [];
+    setMessagesByConversation((current) => ({ ...current, [activeConversation]: (current[activeConversation] ?? []).map((item) => item.id === target.id ? { ...item, unsent_at: new Date().toISOString(), content: "", media_url: null, media_type: null } : item) }));
+    const { data, error } = await supabase.from("messages").update({ unsent_at: new Date().toISOString(), content: "", media_url: null, media_type: null }).eq("id", target.id).eq("sender_id", session.user.id).is("unsent_at", null).select(messageSelect).single();
+    if (error || !data) {
+      setMessagesByConversation((current) => ({ ...current, [activeConversation]: original }));
+      setMessage("Could not unsend that message. Please try again.");
+      return;
+    }
+    setMessagesByConversation((current) => ({ ...current, [activeConversation]: (current[activeConversation] ?? []).map((item) => item.id === target.id ? data as ChatMessage : item) }));
+    setMessageActionTarget(null);
+  }
+
+  function messageIsEditable(item: ChatMessage) {
+    return item.sender_id === session?.user.id && !item.unsent_at && Date.now() - new Date(item.created_at).getTime() <= 15 * 60 * 1000;
+  }
+
+  async function sendMessage(event: FormEvent) {
+    event.preventDefault();
+    if (!supabase || !session?.user || !activeConversation) return;
+    const content = messageDraft.trim();
+    if (!content && !messageMediaFile) return;
+    const conversationId = activeConversation;
+    const clientId = crypto.randomUUID();
+    const now = new Date().toISOString();
+    const optimistic: ChatMessage = {
+      id: `local-${clientId}`, client_id: clientId, conversation_id: conversationId, sender_id: session.user.id,
+      content, created_at: now, updated_at: now, reply_to_id: messageReplyTarget?.id ?? null,
+      media_url: null, media_type: null, reactions: [], status: "sending", optimistic: true,
+    };
+    setMessagesByConversation((current) => ({ ...current, [conversationId]: [...(current[conversationId] ?? []), optimistic] }));
+    setMessageDraft("");
+    const replyId = messageReplyTarget?.id ?? null;
+    setMessageReplyTarget(null);
+    try {
+      let mediaUrl: string | null = null;
+      let mediaType: string | null = null;
+      if (messageMediaFile) {
+        const file = messageMediaFile;
+        if (file.size > 10 * 1024 * 1024) throw new Error("Message media must be 10 MB or smaller.");
+        const extension = file.name.split(".").pop()?.toLowerCase() || "bin";
+        const path = `${session.user.id}/${conversationId}/${crypto.randomUUID()}.${extension}`;
+        const upload = await supabase.storage.from("message-media").upload(path, file, { contentType: file.type, upsert: false });
+        if (upload.error) throw upload.error;
+        mediaUrl = path; mediaType = file.type;
+      }
+      setMessageMediaFile(null);
+      const { data, error } = await supabase.from("messages").insert({
+        conversation_id: conversationId, sender_id: session.user.id, client_id: clientId,
+        content: content || (mediaType?.startsWith("audio/") ? "Voice message" : "Photo"),
+        reply_to_id: replyId, media_url: mediaUrl, media_type: mediaType,
+      }).select(messageSelect).single();
+      if (error || !data) throw error ?? new Error("Message was not saved.");
+      setMessagesByConversation((current) => ({ ...current, [conversationId]: (current[conversationId] ?? []).map((item) => item.id === optimistic.id ? { ...(data as ChatMessage), status: "sent" } : item) }));
+      void loadMessageInbox();
+    } catch (sendError) {
+      setMessagesByConversation((current) => ({ ...current, [conversationId]: (current[conversationId] ?? []).map((item) => item.id === optimistic.id ? { ...item, status: "failed" } : item) }));
+      setMessage(sendError instanceof Error ? sendError.message : "Could not send message.");
+    }
+  }
+
+  function emitMessageTyping(value: string) {
+    setMessageDraft(value);
+    if (!messageChannelRef.current || !session?.user) return;
+    void messageChannelRef.current.send({ type: "broadcast", event: "typing", payload: { userId: session.user.id, typing: true } });
+    if (messageTypingTimerRef.current) clearTimeout(messageTypingTimerRef.current);
+    messageTypingTimerRef.current = setTimeout(() => {
+      void messageChannelRef.current?.send({ type: "broadcast", event: "typing", payload: { userId: session.user.id, typing: false } });
+    }, 1200);
+  }
+
+  async function toggleVoiceRecording() {
+    if (!activeConversation) return;
+    if (messageVoiceRecording) {
+      messageVoiceRecorderRef.current?.stop();
+      return;
+    }
+    if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === "undefined") {
+      setMessage("Voice messages are not supported by this browser.");
+      return;
+    }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const recorder = new MediaRecorder(stream);
+      messageVoiceChunksRef.current = [];
+      recorder.ondataavailable = (event) => { if (event.data.size) messageVoiceChunksRef.current.push(event.data); };
+      recorder.onstop = () => {
+        stream.getTracks().forEach((track) => track.stop());
+        setMessageVoiceRecording(false);
+        const blob = new Blob(messageVoiceChunksRef.current, { type: recorder.mimeType || "audio/webm" });
+        const file = new File([blob], `voice-${Date.now()}.webm`, { type: blob.type });
+        setMessageMediaFile(file);
+      };
+      messageVoiceRecorderRef.current = recorder;
+      recorder.start();
+      setMessageVoiceRecording(true);
+    } catch {
+      setMessage("Microphone access was denied.");
+    }
   }
 
   useEffect(() => {
     try {
       if (activeConversation) sessionStorage.setItem(MESSAGE_CONVERSATION_KEY, activeConversation);
       else sessionStorage.removeItem(MESSAGE_CONVERSATION_KEY);
-    } catch {
-      // Ignore unavailable session storage.
-    }
+    } catch {}
   }, [activeConversation]);
 
   useEffect(() => {
-    if (!activeConversation || !session?.user) return;
-    void loadMessageInbox();
-  }, [activeConversation, session]);
+    if (!activeConversation || !session?.user || !supabase) return;
+    let alive = true;
+    const channel = supabase.channel(`messages:${activeConversation}`, { config: { broadcast: { self: false } } });
+    messageChannelRef.current = channel;
+    channel.on("postgres_changes", { event: "INSERT", schema: "public", table: "messages", filter: `conversation_id=eq.${activeConversation}` }, (payload) => {
+      const incoming = payload.new as ChatMessage;
+      if (!alive) return;
+      setMessagesByConversation((current) => {
+        const list = current[activeConversation] ?? [];
+        if (list.some((item) => item.id === incoming.id || (incoming.client_id && item.client_id === incoming.client_id))) {
+          return { ...current, [activeConversation]: list.map((item) => item.client_id === incoming.client_id ? { ...incoming, status: "sent" } : item) };
+        }
+        return { ...current, [activeConversation]: [...list, { ...incoming, status: incoming.sender_id === session.user.id ? "sent" : "delivered" }] };
+      });
+      if (incoming.sender_id !== session.user.id) {
+        void supabase.from("messages").update({ delivered_at: new Date().toISOString(), read_at: new Date().toISOString() }).eq("id", incoming.id);
+      }
+    }).on("postgres_changes", { event: "UPDATE", schema: "public", table: "messages", filter: `conversation_id=eq.${activeConversation}` }, (payload) => {
+      const updated = payload.new as ChatMessage;
+      setMessagesByConversation((current) => ({ ...current, [activeConversation]: (current[activeConversation] ?? []).map((item) => item.id === updated.id ? { ...item, ...updated, status: updated.read_at ? "read" : updated.delivered_at ? "delivered" : item.status } : item) }));
+    }).on("postgres_changes", { event: "DELETE", schema: "public", table: "messages", filter: `conversation_id=eq.${activeConversation}` }, (payload) => {
+      const removed = payload.old as ChatMessage;
+      setMessagesByConversation((current) => ({ ...current, [activeConversation]: (current[activeConversation] ?? []).filter((item) => item.id !== removed.id) }));
+    }).on("postgres_changes", { event: "INSERT", schema: "public", table: "message_reactions" }, (payload) => {
+      const reaction = payload.new as MessageReaction;
+      setMessagesByConversation((current) => ({ ...current, [activeConversation]: (current[activeConversation] ?? []).map((item) => item.id === reaction.message_id ? { ...item, reactions: [...(item.reactions ?? []).filter((r) => r.user_id !== reaction.user_id), reaction] } : item) }));
+    }).on("postgres_changes", { event: "UPDATE", schema: "public", table: "message_reactions" }, (payload) => {
+      const reaction = payload.new as MessageReaction;
+      setMessagesByConversation((current) => ({ ...current, [activeConversation]: (current[activeConversation] ?? []).map((item) => item.id === reaction.message_id ? { ...item, reactions: [...(item.reactions ?? []).filter((r) => r.user_id !== reaction.user_id), reaction] } : item) }));
+    }).on("postgres_changes", { event: "DELETE", schema: "public", table: "message_reactions" }, (payload) => {
+      const reaction = payload.old as MessageReaction;
+      setMessagesByConversation((current) => ({ ...current, [activeConversation]: (current[activeConversation] ?? []).map((item) => item.id === reaction.message_id ? { ...item, reactions: (item.reactions ?? []).filter((r) => r.user_id !== reaction.user_id) } : item) }));
+    }).on("broadcast", { event: "typing" }, ({ payload }) => {
+      if (!payload?.userId || payload.userId === session.user.id) return;
+      setMessageTypingUsers((current) => {
+        const next = new Set(current);
+        if (payload.typing) next.add(payload.userId); else next.delete(payload.userId);
+        return next;
+      });
+    }).subscribe();
+    return () => {
+      alive = false;
+      if (messageChannelRef.current === channel) messageChannelRef.current = null;
+      void supabase.removeChannel(channel);
+      setMessageTypingUsers(new Set());
+    };
+  }, [activeConversation, session?.user?.id]);
 
   useEffect(() => {
-    if (!activeConversation || activeConversationProfile || !messageConversations.length) return;
-    const conversation = messageConversations.find((item) => item.id === activeConversation);
-    if (conversation) {
-      setActiveConversationProfile(conversation.otherProfile);
-      void loadConversationMessages(activeConversation);
-    }
-  }, [activeConversation, activeConversationProfile, messageConversations]);
+    const list = messageListRef.current;
+    if (!list || !activeConversation) return;
+    const onScroll = () => { if (list.scrollTop < 80) void loadOlderMessages(); };
+    list.addEventListener("scroll", onScroll);
+    return () => list.removeEventListener("scroll", onScroll);
+  }, [activeConversation, messagesByConversation[activeConversation ?? ""]?.length]);
 
-  async function sendMessage(event: FormEvent) {
-    event.preventDefault();
-    if (!supabase || !session?.user || !activeConversation || !messageDraft.trim()) return;
-    const content = messageDraft.trim();
-    const { data, error } = await supabase.from("messages").insert({
-      conversation_id: activeConversation, sender_id: session.user.id, content,
-    }).select("id, sender_id, content, created_at").single();
-    if (error || !data) return;
-    setMessagesByConversation((current) => ({
-      ...current,
-      [activeConversation]: [...(current[activeConversation] ?? []), data as { id: string; sender_id: string; content: string; created_at: string }],
-    }));
-    setMessageDraft("");
-    void loadMessageInbox();
-  }
+  useEffect(() => {
+    if (!messageTyping) return;
+    const timer = setTimeout(() => setMessageTyping(false), 1200);
+    return () => clearTimeout(timer);
+  }, [messageTyping]);
 
   async function loadHighlights() {
     if (!supabase || !session?.user) return;
@@ -4798,108 +5018,137 @@ export function App() {
                 </button>
               </div>
             </div>
-            <div className="message-list" role="log" aria-live="polite">
+            <div className="message-list" ref={messageListRef} role="log" aria-live="polite" onContextMenu={(event) => event.preventDefault()}>
+              {messageLoadingOlder && <div className="message-loading-older">Loading earlier messages…</div>}
               {(messagesByConversation[activeConversation] ?? []).length === 0 ? (
                 <div className="message-chat-empty">
                   <span className="avatar message-empty-avatar">
                     {activeConversationProfile?.avatar_url ? (
                       <span style={{ backgroundImage: `url(${activeConversationProfile.avatar_url})` }} />
-                    ) : (
-                      initials(activeConversationProfile?.display_name ?? "RP")
-                    )}
+                    ) : initials(activeConversationProfile?.display_name ?? "RP")}
                   </span>
                   <strong>Start a conversation</strong>
                   <span>Send a message to {activeConversationProfile?.display_name ?? "this member"}.</span>
                 </div>
               ) : (
                 (messagesByConversation[activeConversation] ?? []).map((item, index, items) => {
-                  const expanded = expandedMessageTimestamps[item.id] ?? false;
                   const previous = items[index - 1];
-                  const sameSender = previous?.sender_id === item.sender_id;
+                  const next = items[index + 1];
+                  const mine = item.sender_id === session?.user.id;
+                  const samePrevious = previous?.sender_id === item.sender_id;
+                  const sameNext = next?.sender_id === item.sender_id;
+                  const expanded = expandedMessageTimestamps[item.id] ?? false;
+                  const reactions = item.reactions ?? [];
+                  const reactionCounts = reactions.reduce<Record<string, number>>((acc, reaction) => { acc[reaction.reaction_type] = (acc[reaction.reaction_type] ?? 0) + 1; return acc; }, {});
+                  const myReaction = reactions.find((reaction) => reaction.user_id === session?.user.id)?.reaction_type;
+                  const reactionEmoji: Record<string,string> = { like:"👍", love:"❤️", care:"🥰", haha:"😂", wow:"😮", sad:"😢", angry:"😡" };
+                  const replyTarget = item.reply_to_id ? items.find((candidate) => candidate.id === item.reply_to_id) : null;
                   return (
-                    <div className={`message-row ${item.sender_id === session?.user.id ? "mine" : ""}`} key={item.id}>
-                      {!sameSender && item.sender_id !== session?.user.id && (
-                        <span className="message-row-avatar avatar">
-                          {activeConversationProfile?.avatar_url ? (
-                            <span style={{ backgroundImage: `url(${activeConversationProfile.avatar_url})` }} />
-                          ) : initials(activeConversationProfile?.display_name ?? "RP")}
+                    <div
+                      className={`message-row ${mine ? "mine" : "received"} ${samePrevious ? "message-grouped" : ""}`}
+                      key={item.id}
+                      onDoubleClick={() => setMessageReplyTarget(item)}
+                      onPointerDown={(event) => {
+                        if (event.button !== 0 && event.pointerType !== "touch") return;
+                        if (messageLongPressRef.current) clearTimeout(messageLongPressRef.current);
+                        messageLongPressRef.current = setTimeout(() => setMessageActionTarget(item), 550);
+                      }}
+                      onPointerUp={() => { if (messageLongPressRef.current) clearTimeout(messageLongPressRef.current); }}
+                      onPointerCancel={() => { if (messageLongPressRef.current) clearTimeout(messageLongPressRef.current); }}
+                    >
+                      {!mine && !samePrevious && (
+                        <span className="message-row-avatar avatar" style={activeConversationProfile?.avatar_url ? { backgroundImage: `url(${activeConversationProfile.avatar_url})` } : undefined}>
+                          {!activeConversationProfile?.avatar_url && initials(activeConversationProfile?.display_name ?? "RP")}
                         </span>
                       )}
-                      <div className={sameSender ? "message-bubble grouped" : "message-bubble"}>
-                        <span>{item.content}</span>
+                      <div className={`message-bubble ${mine ? "mine" : "received"} ${samePrevious ? "grouped-start" : "grouped-first"} ${sameNext ? "grouped-middle" : "grouped-last"}`}>
+                        {replyTarget && <button className="message-reply-preview" type="button" onClick={() => setExpandedMessageTimestamps((current) => ({ ...current, [replyTarget.id]: true }))}><span>Replying to</span><strong>{replyTarget.content || "Attachment"}</strong></button>}
+                        {item.unsent_at ? <span className="message-unsent">Message unsent</span> : (
+                          <>
+                            {item.media_url && item.media_type?.startsWith("image/") && <img className="message-media-preview" src={item.media_url} alt="Message attachment" />}
+                            {item.media_url && item.media_type?.startsWith("audio/") && <audio className="message-audio" controls src={item.media_url} />}
+                            {item.content && <span>{item.content}</span>}
+                          </>
+                        )}
+                        {reactions.length > 0 && (
+                          <button className="message-reaction-summary" type="button" onClick={() => setMessageReactionTarget(item.id)}>
+                            {Object.entries(reactionCounts).slice(0,3).map(([type]) => <span key={type}>{reactionEmoji[type] ?? "•"}</span>)}<b>{reactions.length}</b>
+                          </button>
+                        )}
                         <div className="message-bubble-meta">
-                          <button
-                            className="message-time"
-                            type="button"
-                            onClick={() => setExpandedMessageTimestamps((current) => ({ ...current, [item.id]: !expanded }))}
-                            aria-expanded={expanded}
-                            title="Show exact date and time"
-                          >
+                          <button className="message-time" type="button" onClick={() => setExpandedMessageTimestamps((current) => ({ ...current, [item.id]: !expanded }))}>
                             {expanded ? formatMessageDateTime(item.created_at) : formatMessageTime(item.created_at)}
                           </button>
-                          {item.sender_id === session?.user.id && <CheckCheck size={12} aria-label="Sent" />}
+                          {mine && <span className="message-status">{item.status === "sending" ? "Sending" : item.status === "failed" ? "Not sent" : item.read_at ? "Read" : item.delivered_at ? "Delivered" : "Sent"} {item.status === "sending" ? "" : <CheckCheck size={12} />}</span>}
                         </div>
                       </div>
                     </div>
                   );
                 })
               )}
+              {messageTypingUsers.size > 0 && <div className="message-typing"><span/><span/><span/></div>}
             </div>
             <form className="message-form" onSubmit={sendMessage}>
-              <input
-                ref={messageMediaRef}
-                className="message-media-input"
-                type="file"
-                accept="image/*,video/*"
-                multiple
-                onChange={() => {
-                  setMessage("Media sending will be connected to message storage next.");
-                  if (messageMediaRef.current) messageMediaRef.current.value = "";
-                }}
-              />
-              <button className="message-compose-action" type="button" aria-label="More" title="More">
-                <Plus size={20} strokeWidth={2.2} />
-              </button>
-              <button className="message-compose-action" type="button" aria-label="Camera" title="Camera" onClick={() => setMessage("Camera capture is ready for the next media-upload step.")}>
-                <Camera size={19} strokeWidth={2.1} />
-              </button>
-              <button className="message-compose-action" type="button" aria-label="Photos and videos" title="Photos and videos" onClick={() => messageMediaRef.current?.click()}>
-                <Image size={19} strokeWidth={2.1} />
-              </button>
-              <button className="message-compose-action" type="button" aria-label="Voice message" title="Voice message" onClick={() => setMessage("Voice messages are coming soon.")}>
-                <Mic size={19} strokeWidth={2.1} />
-              </button>
+              <input ref={messageMediaRef} className="message-media-input" type="file" accept="image/*,video/*" onChange={(event) => { setMessageMediaFile(event.target.files?.[0] ?? null); event.currentTarget.value = ""; }} />
+              {messageReplyTarget && <div className="message-reply-composer"><span>Replying to {messageReplyTarget.content || "attachment"}</span><button type="button" onClick={() => setMessageReplyTarget(null)} aria-label="Cancel reply"><X size={14}/></button></div>}
+              {messageMediaFile && <div className="message-attachment-chip"><Image size={14}/><span>{messageMediaFile.name}</span><button type="button" onClick={() => setMessageMediaFile(null)} aria-label="Remove attachment"><X size={13}/></button></div>}
+              <button className="message-compose-action" type="button" aria-label="More" title="More" onClick={() => messageMediaRef.current?.click()}><Plus size={20} strokeWidth={2.2} /></button>
+              <button className="message-compose-action" type="button" aria-label="Camera" title="Camera" onClick={() => messageMediaRef.current?.click()}><Camera size={19} strokeWidth={2.1} /></button>
+              <button className="message-compose-action" type="button" aria-label="Photos and videos" title="Photos and videos" onClick={() => messageMediaRef.current?.click()}><Image size={19} strokeWidth={2.1} /></button>
+              <button className={messageVoiceRecording ? "message-compose-action recording" : "message-compose-action"} type="button" aria-label={messageVoiceRecording ? "Stop voice message" : "Voice message"} title={messageVoiceRecording ? "Stop recording" : "Voice message"} onClick={() => void toggleVoiceRecording()}><Mic size={19} strokeWidth={2.1} /></button>
               <div className="message-input-shell">
-                <textarea
-                  value={messageDraft}
-                  onChange={(event) => {
-                    setMessageDraft(event.target.value);
-                    const target = event.currentTarget;
-                    target.style.height = "auto";
-                    target.style.height = `${Math.min(target.scrollHeight, 120)}px`;
-                  }}
-                  placeholder="Message"
-                  maxLength={2000}
-                  rows={1}
-                  autoFocus
-                  aria-label="Write a message"
-                  onKeyDown={(event) => {
-                    if (event.key === "Enter" && !event.shiftKey) {
-                      event.preventDefault();
-                      if (messageDraft.trim()) void sendMessage(event as unknown as FormEvent);
-                    }
-                  }}
+                <textarea value={messageDraft} onChange={(event) => emitMessageTyping(event.target.value)} placeholder="Message" maxLength={2000} rows={1} autoFocus aria-label="Write a message"
+                  onKeyDown={(event) => { if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); if (messageDraft.trim() || messageMediaFile) void sendMessage(event as unknown as FormEvent); } }}
                 />
-                <button className="message-send-button" type="submit" disabled={!messageDraft.trim()} aria-label="Send message" title="Send message">
-                  <ArrowUp size={18} strokeWidth={2.5} />
-                </button>
+                <button className="message-send-button" type="submit" disabled={!messageDraft.trim() && !messageMediaFile}><ArrowUp size={18} strokeWidth={2.5} /></button>
               </div>
             </form>
           </section>
         </div>
       )}
 
-      {messageSettingsOpen && activeConversationProfile && (
+      {messageActionTarget && activeConversation && (
+        <div className="sheet-backdrop message-action-backdrop" role="presentation" onClick={() => setMessageActionTarget(null)}>
+          <section className="message-action-sheet glass" role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
+            <p className="eyebrow">MESSAGE</p>
+            <h3>Message options</h3>
+            <button type="button" onClick={() => { setMessageReplyTarget(messageActionTarget); setMessageActionTarget(null); }}><MessageCircle size={16}/> Reply</button>
+            <button type="button" onClick={() => { setMessageReactionTarget(messageActionTarget.id); setMessageActionTarget(null); }}><Heart size={16}/> React</button>
+            {messageActionTarget.sender_id === session?.user.id && messageIsEditable(messageActionTarget) && (
+              <button type="button" onClick={() => { setMessageEditTarget(messageActionTarget); setMessageEditDraft(messageActionTarget.content); setMessageActionTarget(null); }}><Pencil size={16}/> Edit</button>
+            )}
+            {messageActionTarget.sender_id === session?.user.id && !messageActionTarget.unsent_at && (
+              <button className="danger" type="button" onClick={() => void unsendMessage(messageActionTarget)}><Trash2 size={16}/> Unsend</button>
+            )}
+            <button type="button" onClick={() => { void navigator.clipboard?.writeText(messageActionTarget.content); setMessageActionTarget(null); }}><Link2 size={16}/> Copy text</button>
+          </section>
+        </div>
+      )}
+
+      {messageReactionTarget && activeConversation && (
+        <div className="message-reaction-backdrop" role="presentation" onClick={() => setMessageReactionTarget(null)}>
+          <div className="message-reaction-picker glass" role="dialog" aria-label="Choose a reaction" onClick={(event) => event.stopPropagation()}>
+            {[
+              ["like","👍"],["love","❤️"],["care","🥰"],["haha","😂"],["wow","😮"],["sad","😢"],["angry","😡"],
+            ].map(([type, emoji]) => (
+              <button key={type} type="button" aria-label={type} onClick={() => { void toggleMessageReaction(messageReactionTarget, type); setMessageReactionTarget(null); }}>{emoji}</button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {messageEditTarget && activeConversation && (
+        <div className="sheet-backdrop message-edit-backdrop" role="presentation" onClick={() => setMessageEditTarget(null)}>
+          <section className="message-edit-sheet glass" role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
+            <p className="eyebrow">EDIT MESSAGE</p>
+            <h3>Edit message</h3>
+            <textarea value={messageEditDraft} onChange={(event) => setMessageEditDraft(event.target.value)} autoFocus maxLength={2000}/>
+            <div className="message-settings-actions"><button className="mode-switch" type="button" onClick={() => setMessageEditTarget(null)}>Cancel</button><button className="primary-button" type="button" onClick={() => void saveEditedMessage()}>Save</button></div>
+          </section>
+        </div>
+      )}
+
+            {messageSettingsOpen && activeConversationProfile && (
         <div className="sheet-backdrop message-settings-backdrop" role="presentation" onClick={() => setMessageSettingsOpen(false)}>
           <section className="message-settings-sheet glass" role="dialog" aria-modal="true" aria-labelledby="message-settings-title" onClick={(event) => event.stopPropagation()}>
             <div className="sheet-header">
