@@ -593,15 +593,11 @@ export function App() {
   const commentReactionOptions = [
     { type: "like", emoji: "👍", label: "Like" },
     { type: "love", emoji: "❤️", label: "Love" },
+    { type: "care", emoji: "🥰", label: "Care" },
     { type: "haha", emoji: "😂", label: "Haha" },
     { type: "wow", emoji: "😮", label: "Wow" },
     { type: "sad", emoji: "😢", label: "Sad" },
     { type: "angry", emoji: "😡", label: "Angry" },
-    { type: "care", emoji: "🥰", label: "Care" },
-    { type: "fire", emoji: "🔥", label: "Fire" },
-    { type: "laugh", emoji: "🤣", label: "Laugh" },
-    { type: "celebrate", emoji: "🎉", label: "Celebrate" },
-    { type: "money", emoji: "💰", label: "Money" },
   ];
 
 
