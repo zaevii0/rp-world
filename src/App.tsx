@@ -1274,7 +1274,17 @@ export function App() {
     const likedSet = new Set((myLikes ?? []).map((item) => item.post_id));
     const likedAtMap = new Map((myLikes ?? []).map((item) => [item.post_id, item.created_at]));
 
-    setPublicProfilePosts(rows.map((row) => ({
+    const profilePostRows = [...rows].sort((a, b) => {
+      const aPinned = Boolean(a.pinned_at);
+      const bPinned = Boolean(b.pinned_at);
+      if (aPinned !== bPinned) return aPinned ? -1 : 1;
+      if (aPinned && bPinned) {
+        return new Date(b.pinned_at ?? 0).getTime() - new Date(a.pinned_at ?? 0).getTime();
+      }
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    });
+
+    setPublicProfilePosts(profilePostRows.map((row) => ({
       id: row.id,
       author_id: row.author_id,
       content: row.content,
@@ -3372,15 +3382,101 @@ export function App() {
                   {publicProfilePosts.length === 0 ? <div className="empty-state glass"><Image size={22} /><strong>No posts yet.</strong><span>This user's published posts will appear here.</span></div> : (
                     <div className="feed-list">{publicProfilePosts.map((post) => (
                       <article className="post-card glass" key={post.id}>
-                        <div className="post-head"><div className="avatar" style={post.profile?.avatar_url ? { backgroundImage: `url(${post.profile.avatar_url})` } : undefined}>{!post.profile?.avatar_url && initials(post.profile?.display_name ?? "RP")}</div><div><strong>{post.profile?.display_name}{post.profile?.username === "zaevii" && <span className="verified-badge" aria-label="Verified">✓</span>}</strong><span className="post-meta">@{post.profile?.username} · {timeAgo(post.created_at)}</span></div></div>
-                        {renderExpandablePostContent(post.content, post.id)}
-                        <div className="post-actions">
-                          <button className={post.liked ? "post-action liked" : "post-action"} type="button" onClick={() => void toggleLike(post)}><Heart size={17} fill={post.liked ? "currentColor" : "none"} />{post.likes}</button>
-                          <button className="post-action" type="button" onClick={() => void toggleComments(post.id)}><MessageCircle size={17} />{post.comments || "Reply"}</button>
-                          <button className={post.reposted ? "post-action reposted" : "post-action"} type="button" onClick={() => void repostPost(post)} disabled={repostBusy === post.id}><Repeat2 size={17} />{post.reposts || 0}</button>
-                          <button className="post-action" type="button" onClick={() => void sharePost(post)} aria-label="Share" title="Share"><Share2 size={17} />{post.shares || 0}</button>
-                           <button className={savedPostIds.has(post.id) ? "post-action active" : "post-action"} type="button" onClick={() => toggleSavedPost(post)} aria-label={savedPostIds.has(post.id) ? "Saved" : "Save"} title={savedPostIds.has(post.id) ? "Saved" : "Save"}><Bookmark size={17} fill={savedPostIds.has(post.id) ? "currentColor" : "none"} /></button>
+                        <div className="post-head">
+                          <button
+                            className="avatar profile-link-button"
+                            type="button"
+                            aria-label={`Open ${post.profile?.display_name ?? "member"} profile`}
+                            onClick={() => void loadPublicProfile(post.author_id)}
+                            style={post.profile?.avatar_url ? { backgroundImage: `url(${post.profile.avatar_url})` } : undefined}
+                          >
+                            {!post.profile?.avatar_url && initials(post.profile?.display_name ?? "RP")}
+                          </button>
+                          <div>
+                            {post.author_id === session?.user.id && (
+                              <button
+                                className="post-more-button"
+                                type="button"
+                                aria-label="Post options"
+                                title="Post options"
+                                onClick={() => setPostActionTarget(post)}
+                              >
+                                <MoreVertical size={18} />
+                              </button>
+                            )}
+                            <button className="profile-name-link" type="button" onClick={() => void loadPublicProfile(post.author_id)}>
+                              {post.profile?.display_name ?? "RP WORLD member"}
+                            </button>
+                            {post.profile?.username === "zaevii" && <span className="verified-badge" aria-label="Verified">✓</span>}
+                            <span className="post-meta">
+                              @{post.profile?.username ?? "member"} ·{" "}
+                              <button
+                                className="timestamp-button"
+                                type="button"
+                                onClick={() => setOpenTimestamp(openTimestamp === post.id ? null : post.id)}
+                                title="Show exact date and time"
+                              >
+                                <Clock size={11} />
+                                {timeAgo(post.created_at)}
+                              </button>
+                            </span>
+                            {openTimestamp === post.id && (
+                              <div className="timestamp-popover">
+                                <strong>Posted</strong>
+                                <span>{exactTime(post.created_at)}</span>
+                                {post.liked && post.liked_at && (
+                                  <>
+                                    <strong>Liked by you</strong>
+                                    <span>{exactTime(post.liked_at)}</span>
+                                  </>
+                                )}
+                              </div>
+                            )}
+                          </div>
                         </div>
+                        {renderExpandablePostContent(post.content, post.id)}
+                        {renderPostMedia(post.media_url, post.media_type)}
+                        {post.pinned_at && <div className="post-status-label"><Pin size={12} /> Pinned</div>}
+                        {post.tagged_profiles?.length ? (
+                          <div className="post-tag-label"><Tag size={12} /> {post.tagged_profiles.map((item) => `@${item.username}`).join(", ")}</div>
+                        ) : null}
+                        <div className="post-actions">
+                          <button className={post.liked ? "post-action liked" : "post-action"} type="button" onClick={() => void toggleLike(post)}>
+                            <Heart size={17} fill={post.liked ? "currentColor" : "none"} />{post.likes}
+                          </button>
+                          <button className={openComments === post.id ? "post-action active" : "post-action"} type="button" onClick={() => void toggleComments(post.id)}>
+                            <MessageCircle size={17} /> {post.comments || "Reply"}
+                          </button>
+                          <button className={post.reposted ? "post-action reposted" : "post-action"} type="button" onClick={() => void repostPost(post)} disabled={repostBusy === post.id} title={post.reposted ? "Reposted" : "Repost"}>
+                            <Repeat2 size={17} />{post.reposts || 0}
+                          </button>
+                          <button className="post-action" type="button" onClick={() => void sharePost(post)}>
+                            <Share2 size={17} /> Share
+                          </button>
+                        </div>
+                        {openComments === post.id && (
+                          <div className="comments-panel">
+                            <div className="comments-list">
+                              {(commentsByPost[post.id] ?? []).length === 0 ? (
+                                <span className="comments-empty">No replies yet. Start the conversation.</span>
+                              ) : (
+                                renderCommentTree(post.id, commentsByPost[post.id] ?? [], null)
+                              )}
+                            </div>
+                            <form className="comment-form" onSubmit={(event) => void createComment(event, post.id)}>
+                              <span className="avatar small-avatar" style={profile?.avatar_url ? { backgroundImage: `url(${profile.avatar_url})` } : undefined}>
+                                {!profile?.avatar_url && initials(profile?.display_name ?? "RP")}
+                              </span>
+                              <input
+                                value={commentDrafts[post.id] ?? ""}
+                                onChange={(event) => setCommentDrafts((current) => ({ ...current, [post.id]: event.target.value }))}
+                                placeholder="Write a reply..."
+                                maxLength={500}
+                              />
+                              <button type="submit" disabled={!commentDrafts[post.id]?.trim()}>Reply</button>
+                            </form>
+                          </div>
+                        )}
                       </article>
                     ))}</div>
                   )}
