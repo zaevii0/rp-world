@@ -410,7 +410,7 @@ export function App() {
 
     return () => {
       void presenceChannel.untrack();
-      void supabase.removeChannel(presenceChannel);
+      if (supabase) void supabase.removeChannel(presenceChannel);
     };
   }, [session]);
 
