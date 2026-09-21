@@ -4825,3 +4825,98 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
     font-size: 18px;
   }
 }
+
+.comment-reaction-count {
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+}
+.comment-action-sheet {
+  width: min(420px, calc(100vw - 28px));
+  padding: 18px;
+  border-radius: 24px;
+}
+.comment-action-sheet button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 10px;
+  border: 0;
+  border-radius: 13px;
+  background: transparent;
+  color: var(--text-primary);
+  text-align: left;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+.comment-action-sheet button:hover { background: color-mix(in srgb, var(--accent) 10%, transparent); }
+.comment-action-sheet button.danger { color: #d94b4b; }
+.comment-edit-inline { display: grid; gap: 7px; }
+.comment-edit-inline textarea {
+  width: 100%;
+  min-height: 70px;
+  resize: vertical;
+  border: 1px solid color-mix(in srgb, var(--text-primary) 12%, transparent);
+  border-radius: 12px;
+  padding: 8px;
+  background: color-mix(in srgb, var(--text-primary) 5%, transparent);
+  color: var(--text-primary);
+  font: inherit;
+}
+.comment-edit-inline > div { display: flex; justify-content: flex-end; gap: 7px; }
+.comment-edit-inline button {
+  border: 0;
+  border-radius: 999px;
+  padding: 5px 10px;
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  color: var(--text-primary);
+  cursor: pointer;
+}
+.comment-media-button {
+  display: block;
+  margin-top: 7px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  overflow: hidden;
+  border-radius: 13px;
+}
+.comment-media-button img {
+  display: block;
+  width: min(280px, 100%);
+  max-height: 320px;
+  object-fit: cover;
+  border-radius: 13px;
+}
+.comment-media-trigger {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
+  border: 0;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  color: var(--accent);
+  cursor: pointer;
+}
+.comment-media-selected {
+  min-width: 0;
+  max-width: 130px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 9px;
+  opacity: .65;
+}
+.comment-bubble { touch-action: manipulation; }
+.comment-reaction-users-sheet {
+  width: min(520px, calc(100vw - 24px));
+  max-height: min(70vh, 620px);
+  overflow: auto;
+  padding: 18px;
+  border-radius: 24px;
+}
