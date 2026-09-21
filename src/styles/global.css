@@ -4231,3 +4231,25 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
     padding-top: 8px;
   }
 }
+
+
+/* Discover category icons — precise optical centering */
+.discover-category-icon {
+  box-sizing: border-box;
+  place-items: center;
+  justify-content: center;
+  align-content: center;
+  line-height: 0;
+}
+
+.discover-category-icon svg {
+  display: block;
+  width: 18px;
+  height: 18px;
+  margin: 0;
+}
+
+.discover-category-card .discover-category-icon svg {
+  width: 17px;
+  height: 17px;
+}
