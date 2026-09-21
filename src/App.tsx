@@ -2343,7 +2343,7 @@ export function App() {
           <h2>
             {session
               ? "Build your RP identity."
-              : "Your RP world. Your identity. Your unique aesthetic."}
+              : "Your RP world. Your identity. Your story."}
           </h2>
 
           <p className="hero-copy">
