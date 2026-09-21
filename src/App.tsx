@@ -392,6 +392,7 @@ export function App() {
   const [messageSettingsOpen, setMessageSettingsOpen] = useState(false);
   const [chatNickname, setChatNickname] = useState("");
   const messageMediaRef = useRef<HTMLInputElement | null>(null);
+  const commentLongPressRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const screenshotLongPressRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const screenshotLongPressTriggeredRef = useRef(false);
   const [screenshotOpen, setScreenshotOpen] = useState(false);
@@ -2858,11 +2859,43 @@ export function App() {
               {!comment.profile?.avatar_url && initials(comment.profile?.display_name ?? "RP")}
             </button>
             <div className="comment-body">
-              <div className="comment-bubble">
+              <div
+                className="comment-bubble"
+                onPointerDown={() => {
+                  if (commentLongPressRef.current) clearTimeout(commentLongPressRef.current);
+                  commentLongPressRef.current = setTimeout(() => {
+                    setCommentActionTarget(comment);
+                    setCommentActionPostId(postId);
+                  }, 600);
+                }}
+                onPointerUp={() => {
+                  if (commentLongPressRef.current) clearTimeout(commentLongPressRef.current);
+                  commentLongPressRef.current = null;
+                }}
+                onPointerCancel={() => {
+                  if (commentLongPressRef.current) clearTimeout(commentLongPressRef.current);
+                  commentLongPressRef.current = null;
+                }}
+                onContextMenu={(event) => event.preventDefault()}
+              >
                 <button className="profile-name-link" type="button" onClick={() => void loadPublicProfile(comment.author_id)}>
                   {comment.profile?.display_name ?? "RP WORLD member"}
                 </button>
-                <p>{comment.content}</p>
+                {commentEditId === comment.id ? (
+                  <div className="comment-edit-inline">
+                    <textarea value={commentEditDraft} onChange={(event) => setCommentEditDraft(event.target.value)} maxLength={500} autoFocus />
+                    <div><button type="button" onClick={() => setCommentEditId(null)}>Cancel</button><button type="button" disabled={commentActionBusy === comment.id} onClick={() => void manageComment(postId, comment, "edit", commentEditDraft)}>Save</button></div>
+                  </div>
+                ) : (
+                  <>
+                    {comment.content && <p>{comment.content}</p>}
+                    {comment.media_url && (
+                      <button className="comment-media-button" type="button" onClick={() => setActivePostMedia({ url: signedMediaUrls[getPostMediaPath(comment.media_url) ?? ""] ?? comment.media_url!, type: "image" })}>
+                        <img src={signedMediaUrls[getPostMediaPath(comment.media_url) ?? ""] ?? comment.media_url} alt="Comment attachment" loading="lazy" />
+                      </button>
+                    )}
+                  </>
+                )}
               </div>
               <div className="comment-actions">
                 <div className="comment-reaction-wrap">
