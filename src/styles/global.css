@@ -697,8 +697,7 @@ h1 { margin:3px 0 0; font-size:17px; letter-spacing:-.03em; }
 .highlight-card-portrait strong { position:absolute; z-index:2; left:0; right:0; bottom:0; width:100%; padding:26px 9px 8px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:10px; font-weight:700; line-height:1.2; text-align:left; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.72), 0 2px 8px rgba(0,0,0,.5); background:linear-gradient(to bottom,transparent 0%,rgba(0,0,0,.08) 28%,rgba(0,0,0,.62) 100%); border-radius:0 0 13px 13px; pointer-events:none; }
 .highlight-card-portrait .highlight-image { width:83px; height:132px; aspect-ratio:83 / 132; border-radius:13px; border:1px solid rgba(127,127,127,.18); padding:0; box-shadow:0 5px 18px rgba(0,0,0,.12); }
 .highlight-card-portrait:hover .highlight-image,
-.highlight-card-portrait:focus-visible .highlight-image { border-color:rgba(127,127,127,.18); box-shadow:0 8px 22px rgba(0,0,0,.12); outline:none; }
-.highlight-card-portrait .add-highlight > span { border-radius:13px; aspect-ratio:11 / 19; }
+.highlight-card-portrait:focus-visible .highlight-image { border-color:rgba(127,127,127,.18); box-shadow:0 8px 22px rgba(0,0,0,.12); outline:none; }.highlight-card-portrait .add-highlight > span { border-radius:13px; aspect-ratio:11 / 19; }
 @media (max-width:560px) {
   .highlight-card-portrait { width:83px; flex-basis:83px; min-height:142px; grid-template-rows:142px; }
   .highlight-card-portrait strong { left:7px; right:7px; bottom:8px; }
@@ -1397,7 +1396,6 @@ h1 { margin:3px 0 0; font-size:17px; letter-spacing:-.03em; }
   .profile-stats span {
     font-size: 8px;
   }
-
   .highlights-row {
     gap: 11px;
   }
@@ -2097,8 +2095,7 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
   font-size: 18px;
 }
 
-.admin-stat span {
-  color: var(--text-muted);
+.admin-stat span {  color: var(--text-muted);
   font-size: 9px;
   text-transform: uppercase;
   letter-spacing: .07em;
@@ -2798,7 +2795,6 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
   display: grid;
   gap: 2px;
 }
-
 .message-chat-identity strong {
   overflow: hidden;
   text-overflow: ellipsis;
@@ -2919,10 +2915,10 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
     width: 100%;
     height: 100dvh;
     max-height: 100dvh;
-    border-radius: 0;
-    border-left: 0;
-    border-right: 0;
-    border-bottom: 0;
+    border-radius: 24px;
+    border-left: 1px solid color-mix(in srgb, var(--accent) 18%, transparent);
+    border-right: 1px solid color-mix(in srgb, var(--accent) 18%, transparent);
+    border-bottom: 1px solid color-mix(in srgb, var(--accent) 18%, transparent);
   }
 
   .message-sheet .sheet-header {
@@ -3051,15 +3047,33 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
 .message-list {
   padding: 18px 18px 12px;
   gap: 5px;
-  background: var(--surface, #fff);
+  background:
+    linear-gradient(
+      color-mix(in srgb, var(--accent) 10%, transparent),
+      color-mix(in srgb, var(--accent) 6%, transparent)
+    ),
+    color-mix(in srgb, var(--surface, #fff) 96%, transparent);
+  border-radius: 0 0 28px 28px;
+  backdrop-filter: blur(24px) saturate(145%);
+  -webkit-backdrop-filter: blur(24px) saturate(145%);
 }
 
 .app.light .message-list {
-  background: #fff;
+  background:
+    linear-gradient(
+      color-mix(in srgb, var(--accent) 7%, transparent),
+      color-mix(in srgb, var(--accent) 4%, transparent)
+    ),
+    rgba(255,255,255,.72);
 }
 
 .app.dark .message-list {
-  background: color-mix(in srgb, #000 86%, var(--surface, #111) 14%);
+  background:
+    linear-gradient(
+      color-mix(in srgb, var(--accent) 11%, transparent),
+      color-mix(in srgb, var(--accent) 7%, transparent)
+    ),
+    rgba(12,12,14,.72);
 }
 
 .message-row-avatar {
@@ -3217,5 +3231,49 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
   .message-form {
     grid-template-columns: 36px minmax(0,1fr);
     padding-inline: 8px;
+  }
+}
+
+/* Final RP WORLD messaging polish — theme color + liquid glass + rounded frame. */
+.message-sheet {
+  border-radius: 28px;
+  overflow: hidden;
+  border-color: color-mix(in srgb, var(--accent) 22%, transparent);
+  box-shadow:
+    0 28px 90px rgba(0,0,0,.30),
+    0 12px 38px color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
+.message-list {
+  background:
+    linear-gradient(
+      color-mix(in srgb, var(--accent) 8%, transparent),
+      color-mix(in srgb, var(--accent) 4%, transparent)
+    ),
+    color-mix(in srgb, var(--surface, #111) 88%, transparent);
+  backdrop-filter: blur(28px) saturate(155%);
+  -webkit-backdrop-filter: blur(28px) saturate(155%);
+}
+
+.app.dark .message-bubble:not(.mine) {
+  background: var(--accent);
+  color: #fff;
+}
+
+.app.light .message-bubble:not(.mine) {
+  background: var(--accent);
+  color: #fff;
+}
+
+@media (max-width: 560px) {
+  .message-sheet {
+    border-radius: 22px;
+    width: calc(100% - 10px);
+    height: calc(100dvh - 10px);
+    max-height: calc(100dvh - 10px);
+  }
+
+  .message-list {
+    border-radius: 0 0 22px 22px;
   }
 }
