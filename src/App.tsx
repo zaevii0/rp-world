@@ -1200,52 +1200,105 @@ export function App() {
       return;
     }
 
-    const { data: target } = await supabase.from("profiles").select("*").eq("id", userId).maybeSingle();
+    // Switch views immediately so navigation never waits for the full profile payload.
+    setView("public");
+    setViewAs(false);
+    setPublicProfilePosts([]);
+    setPublicHighlights([]);
+    setFollowingPublicProfile(false);
+    setFollowedByPublicProfile(false);
+    setPublicProfileFriend(false);
+
+    try {
+      sessionStorage.setItem(PUBLIC_PROFILE_KEY, userId);
+    } catch {
+      // Ignore unavailable session storage.
+    }
+
+    const [{ data: target }, { data: targetPosts }, { data: targetHighlights }, { data: myFollow }, { data: reverseFollow }] =
+      await Promise.all([
+        supabase.from("profiles").select("*").eq("id", userId).maybeSingle(),
+        supabase
+          .from("posts")
+          .select("id, author_id, content, media_url, media_type, created_at, pinned_at, archived_at, trashed_at, post_likes(count), post_comments(count)")
+          .eq("author_id", userId)
+          .is("archived_at", null)
+          .is("trashed_at", null)
+          .order("pinned_at", { ascending: false, nullsFirst: false })
+          .order("created_at", { ascending: false })
+          .limit(50),
+        supabase
+          .from("profile_highlights")
+          .select("id, user_id, title, image_url, created_at")
+          .eq("user_id", userId)
+          .order("created_at", { ascending: true }),
+        supabase
+          .from("user_follows")
+          .select("follower_id")
+          .eq("follower_id", session.user.id)
+          .eq("following_id", userId)
+          .maybeSingle(),
+        supabase
+          .from("user_follows")
+          .select("follower_id")
+          .eq("follower_id", userId)
+          .eq("following_id", session.user.id)
+          .maybeSingle(),
+      ]);
+
     if (!target) return;
 
     const targetProfile = target as Profile;
-    const { data: targetPosts } = await supabase
-      .from("posts")
-      .select("id, author_id, content, media_url, media_type, created_at, pinned_at, archived_at, trashed_at, post_likes(count), post_comments(count)")
-      .eq("author_id", userId).is("archived_at", null).is("trashed_at", null).order("pinned_at", { ascending: false, nullsFirst: false }).order("created_at", { ascending: false }).limit(50);
+    setPublicProfile(targetProfile);
+    setPublicHighlights((targetHighlights ?? []) as Highlight[]);
 
-    const rows = (targetPosts ?? []) as Array<Post & { post_likes?: { count: number }[]; post_comments?: { count: number }[] }>;
+    const rows = (targetPosts ?? []) as Array<Post & {
+      post_likes?: { count: number }[];
+      post_comments?: { count: number }[];
+    }>;
     const postIds = rows.map((row) => row.id);
-    const tagMap = await loadPostTags(postIds);
-    const { data: myLikes } = postIds.length
-      ? await supabase.from("post_likes").select("post_id, created_at").eq("user_id", session.user.id).in("post_id", postIds)
-      : { data: [] as { post_id: string; created_at: string }[] };
+
+    const [{ data: myLikes }, tagMap] = await Promise.all([
+      postIds.length
+        ? supabase
+            .from("post_likes")
+            .select("post_id, created_at")
+            .eq("user_id", session.user.id)
+            .in("post_id", postIds)
+            .then(({ data }) => ({ data: data ?? [] }))
+        : Promise.resolve({ data: [] as { post_id: string; created_at: string }[] }),
+      loadPostTags(postIds),
+    ]);
 
     const likedSet = new Set((myLikes ?? []).map((item) => item.post_id));
     const likedAtMap = new Map((myLikes ?? []).map((item) => [item.post_id, item.created_at]));
+
     setPublicProfilePosts(rows.map((row) => ({
-      id: row.id, author_id: row.author_id, content: row.content, media_url: row.media_url,
-      media_type: row.media_type ?? null, created_at: row.created_at, profile: targetProfile, likes: row.post_likes?.[0]?.count ?? 0,
-      liked: likedSet.has(row.id), liked_at: likedAtMap.get(row.id) ?? null, comments: row.post_comments?.[0]?.count ?? 0,
-      reposts: 0, shares: 0, pinned_at: row.pinned_at ?? null, archived_at: row.archived_at ?? null, trashed_at: row.trashed_at ?? null, tagged_profiles: tagMap.get(row.id) ?? [], reposted: false,
+      id: row.id,
+      author_id: row.author_id,
+      content: row.content,
+      media_url: row.media_url,
+      media_type: row.media_type ?? null,
+      created_at: row.created_at,
+      profile: targetProfile,
+      likes: row.post_likes?.[0]?.count ?? 0,
+      liked: likedSet.has(row.id),
+      liked_at: likedAtMap.get(row.id) ?? null,
+      comments: row.post_comments?.[0]?.count ?? 0,
+      reposts: 0,
+      shares: 0,
+      pinned_at: row.pinned_at ?? null,
+      archived_at: row.archived_at ?? null,
+      trashed_at: row.trashed_at ?? null,
+      tagged_profiles: tagMap.get(row.id) ?? [],
+      reposted: false,
     })));
-
-    const { data: targetHighlights } = await supabase.from("profile_highlights")
-      .select("id, user_id, title, image_url, created_at").eq("user_id", userId).order("created_at", { ascending: true });
-    setPublicHighlights((targetHighlights ?? []) as Highlight[]);
-
-    const { data: myFollow } = await supabase.from("user_follows").select("follower_id")
-      .eq("follower_id", session.user.id).eq("following_id", userId).maybeSingle();
-    const { data: reverseFollow } = await supabase.from("user_follows").select("follower_id")
-      .eq("follower_id", userId).eq("following_id", session.user.id).maybeSingle();
 
     setFollowingPublicProfile(Boolean(myFollow));
     setFollowedByPublicProfile(Boolean(reverseFollow));
     setPublicProfileFriend(Boolean(myFollow && reverseFollow));
-    setPublicProfile(targetProfile);
-    try {
-      sessionStorage.setItem(PUBLIC_PROFILE_KEY, userId);
-    } catch {
-      // Ignore unavailable session storage; the current view still works.
-    }
-    await loadProfileStats(userId);
-    setView("public");
-    setViewAs(false);
+
+    void loadProfileStats(userId);
   }
 
   async function toggleFollowPublicProfile() {
