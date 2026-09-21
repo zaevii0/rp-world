@@ -4255,6 +4255,55 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
 }
 
 
+/* Discover branch descriptions — keep the supporting information readable. */
+.discover-category-card {
+  min-height: 66px;
+  align-items: start;
+}
+
+.discover-category-card .discover-category-copy {
+  align-self: center;
+  min-width: 0;
+  gap: 3px;
+}
+
+.discover-category-card .discover-category-copy strong {
+  display: block;
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+  line-height: 1.2;
+}
+
+.discover-category-card .discover-category-copy small {
+  display: block;
+  color: color-mix(in srgb, var(--text-primary, currentColor) 62%, transparent);
+  opacity: 1;
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+  line-height: 1.35;
+}
+
+.app.dark .discover-category-card .discover-category-copy small {
+  color: rgba(255,255,255,.62);
+}
+
+.app.light .discover-category-card .discover-category-copy small {
+  color: rgba(17,17,20,.58);
+}
+
+@media (max-width: 560px) {
+  .discover-category-card {
+    min-height: 64px;
+  }
+
+  .discover-category-card .discover-category-copy small {
+    font-size: 10px;
+    line-height: 1.35;
+  }
+}
+
 /* Discover branch icons — keep theme-colored icons visible on every surface. */
 .discover-category-card .discover-category-icon {
   color: var(--accent) !important;
