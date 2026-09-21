@@ -2375,3 +2375,10 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
     flex-direction: column;
   }
 }
+
+
+/* Post audience/privacy controls */
+.post-privacy-picker { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:11px 12px; border:1px solid rgba(127,127,127,.14); border-radius:16px; background:rgba(127,127,127,.045); }
+.post-privacy-picker > span { display:inline-flex; align-items:center; gap:7px; color:var(--muted); font-size:10px; font-weight:600; }
+.post-privacy-picker select { min-width:105px; height:32px; padding:0 28px 0 10px; border:1px solid rgba(127,127,127,.15); border-radius:11px; color:inherit; background:rgba(127,127,127,.07); font:inherit; font-size:10px; font-weight:600; outline:none; }
+.post-privacy-picker select:focus { border-color:color-mix(in srgb,var(--accent) 40%,transparent); box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 8%,transparent); }
