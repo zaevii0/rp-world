@@ -36,6 +36,7 @@ import {
   UserPlus,
   X,
   RefreshCw,
+  CheckCheck,
 } from "lucide-react";
 import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from "react";
 import type { Session } from "@supabase/supabase-js";
@@ -4016,28 +4017,75 @@ export function App() {
                 <RefreshCw size={18} />
               </button>
             </div>
-            <div className="message-list">
-              {(messagesByConversation[activeConversation] ?? []).map((item) => {
-                const expanded = expandedMessageTimestamps[item.id] ?? false;
-                return (
-                  <div className={item.sender_id === session?.user.id ? "message-bubble mine" : "message-bubble"} key={item.id}>
-                    <span>{item.content}</span>
-                    <button
-                      className="message-time"
-                      type="button"
-                      onClick={() => setExpandedMessageTimestamps((current) => ({ ...current, [item.id]: !expanded }))}
-                      aria-expanded={expanded}
-                      title="Show exact date and time"
-                    >
-                      {expanded ? formatMessageDateTime(item.created_at) : timeAgo(item.created_at)}
-                    </button>
-                  </div>
-                );
-              })}
+            <div className="message-list" role="log" aria-live="polite">
+              {(messagesByConversation[activeConversation] ?? []).length === 0 ? (
+                <div className="message-chat-empty">
+                  <span className="avatar message-empty-avatar">
+                    {activeConversationProfile?.avatar_url ? (
+                      <span style={{ backgroundImage: `url(${activeConversationProfile.avatar_url})` }} />
+                    ) : (
+                      initials(activeConversationProfile?.display_name ?? "RP")
+                    )}
+                  </span>
+                  <strong>Start a conversation</strong>
+                  <span>Send a message to {activeConversationProfile?.display_name ?? "this member"}.</span>
+                </div>
+              ) : (
+                (messagesByConversation[activeConversation] ?? []).map((item, index, items) => {
+                  const expanded = expandedMessageTimestamps[item.id] ?? false;
+                  const previous = items[index - 1];
+                  const sameSender = previous?.sender_id === item.sender_id;
+                  return (
+                    <div className={`message-row ${item.sender_id === session?.user.id ? "mine" : ""}`} key={item.id}>
+                      {!sameSender && item.sender_id !== session?.user.id && (
+                        <span className="message-row-avatar avatar">
+                          {activeConversationProfile?.avatar_url ? (
+                            <span style={{ backgroundImage: `url(${activeConversationProfile.avatar_url})` }} />
+                          ) : initials(activeConversationProfile?.display_name ?? "RP")}
+                        </span>
+                      )}
+                      <div className={sameSender ? "message-bubble grouped" : "message-bubble"}>
+                        <span>{item.content}</span>
+                        <div className="message-bubble-meta">
+                          <button
+                            className="message-time"
+                            type="button"
+                            onClick={() => setExpandedMessageTimestamps((current) => ({ ...current, [item.id]: !expanded }))}
+                            aria-expanded={expanded}
+                            title="Show exact date and time"
+                          >
+                            {expanded ? formatMessageDateTime(item.created_at) : timeAgo(item.created_at)}
+                          </button>
+                          {item.sender_id === session?.user.id && <CheckCheck size={12} aria-label="Sent" />}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
             </div>
             <form className="message-form" onSubmit={sendMessage}>
-              <input value={messageDraft} onChange={(event) => setMessageDraft(event.target.value)} placeholder="Write a message…" maxLength={2000} autoFocus />
-              <button type="submit" disabled={!messageDraft.trim()}><Send size={16} /></button>
+              <button className="message-attach-button" type="button" aria-label="Message options" title="More message options" disabled>
+                <Plus size={18} />
+              </button>
+              <textarea
+                value={messageDraft}
+                onChange={(event) => setMessageDraft(event.target.value)}
+                placeholder="Message"
+                maxLength={2000}
+                rows={1}
+                autoFocus
+                aria-label="Write a message"
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" && !event.shiftKey) {
+                    event.preventDefault();
+                    if (messageDraft.trim()) void sendMessage(event as unknown as FormEvent);
+                  }
+                }}
+              />
+              <button type="submit" disabled={!messageDraft.trim()} aria-label="Send message" title="Send message">
+                <Send size={17} />
+              </button>
             </form>
           </section>
         </div>
