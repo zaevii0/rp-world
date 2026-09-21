@@ -623,6 +623,8 @@ export function App() {
 
     setFeedError("");
 
+    // Fetch the primary feed first, then resolve related data in parallel.
+    // This avoids the previous waterfall of profile/tags/shares/likes requests.
     const { data, error: loadError } = await supabase
       .from("posts")
       .select(
@@ -645,30 +647,69 @@ export function App() {
       }
     >;
 
+    const postIds = rows.map((row) => row.id);
     const authorIds = [...new Set(rows.map((row) => row.author_id))];
     const sharedPostIds = [...new Set(rows.map((row) => row.shared_post_id).filter(Boolean))] as string[];
 
-    const { data: profiles } = authorIds.length
-      ? await supabase.from("profiles").select("*").in("id", authorIds)
-      : { data: [] as Profile[] };
+    const [
+      profilesResult,
+      sharedRowsResult,
+      shareRowsResult,
+      myLikesResult,
+      tagMap,
+    ] = await Promise.all([
+      authorIds.length
+        ? supabase.from("profiles").select("*").in("id", authorIds)
+        : Promise.resolve({ data: [] as Profile[] }),
+      sharedPostIds.length
+        ? supabase
+            .from("posts")
+            .select("id, content, media_url, media_type, created_at, author_id")
+            .in("id", sharedPostIds)
+        : Promise.resolve({
+            data: [] as Array<{
+              id: string;
+              content: string;
+              media_url: string | null;
+              media_type?: string | null;
+              created_at: string;
+              author_id: string;
+            }>,
+          }),
+      postIds.length
+        ? supabase
+            .from("posts")
+            .select("shared_post_id")
+            .in("shared_post_id", postIds)
+        : Promise.resolve({ data: [] as { shared_post_id: string | null }[] }),
+      postIds.length
+        ? supabase
+            .from("post_likes")
+            .select("post_id, created_at")
+            .eq("user_id", session.user.id)
+            .in("post_id", postIds)
+        : Promise.resolve({ data: [] as { post_id: string; created_at: string }[] }),
+      loadPostTags(postIds),
+    ]);
 
-    const { data: sharedRows } = sharedPostIds.length
-      ? await supabase
-          .from("posts")
-          .select("id, content, media_url, media_type, created_at, author_id")
-          .in("id", sharedPostIds)
-      : { data: [] as Array<{ id: string; content: string; media_url: string | null; media_type?: string | null; created_at: string; author_id: string }> };
+    const profiles = profilesResult.data ?? [];
+    const sharedRows = sharedRowsResult.data ?? [];
+    const shareRows = shareRowsResult.data ?? [];
+    const myLikes = myLikesResult.data ?? [];
 
-    const sharedAuthorIds = [...new Set((sharedRows ?? []).map((row) => row.author_id))];
+    const sharedAuthorIds = [...new Set(sharedRows.map((row) => row.author_id))];
     const { data: sharedProfiles } = sharedAuthorIds.length
       ? await supabase.from("profiles").select("*").in("id", sharedAuthorIds)
       : { data: [] as Profile[] };
 
+    const profileMap = new Map(
+      profiles.map((item) => [item.id, item as Profile]),
+    );
     const sharedProfileMap = new Map(
       (sharedProfiles ?? []).map((item) => [item.id, item as Profile]),
     );
     const sharedMap = new Map(
-      (sharedRows ?? []).map((row) => [
+      sharedRows.map((row) => [
         row.id,
         {
           content: row.content,
@@ -680,40 +721,19 @@ export function App() {
       ]),
     );
 
-    const profileMap = new Map(
-      (profiles ?? []).map((item) => [item.id, item as Profile]),
-    );
-
-    const postIds = rows.map((row) => row.id);
-    const tagMap = await loadPostTags(postIds);
-
-    const { data: shareRows } = postIds.length
-      ? await supabase
-          .from("posts")
-          .select("shared_post_id")
-          .in("shared_post_id", postIds)
-      : { data: [] as { shared_post_id: string | null }[] };
-
     const shareCounts = new Map<string, number>();
-    (shareRows ?? []).forEach((row) => {
+    shareRows.forEach((row) => {
       if (row.shared_post_id) {
-        shareCounts.set(row.shared_post_id, (shareCounts.get(row.shared_post_id) ?? 0) + 1);
+        shareCounts.set(
+          row.shared_post_id,
+          (shareCounts.get(row.shared_post_id) ?? 0) + 1,
+        );
       }
     });
 
-    const { data: myLikes } = postIds.length
-      ? await supabase
-          .from("post_likes")
-          .select("post_id, created_at")
-          .eq("user_id", session.user.id)
-          .in("post_id", postIds)
-      : { data: [] as { post_id: string; created_at: string }[] };
-
-    const likedSet = new Set(
-      (myLikes ?? []).map((item) => item.post_id),
-    );
+    const likedSet = new Set(myLikes.map((item) => item.post_id));
     const likedAtMap = new Map(
-      (myLikes ?? []).map((item) => [item.post_id, item.created_at]),
+      myLikes.map((item) => [item.post_id, item.created_at]),
     );
 
     setPosts(
@@ -731,15 +751,18 @@ export function App() {
         comments: row.post_comments?.[0]?.count ?? 0,
         reposts: 0,
         reposted: false,
+        reposted_at: null,
         shares: shareCounts.get(row.id) ?? 0,
         pinned_at: row.pinned_at ?? null,
         archived_at: row.archived_at ?? null,
-      privacy: row.privacy ?? "public",
+        privacy: row.privacy ?? "public",
         trashed_at: row.trashed_at ?? null,
         tagged_profiles: tagMap.get(row.id) ?? [],
         shared_post_id: row.shared_post_id ?? null,
         share_caption: row.share_caption ?? null,
-        shared_original: row.shared_post_id ? sharedMap.get(row.shared_post_id) ?? null : null,
+        shared_original: row.shared_post_id
+          ? sharedMap.get(row.shared_post_id) ?? null
+          : null,
       })),
     );
   }
