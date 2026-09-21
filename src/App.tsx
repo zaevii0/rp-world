@@ -16,7 +16,6 @@ import {
   Music,
   MessageCircle,
   ShoppingBag,
-  Video,
   PenLine,
   Gamepad2,
   Phone,
@@ -53,7 +52,6 @@ import {
   CheckCheck,
   Settings,
   Mic,
-
 } from "lucide-react";
 import { lazy, Suspense, useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent, type ReactNode } from "react";
 import type { Session } from "@supabase/supabase-js";
