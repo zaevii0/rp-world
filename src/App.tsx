@@ -5140,7 +5140,7 @@ export function App() {
                 : "nav-item"
             }
             type="button"
-            onPointerDown={() => {}}
+            onPointerDown={(event) => event.currentTarget.blur()}
             onPointerUp={() => setView("home")}
           >
             <Home size={19} />
@@ -5154,6 +5154,7 @@ export function App() {
                 : "nav-item"
             }
             type="button"
+            onPointerDown={(event) => event.currentTarget.blur()}
             onPointerUp={() => setView("discover")}
           >
             <LayoutGrid size={19} />
@@ -5164,7 +5165,7 @@ export function App() {
             className="nav-create"
             type="button"
             aria-label="Messages"
-            onPointerDown={startScreenshotLongPress}
+            onPointerDown={(event) => { event.currentTarget.blur(); startScreenshotLongPress(event); }}
             onPointerUp={() => finishScreenshotPress(() => void openMessageInbox())}
             onPointerCancel={cancelScreenshotLongPress}
             onContextMenu={(event) => event.preventDefault()}
@@ -5179,6 +5180,7 @@ export function App() {
                 : "nav-item"
             }
             type="button"
+            onPointerDown={(event) => event.currentTarget.blur()}
             onPointerUp={() => setView("profile")}
           >
             <User size={19} />
@@ -5192,6 +5194,7 @@ export function App() {
                 : "nav-item"
             }
             type="button"
+            onPointerDown={(event) => event.currentTarget.blur()}
             onPointerUp={openMenu}
           >
             <Menu size={19} />
