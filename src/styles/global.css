@@ -6106,3 +6106,9 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
   align-items: center;
   justify-content: center;
 }
+
+
+/* Remove visible borders from centered public-profile social actions. */
+.profile-page .profile-social-actions .profile-action-button {
+  border-color: transparent !important;
+}
