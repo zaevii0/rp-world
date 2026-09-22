@@ -5739,30 +5739,43 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
   padding: 0 12px !important;
   border-radius: 13px !important;
   font-size: 10.5px !important;
-  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent) !important;
-  color: var(--accent) !important;
-  background: color-mix(in srgb, var(--accent) 9%, transparent) !important;
-  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 8%, transparent) !important;
+  font-weight: 680 !important;
+  border: 1px solid color-mix(in srgb, var(--accent) 78%, #000 22%) !important;
+  color: #fff !important;
+  background: var(--accent) !important;
+  box-shadow:
+    0 5px 14px color-mix(in srgb, var(--accent) 18%, transparent),
+    inset 0 1px 0 rgba(255,255,255,.18) !important;
+  transition: transform .16s ease, filter .16s ease, box-shadow .16s ease !important;
 }
 
 .profile-page .profile-social-actions .profile-action-button:hover,
 .profile-page .profile-social-actions .profile-action-button:focus-visible {
-  color: var(--accent) !important;
-  border-color: color-mix(in srgb, var(--accent) 48%, transparent) !important;
-  background: color-mix(in srgb, var(--accent) 14%, transparent) !important;
+  color: #fff !important;
+  background: var(--accent) !important;
+  filter: brightness(1.06) !important;
+  box-shadow:
+    0 7px 18px color-mix(in srgb, var(--accent) 24%, transparent),
+    inset 0 1px 0 rgba(255,255,255,.2) !important;
+  outline: none !important;
 }
 
-/* Edit + Follow intentionally use the exact same visual treatment. */
+.profile-page .profile-social-actions .profile-action-button:active {
+  transform: scale(.97) !important;
+  filter: brightness(.98) !important;
+}
+
+/* Follow uses the same solid iOS button treatment as View as. */
 .profile-page .profile-social-actions .follow-button {
-  color: var(--accent) !important;
-  border-color: color-mix(in srgb, var(--accent) 30%, transparent) !important;
-  background: color-mix(in srgb, var(--accent) 9%, transparent) !important;
-  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 8%, transparent) !important;
+  color: #fff !important;
+  border-color: color-mix(in srgb, var(--accent) 78%, #000 22%) !important;
+  background: var(--accent) !important;
 }
 
-/* View as + Message intentionally use the same visual treatment. */
+/* Keep the paired actions visually identical. */
 .profile-page .profile-social-actions .profile-action-button:not(.follow-button) {
-  color: var(--accent) !important;
+  color: #fff !important;
+  background: var(--accent) !important;
 }
 
 @media (max-width: 640px) {
@@ -5785,7 +5798,6 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
     height: 13px !important;
   }
 
-  /* Compact the profile vertically so the profile + highlights fit better in screenshots. */
   .profile-page .profile-cover {
     height: 138px !important;
   }
