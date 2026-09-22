@@ -9,6 +9,8 @@ export interface Profile {
   rp_id: string;
   theme_id: string;
   profile_visibility: "public" | "private";
+  verified_until: string | null;
+  themes_until: string | null;
   created_at: string;
   updated_at: string;
 }
