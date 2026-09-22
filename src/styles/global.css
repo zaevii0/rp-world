@@ -6254,3 +6254,48 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
     margin-top: -6px !important;
   }
 }
+
+
+/* iOS-style Follow action: compact solid control matching the messaging UI. */
+.profile-page .profile-social-actions .compact-follow-button,
+.public-profile-page .public-profile-actions .compact-follow-button {
+  height: 38px !important;
+  min-height: 38px !important;
+  width: auto !important;
+  min-width: 82px !important;
+  max-width: 140px !important;
+  padding: 0 14px !important;
+  gap: 6px !important;
+  border: 0 !important;
+  border-radius: 12px !important;
+  background: var(--accent) !important;
+  color: #fff !important;
+  box-shadow: 0 5px 14px color-mix(in srgb, var(--accent) 24%, transparent) !important;
+  font-weight: 600 !important;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.profile-page .profile-social-actions .compact-follow-button:hover,
+.profile-page .profile-social-actions .compact-follow-button:focus-visible,
+.public-profile-page .public-profile-actions .compact-follow-button:hover,
+.public-profile-page .public-profile-actions .compact-follow-button:focus-visible {
+  background: var(--accent) !important;
+  border-color: transparent !important;
+  transform: translateY(-1px);
+}
+
+.profile-page .profile-social-actions .compact-follow-button:active,
+.public-profile-page .public-profile-actions .compact-follow-button:active {
+  transform: scale(.97);
+}
+
+@media (max-width: 640px) {
+  .profile-page .profile-social-actions .compact-follow-button,
+  .public-profile-page .public-profile-actions .compact-follow-button {
+    height: 36px !important;
+    min-height: 36px !important;
+    min-width: 78px !important;
+    padding: 0 12px !important;
+    border-radius: 11px !important;
+  }
+}
