@@ -5772,10 +5772,21 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
   background: var(--accent) !important;
 }
 
-/* Keep the paired actions visually identical. */
+/* Edit + Message use a lighter solid accent for secondary actions. */
 .profile-page .profile-social-actions .profile-action-button:not(.follow-button) {
   color: #fff !important;
-  background: var(--accent) !important;
+  background: color-mix(in srgb, var(--accent) 68%, #fff 32%) !important;
+  border-color: color-mix(in srgb, var(--accent) 55%, #fff 45%) !important;
+  box-shadow:
+    0 5px 14px color-mix(in srgb, var(--accent) 12%, transparent),
+    inset 0 1px 0 rgba(255,255,255,.22) !important;
+}
+
+.profile-page .profile-social-actions .profile-action-button:not(.follow-button):hover,
+.profile-page .profile-social-actions .profile-action-button:not(.follow-button):focus-visible {
+  color: #fff !important;
+  background: color-mix(in srgb, var(--accent) 74%, #fff 26%) !important;
+  border-color: color-mix(in srgb, var(--accent) 60%, #fff 40%) !important;
 }
 
 @media (max-width: 640px) {
