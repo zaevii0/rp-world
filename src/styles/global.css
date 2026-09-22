@@ -6488,3 +6488,94 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
   background: #000 !important;
   color: #fff !important;
 }
+
+
+/* Final profile control sizing: slightly smaller, while preserving comfortable touch targets. */
+.profile-page .profile-social-actions .compact-follow-button,
+.public-profile-page .public-profile-actions .compact-follow-button {
+  height: 36px !important;
+  min-height: 36px !important;
+  min-width: 78px !important;
+  padding: 0 12px !important;
+  font-size: 10.5px !important;
+  gap: 5px !important;
+}
+
+.profile-page .profile-social-actions .message-icon-button,
+.profile-page .profile-social-actions .profile-icon-action,
+.profile-page .profile-social-actions .profile-more-button,
+.public-profile-page .public-profile-actions .message-icon-button,
+.public-profile-page .public-profile-actions .profile-more-button {
+  width: 36px !important;
+  min-width: 36px !important;
+  max-width: 36px !important;
+  height: 36px !important;
+  min-height: 36px !important;
+  flex-basis: 36px !important;
+}
+
+.profile-page .profile-social-actions .message-icon-button svg,
+.profile-page .profile-social-actions .profile-icon-action svg,
+.profile-page .profile-social-actions .profile-more-button svg,
+.public-profile-page .public-profile-actions .message-icon-button svg,
+.public-profile-page .public-profile-actions .profile-more-button svg {
+  width: 15px !important;
+  height: 15px !important;
+}
+
+.profile-page .profile-social-actions .primary-profile-action {
+  min-height: 36px !important;
+  padding: 0 13px !important;
+  font-size: 10.5px !important;
+}
+
+.public-profile-cover-actions .circle-button {
+  width: 34px !important;
+  height: 34px !important;
+  min-width: 34px !important;
+  min-height: 34px !important;
+}
+
+@media (max-width: 640px) {
+  .profile-page .profile-social-actions .compact-follow-button,
+  .public-profile-page .public-profile-actions .compact-follow-button {
+    height: 34px !important;
+    min-height: 34px !important;
+    min-width: 74px !important;
+    padding: 0 11px !important;
+  }
+
+  .profile-page .profile-social-actions .message-icon-button,
+  .profile-page .profile-social-actions .profile-icon-action,
+  .profile-page .profile-social-actions .profile-more-button,
+  .public-profile-page .public-profile-actions .message-icon-button,
+  .public-profile-page .public-profile-actions .profile-more-button {
+    width: 34px !important;
+    min-width: 34px !important;
+    max-width: 34px !important;
+    height: 34px !important;
+    min-height: 34px !important;
+    flex-basis: 34px !important;
+  }
+
+  .profile-page .profile-social-actions .message-icon-button svg,
+  .profile-page .profile-social-actions .profile-icon-action svg,
+  .profile-page .profile-social-actions .profile-more-button svg,
+  .public-profile-page .public-profile-actions .message-icon-button svg,
+  .public-profile-page .public-profile-actions .profile-more-button svg {
+    width: 14px !important;
+    height: 14px !important;
+  }
+
+  .profile-page .profile-social-actions .primary-profile-action {
+    min-height: 34px !important;
+    padding: 0 12px !important;
+  }
+
+  .public-profile-cover-actions .circle-button {
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+    min-height: 32px !important;
+  }
+}
