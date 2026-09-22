@@ -1,0 +1,184 @@
+/* Black theme — adaptive monochrome system.
+   Keep the theme black, but never force controls to disappear or become
+   visually harsh in dark mode. This file intentionally overrides only
+   Black-theme surfaces and controls. */
+
+:root[data-theme="black"] {
+  --theme-black-surface: #0b0b0d;
+  --theme-black-elevated: #141416;
+  --theme-black-control: #1b1b1e;
+  --theme-black-border: rgba(255,255,255,.12);
+  --theme-black-border-strong: rgba(255,255,255,.18);
+  --theme-black-muted: rgba(255,255,255,.08);
+  --theme-black-text: #f5f5f7;
+}
+
+:root[data-theme="black"] .app.dark {
+  --accent: #f5f5f7;
+  --accent-soft: rgba(255,255,255,.10);
+}
+
+:root[data-theme="black"] .app.light {
+  --accent: #000;
+  --accent-soft: rgba(0,0,0,.09);
+}
+
+/* Primary actions: charcoal in dark mode, true black in light mode.
+   This avoids the white-button problem while keeping strong contrast. */
+:root[data-theme="black"] .app.dark .primary-button,
+:root[data-theme="black"] .app.dark .nav-create,
+:root[data-theme="black"] .app.dark .profile-social-actions .compact-follow-button,
+:root[data-theme="black"] .app.dark .public-profile-actions .compact-follow-button,
+:root[data-theme="black"] .app.dark .profile-social-actions .primary-profile-action {
+  color: #fff !important;
+  background: #1c1c1e !important;
+  border-color: rgba(255,255,255,.16) !important;
+  box-shadow: 0 8px 24px rgba(0,0,0,.28) !important;
+}
+
+:root[data-theme="black"] .app.dark .primary-button:hover,
+:root[data-theme="black"] .app.dark .nav-create:hover,
+:root[data-theme="black"] .app.dark .profile-social-actions .compact-follow-button:hover,
+:root[data-theme="black"] .app.dark .public-profile-actions .compact-follow-button:hover,
+:root[data-theme="black"] .app.dark .profile-social-actions .primary-profile-action:hover {
+  background: #2a2a2d !important;
+  border-color: rgba(255,255,255,.22) !important;
+  color: #fff !important;
+}
+
+:root[data-theme="black"] .app.light .primary-button,
+:root[data-theme="black"] .app.light .nav-create,
+:root[data-theme="black"] .app.light .profile-social-actions .compact-follow-button,
+:root[data-theme="black"] .app.light .public-profile-actions .compact-follow-button,
+:root[data-theme="black"] .app.light .profile-social-actions .primary-profile-action {
+  color: #fff !important;
+  background: #000 !important;
+  border-color: #000 !important;
+  box-shadow: 0 8px 22px rgba(0,0,0,.16) !important;
+}
+
+/* Secondary / outline controls should not become bright white pills. */
+:root[data-theme="black"] .app.dark .outline-button,
+:root[data-theme="black"] .app.dark .small-add,
+:root[data-theme="black"] .app.dark .secondary-button,
+:root[data-theme="black"] .app.dark .comment-form button,
+:root[data-theme="black"] .app.dark .replying-to {
+  color: #f5f5f7 !important;
+  background: rgba(255,255,255,.06) !important;
+  border-color: rgba(255,255,255,.12) !important;
+}
+
+:root[data-theme="black"] .app.dark .outline-button:hover,
+:root[data-theme="black"] .app.dark .small-add:hover,
+:root[data-theme="black"] .app.dark .secondary-button:hover,
+:root[data-theme="black"] .app.dark .comment-form button:hover {
+  background: rgba(255,255,255,.10) !important;
+  border-color: rgba(255,255,255,.18) !important;
+}
+
+/* Active navigation and reactions use a quiet monochrome treatment. */
+:root[data-theme="black"] .app.dark .nav-item.active,
+:root[data-theme="black"] .app.dark .post-action.liked,
+:root[data-theme="black"] .app.dark .post-action.active {
+  color: #fff !important;
+  background: rgba(255,255,255,.09) !important;
+}
+
+:root[data-theme="black"] .app.dark .post-action:hover {
+  color: #fff !important;
+  background: rgba(255,255,255,.07) !important;
+}
+
+/* Inputs and selectable cards stay subtle instead of turning into bright
+   accent blocks. */
+:root[data-theme="black"] .app.dark .input-wrap,
+:root[data-theme="black"] .app.dark .comment-form input,
+:root[data-theme="black"] .app.dark .theme-card,
+:root[data-theme="black"] .app.dark .highlight-style-option {
+  background: rgba(255,255,255,.045) !important;
+  border-color: rgba(255,255,255,.10) !important;
+}
+
+:root[data-theme="black"] .app.dark .input-wrap:focus-within,
+:root[data-theme="black"] .app.dark .comment-form input:focus {
+  border-color: rgba(255,255,255,.26) !important;
+  box-shadow: 0 0 0 3px rgba(255,255,255,.07) !important;
+}
+
+:root[data-theme="black"] .app.dark .theme-card.selected,
+:root[data-theme="black"] .app.dark .highlight-style-option.active {
+  border-color: rgba(255,255,255,.28) !important;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.12) !important;
+  background: rgba(255,255,255,.08) !important;
+}
+
+/* Glass surfaces: neutral monochrome, no black-on-black accent glow. */
+:root[data-theme="black"] .app.dark .glass {
+  border-color: rgba(255,255,255,.10);
+}
+
+:root[data-theme="black"] .app.dark .profile-meta span,
+:root[data-theme="black"] .app.dark .comments-panel,
+:root[data-theme="black"] .app.dark .comment-row > div {
+  background: rgba(255,255,255,.045) !important;
+}
+
+:root[data-theme="black"] .app.dark .profile-stats,
+:root[data-theme="black"] .app.dark .profile-stats > div + div {
+  border-color: rgba(255,255,255,.09) !important;
+}
+
+/* Black theme icons and status indicators remain visible without neon glow. */
+:root[data-theme="black"] .app.dark .brand-mark,
+:root[data-theme="black"] .app.dark .hero-icon {
+  color: #fff !important;
+  background: rgba(255,255,255,.08) !important;
+}
+
+:root[data-theme="black"] .app.dark .status-dot {
+  background: #fff !important;
+  box-shadow: 0 0 8px rgba(255,255,255,.22) !important;
+}
+
+/* Keep media controls and destructive actions readable. */
+:root[data-theme="black"] .app.dark .highlight-actions-sheet,
+:root[data-theme="black"] .app.dark .comment-action-sheet {
+  background: rgba(20,20,22,.94) !important;
+  border-color: rgba(255,255,255,.12) !important;
+}
+
+:root[data-theme="black"] .app.dark .highlight-actions-sheet button:hover:not(:disabled),
+:root[data-theme="black"] .app.dark .highlight-actions-sheet button:focus-visible,
+:root[data-theme="black"] .app.dark .comment-action-sheet button:hover,
+:root[data-theme="black"] .app.dark .comment-action-sheet button:focus-visible {
+  background: rgba(255,255,255,.07) !important;
+}
+
+:root[data-theme="black"] .app.dark .highlight-actions-sheet button.danger,
+:root[data-theme="black"] .app.dark .comment-action-sheet button.danger {
+  color: #ff6961 !important;
+}
+
+/* Light mode gets the same structure, with black as the actual accent. */
+:root[data-theme="black"] .app.light .outline-button,
+:root[data-theme="black"] .app.light .small-add,
+:root[data-theme="black"] .app.light .secondary-button,
+:root[data-theme="black"] .app.light .comment-form button {
+  color: #111 !important;
+  background: rgba(0,0,0,.045) !important;
+  border-color: rgba(0,0,0,.12) !important;
+}
+
+:root[data-theme="black"] .app.light .nav-item.active,
+:root[data-theme="black"] .app.light .post-action.liked,
+:root[data-theme="black"] .app.light .post-action.active,
+:root[data-theme="black"] .app.light .post-action:hover {
+  color: #000 !important;
+  background: rgba(0,0,0,.07) !important;
+}
+
+/* Prevent the generic accent radial background from creating an odd white
+   spotlight in Black dark mode. */
+:root[data-theme="black"] .app.dark {
+  background: #050505 !important;
+}
