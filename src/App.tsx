@@ -4386,6 +4386,15 @@ export function App() {
                         {!viewAs ? (
                           <>
                             <button
+                              className="profile-action-button primary-profile-action"
+                              type="button"
+                              onClick={() => setViewAs(true)}
+                            >
+                              <Eye size={14} />
+                              View as
+                            </button>
+
+                            <button
                               className="profile-action-button secondary-profile-action profile-icon-action"
                               type="button"
                               onClick={() => setProfileOpen(true)}
@@ -4393,15 +4402,6 @@ export function App() {
                               title="Edit profile"
                             >
                               <Pencil size={18} />
-                            </button>
-
-                            <button
-                              className="profile-action-button primary-profile-action"
-                              type="button"
-                              onClick={() => setViewAs(true)}
-                            >
-                              <Eye size={14} />
-                              View as
                             </button>
                           </>
                         ) : (
