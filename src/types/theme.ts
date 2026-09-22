@@ -1,5 +1,6 @@
 export type ThemeId =
   | "midnight"
+  | "black"
   | "rose"
   | "lavender"
   | "ocean"
@@ -18,6 +19,7 @@ export interface ThemeDefinition {
 
 export const themes: ThemeDefinition[] = [
   { id: "midnight", label: "⚫ Midnight", accent: "#8f8f98", accentSoft: "rgba(143,143,152,.16)" },
+  { id: "black", label: "⬛ Black", accent: "#000000", accentSoft: "rgba(0,0,0,.16)" },
   { id: "rose", label: "🔴 Red", accent: "#d7263d", accentSoft: "rgba(215,38,61,.16)" },
   { id: "lavender", label: "💜 Lavender", accent: "#9b8cf2", accentSoft: "rgba(155,140,242,.16)" },
   { id: "ocean", label: "🌊 Ocean", accent: "#5e9fe8", accentSoft: "rgba(94,159,232,.16)" },
