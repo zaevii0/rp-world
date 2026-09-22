@@ -4429,10 +4429,7 @@ export function App() {
                           <Heart size={13} />
                           {profileStats.likes} {profileStats.likes === 1 ? "like" : "likes"}
                         </span>
-                        <span>
-                          <MapPin size={13} />
-                          RP WORLD
-                        </span>
+
                       </div>
                     </div>
                   </div>
