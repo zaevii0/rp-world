@@ -679,6 +679,13 @@ export function App() {
     localStorage.setItem(APPEARANCE_KEY, appearance);
     document.documentElement.dataset.appearance = appearance;
   }, [appearance]);
+\n  useEffect(() => {
+    if (!profile || hasPremiumThemes(profile)) return;
+    if (theme !== "midnight" && theme !== "ocean") {
+      setTheme("midnight");
+    }
+  }, [profile, theme]);
+
 
   // Preserve the current SPA page across a browser/app refresh. This uses
   // sessionStorage intentionally: a refresh restores the page, while a new
