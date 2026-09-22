@@ -5686,3 +5686,232 @@ nav.bottom-nav {
   .message-form { grid-template-columns: repeat(4, 29px) minmax(0,1fr); gap: 2px; padding-inline: 7px; }
   .message-compose-action { width: 29px; height: 29px; }
 }
+
+
+/* Refined threaded comments: compact iOS hierarchy and reaction controls. */
+.comment-thread {
+  position: relative;
+  margin: 0 0 12px;
+}
+
+.comment-thread-reply {
+  position: relative;
+  margin: 6px 0 0 38px;
+  padding-left: 14px;
+  border-left: 1px solid color-mix(in srgb, var(--accent) 18%, var(--text-primary) 7%);
+}
+
+.comment-thread-reply::before {
+  content: "";
+  position: absolute;
+  top: 17px;
+  left: -1px;
+  width: 9px;
+  height: 1px;
+  background: color-mix(in srgb, var(--accent) 18%, var(--text-primary) 7%);
+}
+
+.comment-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  min-width: 0;
+}
+
+.comment-body {
+  min-width: 0;
+  flex: 1;
+}
+
+.comment-bubble {
+  width: fit-content;
+  max-width: min(100%, 620px);
+  padding: 8px 11px;
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--text-primary) 5%, var(--surface) 95%);
+  border: 1px solid color-mix(in srgb, var(--text-primary) 7%, transparent);
+}
+
+.app.dark .comment-bubble {
+  background: color-mix(in srgb, var(--surface) 90%, var(--accent) 10%);
+}
+
+.comment-bubble p {
+  margin: 4px 0 0;
+  line-height: 1.42;
+  overflow-wrap: anywhere;
+}
+
+.comment-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px 10px;
+  margin: 3px 0 0 5px;
+}
+
+.comment-action {
+  min-height: 22px;
+  padding: 1px 2px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 9px;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.comment-action:hover,
+.comment-action:focus-visible {
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 7%, transparent);
+  outline: none;
+}
+
+.comment-reaction-wrap {
+  position: relative;
+  display: inline-flex;
+}
+
+.comment-reaction-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.comment-reaction-trigger-emoji {
+  width: 14px;
+  text-align: center;
+  font-size: 12px;
+  line-height: 1;
+}
+
+.comment-reaction-trigger.reaction-active {
+  color: var(--accent);
+}
+
+.comment-reaction-picker {
+  position: absolute;
+  z-index: 80;
+  left: -5px;
+  bottom: calc(100% + 7px);
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  width: max-content;
+  max-width: min(360px, calc(100vw - 28px));
+  overflow-x: auto;
+  padding: 6px;
+  border: 1px solid color-mix(in srgb, var(--text-primary) 10%, transparent);
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--surface) 94%, transparent);
+  box-shadow: 0 14px 36px rgba(0,0,0,.18);
+  backdrop-filter: blur(22px) saturate(150%);
+  -webkit-backdrop-filter: blur(22px) saturate(150%);
+  scrollbar-width: none;
+}
+
+.comment-reaction-picker::-webkit-scrollbar {
+  display: none;
+}
+
+.comment-reaction-option {
+  width: 30px;
+  height: 30px;
+  flex: 0 0 30px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  font-size: 17px;
+  line-height: 1;
+  cursor: pointer;
+  transition: transform .14s ease, background .14s ease;
+}
+
+.comment-reaction-option:hover,
+.comment-reaction-option:focus-visible,
+.comment-reaction-option.active {
+  background: color-mix(in srgb, var(--accent) 11%, transparent);
+  transform: scale(1.08);
+  outline: none;
+}
+
+.comment-reaction-summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 1px;
+  min-height: 18px;
+  margin: -1px 0 0 7px;
+  padding: 2px 6px;
+  border: 1px solid color-mix(in srgb, var(--text-primary) 7%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--surface) 84%, transparent);
+  box-shadow: 0 2px 8px rgba(0,0,0,.06);
+}
+
+.comment-reaction-summary span {
+  font-size: 11px;
+  line-height: 1;
+}
+
+.comment-reaction-summary strong {
+  margin-left: 3px;
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.comment-replies-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 23px;
+  margin: 3px 0 0 5px;
+  padding: 0 5px;
+  border: 0;
+  background: transparent;
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 9px;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.comment-replies-toggle:hover,
+.comment-replies-toggle:focus-visible {
+  color: var(--accent);
+  outline: none;
+}
+
+.comment-replies-line {
+  width: 17px;
+  height: 1px;
+  background: color-mix(in srgb, var(--accent) 22%, var(--text-primary) 8%);
+}
+
+@media (max-width: 560px) {
+  .comment-thread-reply {
+    margin-left: 25px;
+    padding-left: 10px;
+  }
+
+  .comment-thread-reply::before {
+    width: 7px;
+  }
+
+  .comment-bubble {
+    max-width: 100%;
+    padding: 7px 10px;
+  }
+
+  .comment-actions {
+    gap: 2px 8px;
+  }
+
+  .comment-reaction-picker {
+    max-width: calc(100vw - 34px);
+  }
+}
