@@ -4850,7 +4850,7 @@ export function App() {
                   </div>
                 </div>
                 <div className="profile-section">
-                  <div className="section-heading"><div><p className="eyebrow">HIGHLIGHTS</p><h3>Moments</h3></div></div>
+                  <div className="section-heading"><div><h3>Moments</h3></div></div>
                   <div className="highlights-row view-as">
                     {publicHighlights.length === 0 ? <span className="comments-empty">No highlights yet.</span> : publicHighlights.map((item) => (
                       <button className={publicProfile.highlight_style === "portrait" ? "highlight-card highlight-card-portrait" : "highlight-card highlight-card-circle"} key={item.id} type="button" onClick={() => setActiveHighlight(item)}>
