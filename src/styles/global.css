@@ -5869,3 +5869,16 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
     width: min(100%, 380px) !important;
   }
 }
+
+/* View as: solid accent iOS button. */
+.profile-page .profile-social-actions .primary-profile-action,
+.profile-page .profile-social-actions .primary-profile-action:hover,
+.profile-page .profile-social-actions .primary-profile-action:focus-visible {
+  color: #fff !important;
+  background: var(--accent) !important;
+  border-color: var(--accent) !important;
+  box-shadow:
+    0 5px 14px color-mix(in srgb, var(--accent) 18%, transparent),
+    inset 0 1px 0 rgba(255,255,255,.18) !important;
+  filter: none !important;
+}
