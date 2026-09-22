@@ -6016,3 +6016,20 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
     flex-basis: 38px !important;
   }
 }
+
+/* Final public profile action alignment. */
+.public-profile-page .public-profile-actions {
+  justify-content: center !important;
+  width: 100% !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+.public-profile-page .public-profile-actions .compact-follow-button {
+  border-color: transparent !important;
+}
+
+.public-profile-page .public-profile-actions .message-icon-button,
+.public-profile-page .public-profile-actions .profile-more-button {
+  border-color: transparent !important;
+}
