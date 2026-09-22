@@ -5436,3 +5436,22 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
     transition: none !important;
   }
 }
+
+
+/* RP WORLD — Discover icon centering fix */
+.discover-category-summary .discover-category-icon,
+.discover-category-card .discover-category-icon {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  place-items: center !important;
+  line-height: 0 !important;
+  text-align: center !important;
+}
+
+.discover-category-summary .discover-category-icon svg,
+.discover-category-card .discover-category-icon svg {
+  display: block !important;
+  flex: 0 0 auto !important;
+  margin: 0 !important;
+}
