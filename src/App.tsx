@@ -325,6 +325,12 @@ export function App() {
 
   const [profileOpen, setProfileOpen] = useState(false);
   const [composerOpen, setComposerOpen] = useState(false);
+  const [supportOpen, setSupportOpen] = useState(false);
+  const [supportAmount, setSupportAmount] = useState("100");
+  const [supportFrequency, setSupportFrequency] = useState<"one_time" | "monthly">("one_time");
+  const [supportNote, setSupportNote] = useState("");
+  const [supportBusy, setSupportBusy] = useState(false);
+  const [supportMessage, setSupportMessage] = useState("");
 
   const [username, setUsername] = useState("");
   const [displayName, setDisplayName] = useState("");
@@ -1367,6 +1373,37 @@ export function App() {
       setAuthOpen(false);
       setPassword("");
     }
+  }
+
+  async function submitSupportIntent() {
+    if (!supabase || !session?.user) return;
+
+    const amount = Number(supportAmount);
+    if (!Number.isFinite(amount) || amount < 10 || amount > 1000000) {
+      setSupportMessage("Enter a support amount between ₱10 and ₱1,000,000.");
+      return;
+    }
+
+    setSupportBusy(true);
+    setSupportMessage("");
+
+    const { error } = await supabase.from("support_intents").insert({
+      user_id: session.user.id,
+      amount,
+      currency: "PHP",
+      frequency: supportFrequency,
+      note: supportNote.trim() || null,
+    });
+
+    setSupportBusy(false);
+
+    if (error) {
+      setSupportMessage("We couldn't save your support request yet. Please try again.");
+      return;
+    }
+
+    setSupportNote("");
+    setSupportMessage("Thank you. Your support intent has been recorded. Payment options will be connected next.");
   }
 
   async function handleProfileSubmit(event: FormEvent) {
@@ -4840,6 +4877,18 @@ export function App() {
                 )}
                 <button
                   type="button"
+                  className="menu-feature-button support-menu-button"
+                  onClick={() => {
+                    setSupportMessage("");
+                    setSupportOpen(true);
+                  }}
+                >
+                  <Heart size={18} />
+                  <span>Support RP WORLD</span>
+                </button>
+
+                <button
+                  type="button"
                   onClick={() =>
                     setProfileOpen(true)
                   }
@@ -4879,6 +4928,57 @@ export function App() {
             )}
           </section>
         </main>
+      )}
+
+      {supportOpen && session && profile && (
+        <div className="modal-backdrop" role="presentation" onMouseDown={() => setSupportOpen(false)}>
+          <section className="support-modal glass" role="dialog" aria-modal="true" aria-labelledby="support-title" onMouseDown={(event) => event.stopPropagation()}>
+            <div className="support-modal-header">
+              <div>
+                <span className="support-eyebrow">RP WORLD</span>
+                <h2 id="support-title">Support RP WORLD</h2>
+                <p>Help cover hosting, database, storage, security, moderation, and future improvements.</p>
+              </div>
+              <button className="icon-button glass" type="button" aria-label="Close support" onClick={() => setSupportOpen(false)}>
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="support-amounts" aria-label="Support amount">
+              {[50, 100, 250, 500].map((amount) => (
+                <button key={amount} type="button" className={supportAmount === String(amount) ? "support-amount active" : "support-amount"} onClick={() => setSupportAmount(String(amount))}>
+                  ₱{amount}
+                </button>
+              ))}
+            </div>
+
+            <label className="support-field">
+              <span>Custom amount</span>
+              <div className="support-input-wrap"><span>₱</span><input inputMode="decimal" value={supportAmount} onChange={(event) => setSupportAmount(event.target.value)} min="10" max="1000000" /></div>
+            </label>
+
+            <div className="support-frequency" role="group" aria-label="Support frequency">
+              <button type="button" className={supportFrequency === "one_time" ? "active" : ""} onClick={() => setSupportFrequency("one_time")}>One-time</button>
+              <button type="button" className={supportFrequency === "monthly" ? "active" : ""} onClick={() => setSupportFrequency("monthly")}>Monthly</button>
+            </div>
+
+            <label className="support-field">
+              <span>Optional note</span>
+              <textarea value={supportNote} onChange={(event) => setSupportNote(event.target.value)} maxLength={240} placeholder="Tell us what you'd like to support." />
+            </label>
+
+            <div className="support-disclosure">
+              <strong>Transparent support</strong>
+              <span>This records your intended contribution only. No payment is collected yet; payment providers will be connected separately.</span>
+            </div>
+
+            {supportMessage && <p className="support-message" role="status">{supportMessage}</p>}
+
+            <button className="support-submit-button" type="button" disabled={supportBusy} onClick={() => void submitSupportIntent()}>
+              {supportBusy ? "Saving…" : "Save support intent"}
+            </button>
+          </section>
+        </div>
       )}
 
       {session && profile && (
