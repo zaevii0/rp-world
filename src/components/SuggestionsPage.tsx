@@ -12,7 +12,6 @@ export function SuggestionsPage({ session }: SuggestionsPageProps) {
   const [category, setCategory] = useState("Feature");
   const [description, setDescription] = useState("");
   const [busy, setBusy] = useState(false);
-  const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [successOpen, setSuccessOpen] = useState(false);
 
@@ -32,7 +31,6 @@ export function SuggestionsPage({ session }: SuggestionsPageProps) {
     }
 
     setBusy(true);
-    setMessage("");
     setError("");
 
     const { error: insertError } = await supabase.from("suggestions").insert({
@@ -52,7 +50,6 @@ export function SuggestionsPage({ session }: SuggestionsPageProps) {
     setTitle("");
     setCategory("Feature");
     setDescription("");
-    setMessage("");
     setSuccessOpen(true);
   }
 
@@ -83,73 +80,72 @@ export function SuggestionsPage({ session }: SuggestionsPageProps) {
         </div>
       )}
 
-    <section className="suggestions-page">
-      <div className="suggestions-card glass">
-        <div className="suggestions-header">
-          <div className="suggestions-icon" aria-hidden="true">
-            <Lightbulb size={24} />
+      <section className="suggestions-page">
+        <div className="suggestions-card glass">
+          <div className="suggestions-header">
+            <div className="suggestions-icon" aria-hidden="true">
+              <Lightbulb size={24} />
+            </div>
+            <div>
+              <p className="eyebrow">RP WORLD FEEDBACK</p>
+              <h2>Help shape RP WORLD.</h2>
+            </div>
           </div>
-          <div>
-            <p className="eyebrow">RP WORLD FEEDBACK</p>
-            <h2>Help shape RP WORLD.</h2>
-          </div>
+
+          <p className="suggestions-copy">
+            Have an idea for something RP WORLD should add or improve? Send it here.
+            Your suggestions will be reviewed as development continues.
+          </p>
+
+          <form className="auth-form" onSubmit={submitSuggestion}>
+            <label>
+              <span>Suggestion title</span>
+              <div className="input-wrap">
+                <input
+                  value={title}
+                  onChange={(event) => setTitle(event.target.value)}
+                  placeholder="e.g. Add profile music"
+                  maxLength={100}
+                  required
+                />
+              </div>
+            </label>
+
+            <label>
+              <span>Category</span>
+              <div className="input-wrap">
+                <select value={category} onChange={(event) => setCategory(event.target.value)}>
+                  <option>Feature</option>
+                  <option>Improvement</option>
+                  <option>Design</option>
+                  <option>Bug / Issue</option>
+                  <option>Other</option>
+                </select>
+              </div>
+            </label>
+
+            <label>
+              <span>Details</span>
+              <div className="input-wrap textarea-wrap">
+                <textarea
+                  value={description}
+                  onChange={(event) => setDescription(event.target.value)}
+                  placeholder="Tell us what you would like to see in RP WORLD and how it could work."
+                  maxLength={2000}
+                  rows={7}
+                  required
+                />
+              </div>
+            </label>
+
+            {error && <p className="form-message error">{error}</p>}
+
+            <button className="primary-button full" type="submit" disabled={busy}>
+              {busy ? "Sending…" : <><Send size={16} /> Send suggestion</>}
+            </button>
+          </form>
         </div>
-
-        <p className="suggestions-copy">
-          Have an idea for something RP WORLD should add or improve? Send it here.
-          Your suggestions will be reviewed as development continues.
-        </p>
-
-        <form className="auth-form" onSubmit={submitSuggestion}>
-          <label>
-            <span>Suggestion title</span>
-            <div className="input-wrap">
-              <input
-                value={title}
-                onChange={(event) => setTitle(event.target.value)}
-                placeholder="e.g. Add profile music"
-                maxLength={100}
-                required
-              />
-            </div>
-          </label>
-
-          <label>
-            <span>Category</span>
-            <div className="input-wrap">
-              <select value={category} onChange={(event) => setCategory(event.target.value)}>
-                <option>Feature</option>
-                <option>Improvement</option>
-                <option>Design</option>
-                <option>Bug / Issue</option>
-                <option>Other</option>
-              </select>
-            </div>
-          </label>
-
-          <label>
-            <span>Details</span>
-            <div className="input-wrap textarea-wrap">
-              <textarea
-                value={description}
-                onChange={(event) => setDescription(event.target.value)}
-                placeholder="Tell us what you would like to see in RP WORLD and how it could work."
-                maxLength={2000}
-                rows={7}
-                required
-              />
-            </div>
-          </label>
-
-          {error && <p className="form-message error">{error}</p>}
-          {message && <p className="form-message success">{message}</p>}
-
-          <button className="primary-button full" type="submit" disabled={busy}>
-            {busy ? "Sending…" : <><Send size={16} /> Send suggestion</>}
-          </button>
-        </form>
-      </div>
-    </section>
+      </section>
     </>
   );
 }
