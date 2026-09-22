@@ -4458,10 +4458,6 @@ export function App() {
                 <div className="profile-section">
                   <div className="section-heading">
                     <div>
-                      <p className="eyebrow">
-                        HIGHLIGHTS
-                      </p>
-
                       <h3>Moments</h3>
                     </div>
 
