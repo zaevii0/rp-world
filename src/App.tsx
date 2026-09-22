@@ -4377,7 +4377,7 @@ export function App() {
                             </button>
 
                             <button
-                              className="profile-action-button"
+                              className="profile-action-button primary-profile-action"
                               type="button"
                               onClick={() => setViewAs(true)}
                             >
