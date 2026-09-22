@@ -5923,76 +5923,102 @@ nav.bottom-nav {
 }
 .support-page {
   width: min(720px, 100%);
-  margin: 0 auto;
-  padding: 24px;
-  border-radius: 30px;
-  min-height: min(720px, calc(100vh - 170px));
-}
-
-.support-page-header {
+  margin: 8px auto 40px;
   display: grid;
-  grid-template-columns: auto 1fr auto;
-  align-items: start;
   gap: 16px;
-  margin-bottom: 28px;
 }
 
-.support-page-header h2 {
-  margin: 4px 0 8px;
-  font-size: clamp(28px, 5vw, 40px);
-  letter-spacing: -0.04em;
+.support-hero {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 24px;
+  border-radius: 28px;
 }
 
-.support-page-header p {
-  margin: 0;
-  max-width: 560px;
-  color: var(--muted);
-  line-height: 1.55;
-}
-
-.support-page-heart {
-  width: 52px;
-  height: 52px;
+.support-hero-icon {
+  flex: 0 0 58px;
+  width: 58px;
+  height: 58px;
   display: grid;
   place-items: center;
-  border-radius: 18px;
+  border-radius: 20px;
   color: var(--accent);
-  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  background: color-mix(in srgb, var(--accent) 13%, transparent);
+  box-shadow: 0 10px 30px color-mix(in srgb, var(--accent) 10%, transparent);
 }
 
-.support-page-body {
+.support-hero h3 {
+  margin: 4px 0 7px;
+  font-size: clamp(27px, 5vw, 38px);
+  line-height: 1.05;
+  letter-spacing: -.045em;
+}
+
+.support-hero p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.support-card {
+  padding: 22px;
+  border-radius: 28px;
   display: grid;
   gap: 18px;
-  max-width: 620px;
 }
 
-.support-page-intro {
+.support-card-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.support-card-heading > div {
   display: grid;
   gap: 5px;
-  padding: 18px;
-  border-radius: 20px;
-  background: color-mix(in srgb, var(--accent) 7%, transparent);
-  border: 1px solid color-mix(in srgb, var(--accent) 14%, transparent);
 }
 
-.support-page-intro span {
+.support-card-heading strong {
+  font-size: 16px;
+}
+
+.support-section-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .12em;
   color: var(--muted);
-  line-height: 1.55;
+}
+
+.support-hero .support-eyebrow {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .14em;
+  color: var(--accent);
 }
 
 @media (max-width: 640px) {
   .support-page {
+    margin-top: 0;
+    margin-bottom: 24px;
+  }
+
+  .support-hero {
+    padding: 20px;
+    border-radius: 24px;
+  }
+
+  .support-hero-icon {
+    flex-basis: 48px;
+    width: 48px;
+    height: 48px;
+    border-radius: 16px;
+  }
+
+  .support-card {
     padding: 18px;
     border-radius: 24px;
-    min-height: calc(100vh - 150px);
-  }
-
-  .support-page-header {
-    grid-template-columns: auto 1fr;
-  }
-
-  .support-page-heart {
-    display: none;
   }
 }
 
