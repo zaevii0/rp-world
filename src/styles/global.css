@@ -7063,3 +7063,15 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
   background-color: transparent !important;
   box-shadow: none !important;
 }
+
+
+/* Moments: remove the section container/surface completely; keep only its content. */
+.profile-page .highlights-row,
+.profile-page .highlights-row.glass,
+.profile-page .highlights-row::before,
+.profile-page .highlights-row::after {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
