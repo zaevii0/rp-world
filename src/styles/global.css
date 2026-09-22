@@ -6068,3 +6068,26 @@ nav.bottom-nav {
 .admin-support-summary span{font-size:12px;color:var(--muted,#8d8d95)}
 .admin-support-summary strong{font-size:18px}
 @media (max-width:560px){.admin-support-summary{grid-template-columns:1fr}}
+
+.support-checkout-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 44px;
+  margin-top: 10px;
+  border: 1px solid color-mix(in srgb, var(--accent) 42%, transparent);
+  border-radius: 13px;
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  color: var(--accent);
+  text-decoration: none;
+  font: inherit;
+  font-weight: 700;
+  box-sizing: border-box;
+  transition: transform .18s ease, background .18s ease;
+}
+.support-checkout-link:hover {
+  background: color-mix(in srgb, var(--accent) 17%, transparent);
+  transform: translateY(-1px);
+}
