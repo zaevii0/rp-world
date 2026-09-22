@@ -3392,6 +3392,7 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
 .message-bubble > span {
   font-size: 16px;
   line-height: 1.28;
+}
 
 /* RP WORLD — iOS Liquid Glass bottom navigation */
 .bottom-nav {
