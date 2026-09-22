@@ -3252,10 +3252,19 @@ export function App() {
   }
 
   function renderCommentTree(postId: string, comments: Comment[], parentId: string | null, depth = 0): ReactNode[] {
-    const children = comments.filter((comment) => comment.parent_id === parentId);
+    // Build the reply tree once per render instead of repeatedly scanning the full
+    // comment list for every parent. This keeps large reply threads responsive.
+    const childrenByParent = new Map<string | null, Comment[]>();
+    comments.forEach((item) => {
+      const key = item.parent_id ?? null;
+      const bucket = childrenByParent.get(key) ?? [];
+      bucket.push(item);
+      childrenByParent.set(key, bucket);
+    });
+    const children = childrenByParent.get(parentId) ?? [];
     const visible = parentId === null ? children : (expandedReplyIds.has(parentId) ? children : children.slice(0, 2));
     return visible.map((comment) => {
-      const replies = comments.filter((item) => item.parent_id === comment.id);
+      const replies = childrenByParent.get(comment.id) ?? [];
       const isEditing = commentEditId === comment.id;
       const reactionSummary = commentReactionOptions
         .filter((reaction) => (comment.reactionCounts?.[reaction.type] ?? 0) > 0)
