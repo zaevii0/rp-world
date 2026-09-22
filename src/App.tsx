@@ -4940,7 +4940,7 @@ export function App() {
                   onClick={() => {
                     setSupportMessage("");
                     setSupportCheckoutUrl(null);
-                    setSupportOpen(false);
+                    setSupportPlan("verified_2w");
                     setView("support");
                   }}
                 >
