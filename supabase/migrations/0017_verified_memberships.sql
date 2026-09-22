@@ -4,7 +4,8 @@
 alter table public.support_intents
   add column if not exists plan_code text not null default 'support';
 
-drop constraint if exists support_intents_plan_check on public.support_intents;
+alter table public.support_intents
+  drop constraint if exists support_intents_plan_check;
 alter table public.support_intents
   add constraint support_intents_plan_check
   check (
