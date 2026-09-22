@@ -63,7 +63,7 @@ export function ThemePicker({ theme, onThemeChange, canUseAllThemes = true, onLo
 
             <div className="theme-grid">
               {themes.map((item) => {
-                const locked = !canUseAllThemes && item.id !== "midnight" && item.id !== "ocean";
+                const locked = !canUseAllThemes && item.id !== "midnight" && item.id !== "ocean" && item.id !== "black";
                 return (
                   <button
                     className={item.id === theme ? `theme-card selected${locked ? " locked" : ""}` : `theme-card${locked ? " locked" : ""}`}
