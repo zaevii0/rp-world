@@ -6416,3 +6416,16 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
   border: 0 !important;
   border-color: transparent !important;
 }
+
+
+/* Final: remove visible borders from all profile/avatar pictures. */
+.avatar,
+.profile-avatar,
+.profile-avatar-wrap,
+.small-avatar,
+.post-head .avatar,
+.comment-row .small-avatar,
+.profile-card .profile-avatar {
+  border: 0 !important;
+  border-color: transparent !important;
+}
