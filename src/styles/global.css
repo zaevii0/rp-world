@@ -6811,3 +6811,26 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
   text-box-trim: trim-both;
   text-box-edge: cap alphabetic;
 }
+
+
+/* Bottom navbar: suppress browser focus/tap flashes when switching icons. */
+.bottom-nav .nav-item,
+.bottom-nav .nav-create {
+  -webkit-tap-highlight-color: transparent !important;
+  -webkit-focus-ring-color: transparent !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+.bottom-nav .nav-item:focus,
+.bottom-nav .nav-item:focus-visible,
+.bottom-nav .nav-item:active,
+.bottom-nav .nav-create:focus,
+.bottom-nav .nav-create:focus-visible,
+.bottom-nav .nav-create:active {
+  outline: none !important;
+  box-shadow: none !important;
+}
+.bottom-nav .nav-item:focus-visible,
+.bottom-nav .nav-create:focus-visible {
+  background: transparent !important;
+}
