@@ -81,6 +81,7 @@ const PUBLIC_PROFILE_KEY = "rpw-current-public-profile";
 const MESSAGE_CONVERSATION_KEY = "rpw-active-message-conversation";
 
 type AppView = "home" | "search" | "discover" | "profile" | "public" | "menu" | "suggestions" | "admin" | "support";
+type VerifiedPlan = "verified_2w" | "verified_1m" | "verified_3m_themes";
 
 function readStoredView(): AppView {
   try {
@@ -195,7 +196,7 @@ function readAppearance(): Appearance {
   return saved === "light" || saved === "system" ? saved : "dark";
 }
 
-function initials(name: string) {
+function isVerifiedProfile(profile?: Profile | null) {\n  return Boolean(profile?.verified_until && new Date(profile.verified_until).getTime() > Date.now());\n}\n\nfunction hasPremiumThemes(profile?: Profile | null) {\n  return Boolean(profile?.themes_until && new Date(profile.themes_until).getTime() > Date.now());\n}\n\nfunction initials(name: string) {
   return name.trim().slice(0, 1).toUpperCase() || "R";
 }
 
@@ -1379,39 +1380,32 @@ export function App() {
   async function submitSupportIntent() {
     if (!supabase || !session?.user) return;
 
-    const amount = Number(supportAmount);
-    if (!Number.isFinite(amount) || amount < 10 || amount > 1000000) {
-      setSupportMessage("Enter a support amount between ₱10 and ₱1,000,000.");
-      return;
-    }
+    const plans: Record<VerifiedPlan, { amount: number; label: string }> = {
+      verified_2w: { amount: 50, label: "2 weeks" },
+      verified_1m: { amount: 100, label: "1 month" },
+      verified_3m_themes: { amount: 250, label: "3 months + all theme colors" },
+    };
+    const selected = plans[supportPlan];
 
     setSupportBusy(true);
     setSupportMessage("");
+    setSupportCheckoutUrl(null);
 
     const { data: intent, error } = await supabase
       .from("support_intents")
       .insert({
         user_id: session.user.id,
-        amount,
+        amount: selected.amount,
         currency: "PHP",
-        frequency: supportFrequency,
-        note: supportNote.trim() || null,
+        frequency: "one_time",
+        plan_code: supportPlan,
       })
       .select("id")
       .single();
 
     if (error || !intent) {
       setSupportBusy(false);
-      setSupportMessage("We couldn't save your support request yet. Please try again.");
-      return;
-    }
-
-    if (supportFrequency === "monthly") {
-      setSupportBusy(false);
-      setSupportNote("");
-      setSupportMessage(
-        "Your monthly support request is saved. Automatic monthly billing is not enabled yet; choose One-time support to pay now.",
-      );
+      setSupportMessage("We couldn't prepare your verified membership yet. Please try again.");
       return;
     }
 
@@ -1423,20 +1417,15 @@ export function App() {
     setSupportBusy(false);
 
     if (checkoutError || !checkout?.checkout_url) {
-      console.error("RP WORLD support checkout creation failed", checkoutError);
-      setSupportMessage(
-        "Your support request was saved, but checkout could not be opened. Please try again from this support window.",
-      );
+      console.error("RP WORLD verified checkout creation failed", checkoutError);
+      setSupportMessage("Your membership request was saved, but checkout could not be opened. Please try again.");
       return;
     }
 
-    setSupportNote("");
     setSupportCheckoutUrl(checkout.checkout_url);
-    setSupportMessage("Secure checkout is ready. Review the amount and complete payment on PayMongo.");
+    setSupportMessage("Secure checkout is ready for ₱" + selected.amount + " · " + selected.label + ".");
     const opened = window.open(checkout.checkout_url, "_blank", "noopener,noreferrer");
-    if (!opened) {
-      setSupportMessage("Your secure checkout is ready. Tap “Open secure checkout” below.");
-    }
+    if (!opened) setSupportMessage("Your secure checkout is ready. Tap “Open secure checkout” below.");
   }
 
   async function handleProfileSubmit(event: FormEvent) {
@@ -3655,7 +3644,16 @@ export function App() {
         <div className="header-actions">
           <ThemePicker
             theme={theme}
-            onThemeChange={setTheme}
+            canUseAllThemes={hasPremiumThemes(profile)}
+            onThemeChange={(nextTheme) => {
+              setTheme(nextTheme);
+              setMessage("");
+            }}
+            onLockedTheme={() => {
+              setView("support");
+              setSupportPlan("verified_3m_themes");
+              setSupportMessage("All theme colors are included with the ₱250 verified membership.");
+            }}
           />
 
           <button
@@ -4647,7 +4645,7 @@ export function App() {
                                 {!post.profile?.avatar_url && initials(post.profile?.display_name ?? "R")}
                               </div>
                               <div>
-                                <strong>{post.profile?.display_name ?? "RP WORLD member"}{post.profile?.username === "zaevii" && <span className="verified-badge" aria-label="Verified">✓</span>}</strong>
+                                <strong>{post.profile?.display_name ?? "RP WORLD member"}{isVerifiedProfile(post.profile) && <span className="verified-badge" aria-label="Verified">✓</span>}</strong>
                                 <span className="post-meta">
                                   @{post.profile?.username ?? "member"} ·{" "}
                                   <button
@@ -4713,7 +4711,7 @@ export function App() {
                   <div className="profile-main">
                     <div className="profile-avatar-wrap"><div className="profile-avatar avatar" style={publicProfile.avatar_url ? { backgroundImage: `url(${publicProfile.avatar_url})` } : undefined}>{!publicProfile.avatar_url && initials(publicProfile.display_name)}</div></div>
                     <div className="profile-identity">
-                      <div className="profile-name-row"><div><h2>{publicProfile.display_name}{publicProfile.username === "zaevii" && <span className="verified-badge" aria-label="Verified">✓</span>}</h2><span>@{publicProfile.username}</span></div></div>
+                      <div className="profile-name-row"><div><h2>{publicProfile.display_name}{isVerifiedProfile(publicProfile) && <span className="verified-badge" aria-label="Verified">✓</span>}</h2><span>@{publicProfile.username}</span></div></div>
                       {publicProfile.bio ? <p className="profile-bio">{publicProfile.bio}</p> : null}
                       <div className="profile-actions profile-social-actions">
                         <button className={publicProfileFriend ? "profile-action-button follow-button friend-button" : "profile-action-button follow-button"} type="button" onClick={() => void toggleFollowPublicProfile()}><UserPlus size={14} />{publicProfileFriend ? "Friends" : followingPublicProfile ? "Following" : "Follow"}</button>
