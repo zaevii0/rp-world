@@ -3832,7 +3832,16 @@ export function App() {
                     <Search size={17} />
                   </button>
                   {viewAs && (
-                    <button className="glass circle-button" type="button" onClick={() => { setViewAs(false); setView("profile"); }} aria-label="Back" title="Back">
+                    <button className="glass circle-button" type="button" onClick={() => {
+                        setViewAs(false);
+                        setPublicProfile(null);
+                        setView("profile");
+                        try {
+                          sessionStorage.setItem(VIEW_KEY, "profile");
+                        } catch {
+                          // Ignore unavailable session storage.
+                        }
+                      }} aria-label="Back" title="Back">
                       <ArrowLeft size={17} />
                     </button>
                   )}
