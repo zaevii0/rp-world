@@ -3821,7 +3821,7 @@ export function App() {
       ) : (
         <main className="social-shell">
           <section className="feed-column">
-            {view !== "public" && (
+            {view !== "public" && view !== "profile" && (
               <div className={`page-heading ${view === "home" ? "home-page-heading" : ""}`}>
                 <div>
                   {view === "home" && <p className="eyebrow">RP WORLD FEED</p>}
@@ -4328,7 +4328,14 @@ export function App() {
                         : undefined
                     }
                   >
-
+                    <div className="public-profile-cover-actions">
+                      <button className="glass circle-button" type="button" aria-label="Back" title="Back" onClick={() => setView("home")}>
+                        <ArrowLeft size={17} />
+                      </button>
+                      <button className="glass circle-button" type="button" aria-label="Search" title="Search" onClick={() => setView("search")}>
+                        <Search size={17} />
+                      </button>
+                    </div>
                   </div>
 
                   <div className="profile-main">
