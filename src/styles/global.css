@@ -5641,8 +5641,10 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
   border: 0 !important;
   background: transparent !important;
   box-shadow: none !important;
-  padding: 2px !important;
-  border-radius: 18px !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  appearance: none !important;
+  -webkit-appearance: none !important;
 }
 
 .profile-page .highlight-image {
