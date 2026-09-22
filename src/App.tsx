@@ -4421,6 +4421,16 @@ export function App() {
                               <MessageCircle size={16} />
                             </button>
 
+                            <button
+                              className="profile-action-button secondary-profile-action profile-more-button"
+                              type="button"
+                              onClick={() => setFriendActionsOpen((open) => !open)}
+                              aria-label="More options"
+                              title="More options"
+                            >
+                              <MoreVertical size={19} />
+                            </button>
+
                           </>
                         )}
                       </div>
