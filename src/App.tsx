@@ -4388,25 +4388,27 @@ export function App() {
                         ) : (
                           <>
                             <button
-                              className="profile-action-button follow-button"
+                              className="profile-action-button follow-button compact-follow-button"
                               type="button"
                               onClick={() =>
                                 setMessage("Follow is ready for the public profile.")
                               }
+                              aria-label="Follow"
                             >
                               <UserPlus size={14} />
                               Follow
                             </button>
 
                             <button
-                              className="profile-action-button secondary-profile-action"
+                              className="profile-action-button secondary-profile-action message-icon-button"
                               type="button"
                               onClick={() =>
                                 setMessage("Messaging will open here once direct messaging is connected.")
                               }
+                              aria-label="Message"
+                              title="Message"
                             >
-                              <MessageCircle size={14} />
-                              Message
+                              <MessageCircle size={16} />
                             </button>
 
                           </>
