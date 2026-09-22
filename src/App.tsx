@@ -4946,7 +4946,7 @@ export function App() {
                     setView("support");
                   }}
                 >
-                  <Heart size={18} />
+                  <ShieldCheck size={18} />
                   <span>Support RP WORLD</span>
                 </button>
 
