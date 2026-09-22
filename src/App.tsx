@@ -3795,36 +3795,51 @@ export function App() {
             {view === "support" && (
               <section className="support-page" aria-labelledby="support-page-title">
                 <div className="support-hero glass">
-                  <div className="support-hero-icon"><Heart size={28} /></div>
+                  <div className="support-hero-icon"><ShieldCheck size={28} /></div>
                   <div>
-                    <span className="support-eyebrow">KEEP RP WORLD ALIVE</span>
-                    <h3 id="support-page-title">Support RP WORLD</h3>
-                    <p>Your support helps keep the app online, maintained, secure, and growing.</p>
+                    <span className="support-eyebrow">RP WORLD VERIFIED</span>
+                    <h3 id="support-page-title">Get verified.</h3>
+                    <p>A visible verified badge for your RP identity, with an optional theme membership.</p>
                   </div>
                 </div>
+
+                <div className="verified-plan-grid">
+                  {([
+                    { id: "verified_2w", price: "₱50", duration: "2 weeks", detail: "Verified badge", badge: "STARTER" },
+                    { id: "verified_1m", price: "₱100", duration: "1 month", detail: "Verified badge", badge: "POPULAR" },
+                    { id: "verified_3m_themes", price: "₱250", duration: "3 months", detail: "Verified badge + all theme colors", badge: "FULL ACCESS" },
+                  ] as const).map((plan) => (
+                    <button
+                      key={plan.id}
+                      type="button"
+                      className={supportPlan === plan.id ? "verified-plan active" : "verified-plan"}
+                      onClick={() => { setSupportPlan(plan.id); setSupportCheckoutUrl(null); setSupportMessage(""); }}
+                    >
+                      <span className="verified-plan-badge">{plan.badge}</span>
+                      <strong>{plan.price}</strong>
+                      <span>{plan.duration}</span>
+                      <small>{plan.detail}</small>
+                    </button>
+                  ))}
+                </div>
+
                 <div className="support-card glass">
                   <div className="support-card-heading">
                     <div>
-                      <span className="support-section-label">CHOOSE YOUR SUPPORT</span>
-                      <strong>How much would you like to contribute?</strong>
+                      <span className="support-section-label">VERIFIED MEMBERSHIP</span>
+                      <strong>{supportPlan === "verified_2w" ? "2 weeks verified" : supportPlan === "verified_1m" ? "1 month verified" : "3 months verified + all themes"}</strong>
                     </div>
                     <button className="glass circle-button" type="button" aria-label="Back to menu" onClick={() => setView("menu")}><ArrowLeft size={18} /></button>
                   </div>
-                  <div className="support-amounts" aria-label="Support amount">
-                    {[50, 100, 250, 500].map((amount) => (
-                      <button key={amount} type="button" className={supportAmount === String(amount) ? "support-amount active" : "support-amount"} onClick={() => setSupportAmount(String(amount))}>₱{amount}</button>
-                    ))}
+                  <div className="verified-benefits">
+                    <div><ShieldCheck size={17} /><span>Verified badge appears beside your RP identity.</span></div>
+                    <div><Paintbrush size={17} /><span>{supportPlan === "verified_3m_themes" ? "Unlocks every RP WORLD theme color for 3 months." : "Free members keep Midnight and Ocean (blue)."}</span></div>
+                    <div><CheckCheck size={17} /><span>One-time purchase. No automatic recurring charge.</span></div>
                   </div>
-                  <label className="support-field"><span>Custom amount</span><div className="support-input-wrap"><span>₱</span><input inputMode="decimal" value={supportAmount} onChange={(event) => setSupportAmount(event.target.value)} min="10" max="1000000" /></div></label>
-                  <div className="support-frequency" role="group" aria-label="Support frequency">
-                    <button type="button" className={supportFrequency === "one_time" ? "active" : ""} onClick={() => setSupportFrequency("one_time")}>One-time</button>
-                    <button type="button" className={supportFrequency === "monthly" ? "active" : ""} onClick={() => setSupportFrequency("monthly")}>Monthly</button>
-                  </div>
-                  <label className="support-field"><span>Optional note</span><textarea value={supportNote} onChange={(event) => setSupportNote(event.target.value)} maxLength={240} placeholder="Tell us what you'd like to support." /></label>
-                  <div className="support-disclosure"><strong>Secure checkout</strong><span>One-time support opens a secure PayMongo-hosted checkout. Your payment details are handled by the payment provider.</span></div>
+                  <div className="support-disclosure"><strong>Secure checkout</strong><span>Payment is handled on a PayMongo-hosted checkout. RP WORLD never receives your card or payment details.</span></div>
                   {supportMessage && <p className="support-message" role="status">{supportMessage}</p>}
-                  {supportCheckoutUrl && supportFrequency === "one_time" && <a className="support-checkout-link" href={supportCheckoutUrl} target="_blank" rel="noopener noreferrer"><Heart size={17} /><span>Open secure checkout</span></a>}
-                  <button className="support-submit-button" type="button" disabled={supportBusy} onClick={() => void submitSupportIntent()}>{supportBusy ? "Preparing checkout…" : supportFrequency === "monthly" ? "Save monthly support" : "Continue to secure checkout"}</button>
+                  {supportCheckoutUrl && <a className="support-checkout-link" href={supportCheckoutUrl} target="_blank" rel="noopener noreferrer"><ShieldCheck size={17} /><span>Open secure checkout</span></a>}
+                  <button className="support-submit-button" type="button" disabled={supportBusy} onClick={() => void submitSupportIntent()}>{supportBusy ? "Preparing checkout…" : "Get verified for " + (supportPlan === "verified_2w" ? "₱50" : supportPlan === "verified_1m" ? "₱100" : "₱250")}</button>
                 </div>
               </section>
             )}
