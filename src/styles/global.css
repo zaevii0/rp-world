@@ -6435,3 +6435,19 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
 .profile-page .profile-social-actions .primary-profile-action {
   border-radius: 999px !important;
 }
+
+
+/* Final: remove visible border from profile Message icon. */
+.profile-page .profile-social-actions .message-icon-button,
+.public-profile-page .public-profile-actions .message-icon-button {
+  border: 0 !important;
+  border-color: transparent !important;
+}
+
+.profile-page .profile-social-actions .message-icon-button:hover,
+.profile-page .profile-social-actions .message-icon-button:focus-visible,
+.public-profile-page .public-profile-actions .message-icon-button:hover,
+.public-profile-page .public-profile-actions .message-icon-button:focus-visible {
+  border: 0 !important;
+  border-color: transparent !important;
+}
