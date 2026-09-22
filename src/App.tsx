@@ -1387,23 +1387,54 @@ export function App() {
     setSupportBusy(true);
     setSupportMessage("");
 
-    const { error } = await supabase.from("support_intents").insert({
-      user_id: session.user.id,
-      amount,
-      currency: "PHP",
-      frequency: supportFrequency,
-      note: supportNote.trim() || null,
-    });
+    const { data: intent, error } = await supabase
+      .from("support_intents")
+      .insert({
+        user_id: session.user.id,
+        amount,
+        currency: "PHP",
+        frequency: supportFrequency,
+        note: supportNote.trim() || null,
+      })
+      .select("id")
+      .single();
 
-    setSupportBusy(false);
-
-    if (error) {
+    if (error || !intent) {
+      setSupportBusy(false);
       setSupportMessage("We couldn't save your support request yet. Please try again.");
       return;
     }
 
+    if (supportFrequency === "monthly") {
+      setSupportBusy(false);
+      setSupportNote("");
+      setSupportMessage(
+        "Your monthly support request is saved. Automatic monthly billing is not enabled yet; choose One-time support to pay now.",
+      );
+      return;
+    }
+
+    const { data: checkout, error: checkoutError } =
+      await supabase.functions.invoke("create-support-payment", {
+        body: { support_intent_id: intent.id },
+      });
+
+    setSupportBusy(false);
+
+    if (checkoutError || !checkout?.checkout_url) {
+      console.error("RP WORLD support checkout creation failed", checkoutError);
+      setSupportMessage(
+        "Your support request was saved, but checkout could not be opened. Please try again from this support window.",
+      );
+      return;
+    }
+
     setSupportNote("");
-    setSupportMessage("Thank you. Your support intent has been recorded. Payment options will be connected next.");
+    setSupportMessage("Secure checkout is ready. Opening PayMongo…");
+    const opened = window.open(checkout.checkout_url, "_blank", "noopener,noreferrer");
+    if (!opened) {
+      setSupportMessage("Your secure checkout is ready. Use the button below if your browser blocked the new tab.");
+    }
   }
 
   async function handleProfileSubmit(event: FormEvent) {
@@ -4968,14 +4999,14 @@ export function App() {
             </label>
 
             <div className="support-disclosure">
-              <strong>Transparent support</strong>
-              <span>This records your intended contribution only. No payment is collected yet; payment providers will be connected separately.</span>
+              <strong>Secure payment</strong>
+              <span>One-time support opens a PayMongo-hosted checkout where available payment methods such as GCash, Maya, cards, QR Ph, and online banking can be selected. Your payment details stay with the payment provider.</span>
             </div>
 
             {supportMessage && <p className="support-message" role="status">{supportMessage}</p>}
 
             <button className="support-submit-button" type="button" disabled={supportBusy} onClick={() => void submitSupportIntent()}>
-              {supportBusy ? "Saving…" : "Save support intent"}
+              {supportBusy ? "Preparing checkout…" : supportFrequency === "monthly" ? "Save monthly support" : "Continue to secure checkout"}
             </button>
           </section>
         </div>
