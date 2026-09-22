@@ -4368,7 +4368,7 @@ export function App() {
                         {!viewAs ? (
                           <>
                             <button
-                              className="profile-action-button"
+                              className="profile-action-button secondary-profile-action"
                               type="button"
                               onClick={() => setProfileOpen(true)}
                             >
@@ -4399,7 +4399,7 @@ export function App() {
                             </button>
 
                             <button
-                              className="profile-action-button"
+                              className="profile-action-button secondary-profile-action"
                               type="button"
                               onClick={() =>
                                 setMessage("Messaging will open here once direct messaging is connected.")
