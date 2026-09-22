@@ -4127,3 +4127,31 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
   .profile-page .profile-social-actions { gap: 6px; margin-top: 12px; }
   .profile-page .profile-social-actions .profile-action-button { min-height: 36px; padding: 7px 11px; border-radius: 13px; }
 }
+
+
+/* Profile followers button — match the compact Like action treatment */
+.profile-page .profile-stats button,
+.profile-page .followers-button,
+.profile-page .following-button {
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: inherit;
+  box-shadow: none;
+  transition: background .16s ease, color .16s ease, transform .16s ease;
+}
+.profile-page .profile-stats button:hover,
+.profile-page .followers-button:hover,
+.profile-page .following-button:hover,
+.profile-page .profile-stats button:focus-visible,
+.profile-page .followers-button:focus-visible,
+.profile-page .following-button:focus-visible {
+  background: var(--accent-soft);
+  color: var(--accent);
+  outline: none;
+}
+.profile-page .profile-stats button:active,
+.profile-page .followers-button:active,
+.profile-page .following-button:active {
+  transform: scale(.97);
+}
