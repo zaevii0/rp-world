@@ -50,13 +50,22 @@ Deno.serve(async (req) => {
 
   const { data: intent, error: intentError } = await adminClient
     .from("support_intents")
-    .select("id,user_id,amount,currency,frequency,note,status,provider,provider_reference")
+    .select("id,user_id,amount,currency,frequency,note,status,provider,provider_reference,plan_code")
     .eq("id", intentId)
     .eq("user_id", authData.user.id)
     .single();
 
   if (intentError || !intent) return json({ error: "Support request not found." }, 404);
-  if (intent.frequency !== "one_time") {
+  const planPrices: Record<string, number> = {
+    verified_2w: 50,
+    verified_1m: 100,
+    verified_3m_themes: 250,
+  };
+  const planPrice = planPrices[intent.plan_code];
+  if (intent.plan_code !== "support" && (!planPrice || Number(intent.amount) !== planPrice || intent.frequency !== "one_time")) {
+    return json({ error: "Invalid verified membership plan." }, 400);
+  }
+  if (intent.plan_code === "support" && intent.frequency !== "one_time") {
     return json({ error: "Automatic monthly support is not enabled yet. Please choose one-time support." }, 400);
   }
   if (intent.status === "paid") return json({ error: "This support request is already marked as paid." }, 409);
@@ -88,11 +97,12 @@ Deno.serve(async (req) => {
     body: JSON.stringify({
       amount,
       currency: "PHP",
-      description: "Support RP WORLD",
-      remarks: `RP WORLD support request ${intent.id}`,
+      description: intent.plan_code === "verified_2w" ? "RP WORLD Verified — 2 weeks" : intent.plan_code === "verified_1m" ? "RP WORLD Verified — 1 month" : intent.plan_code === "verified_3m_themes" ? "RP WORLD Verified + All Themes — 3 months" : "Support RP WORLD",
+      remarks: `RP WORLD ${intent.plan_code} ${intent.id}`,
       metadata: {
         support_intent_id: intent.id,
         rp_world_user_id: authData.user.id,
+        plan_code: intent.plan_code,
       },
       restriction: {
         completed_sessions: { limit: 1 },
