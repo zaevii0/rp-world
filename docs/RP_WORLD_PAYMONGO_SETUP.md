@@ -72,3 +72,14 @@ Automatic recurring billing should be added only after the chosen PayMongo recur
 - Verify `Paymongo-Signature` using the raw webhook body before processing the event.
 - Keep test and live webhook secrets separate.
 - Treat webhook delivery as at-least-once and keep the handler idempotent.
+## RP WORLD Verified memberships
+
+The Support RP WORLD page now sells one-time verified memberships:
+
+- **₱50** — Verified badge for **2 weeks**
+- **₱100** — Verified badge for **1 month**
+- **₱250** — Verified badge + **all theme colors for 3 months**
+
+Free users can use **Midnight** and **Ocean (blue)**. Premium theme access is enforced by the profile entitlement fields `themes_until`; paid verification is enforced by `verified_until`. Entitlements are granted only after the signed PayMongo webhook calls the server-side `apply_verified_membership` function.
+
+Apply the new `supabase/migrations/0017_verified_memberships.sql` migration before testing these plans. Existing PayMongo secrets/webhook configuration remain required.
