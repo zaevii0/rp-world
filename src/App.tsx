@@ -412,6 +412,11 @@ export function App() {
   const [commentMentionQuery, setCommentMentionQuery] = useState<Record<string, string | null>>({});
   const [commentMentionStart, setCommentMentionStart] = useState<Record<string, number | null>>({});
   const [viewAs, setViewAs] = useState(false);
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const [profileUtilityView, setProfileUtilityView] = useState<"archive" | "activity" | "review" | null>(null);
+  const [archivedProfilePosts, setArchivedProfilePosts] = useState<Post[]>([]);
+  const [reviewTaggedPosts, setReviewTaggedPosts] = useState<Post[]>([]);
+  const [profileUtilityBusy, setProfileUtilityBusy] = useState(false);
   const [publicProfile, setPublicProfile] = useState<Profile | null>(null);
   const [publicProfilePosts, setPublicProfilePosts] = useState<Post[]>([]);
   const [publicHighlights, setPublicHighlights] = useState<Highlight[]>([]);
@@ -3433,6 +3438,38 @@ export function App() {
     setMessage("Post privacy updated.");
   }
 
+  async function openProfileUtility(kind: "archive" | "activity" | "review") {
+    setProfileMenuOpen(false); setProfileUtilityView(kind);
+    if (!supabase || !session?.user) return;
+    setProfileUtilityBusy(true);
+    try {
+      if (kind === "archive") {
+        const { data, error } = await supabase.from("posts").select("id, author_id, content, media_url, media_type, created_at, pinned_at, archived_at, trashed_at, privacy, post_likes(count), post_comments(count)").eq("author_id", session.user.id).not("archived_at", "is", null).is("trashed_at", null).order("archived_at", { ascending: false }).limit(50);
+        if (error) throw error;
+        setArchivedProfilePosts((data ?? []).map((row: any) => ({ ...row, likes: row.post_likes?.[0]?.count ?? 0, liked: false, liked_at: null, comments: row.post_comments?.[0]?.count ?? 0, reposts: 0, reposted: false, reposted_at: null, shares: 0, profile, tagged_profiles: [] })));
+      } else if (kind === "review") {
+        const { data: tagRows, error: tagError } = await supabase.from("post_tags").select("post_id").eq("user_id", session.user.id).limit(100);
+        if (tagError) throw tagError;
+        const ids = [...new Set((tagRows ?? []).map((row: any) => row.post_id))];
+        if (!ids.length) { setReviewTaggedPosts([]); } else {
+          const { data, error } = await supabase.from("posts").select("id, author_id, content, media_url, media_type, created_at, pinned_at, archived_at, trashed_at, privacy, post_likes(count), post_comments(count)").in("id", ids).order("created_at", { ascending: false });
+          if (error) throw error;
+          const authorIds = [...new Set((data ?? []).map((row: any) => row.author_id))];
+          const { data: authors } = authorIds.length ? await supabase.from("profiles").select("*").in("id", authorIds) : { data: [] as Profile[] };
+          const authorMap = new Map((authors ?? []).map((item) => [item.id, item as Profile]));
+          setReviewTaggedPosts((data ?? []).map((row: any) => ({ ...row, profile: authorMap.get(row.author_id), likes: row.post_likes?.[0]?.count ?? 0, liked: false, liked_at: null, comments: row.post_comments?.[0]?.count ?? 0, reposts: 0, reposted: false, reposted_at: null, shares: 0, tagged_profiles: [] })));
+        }
+      }
+    } catch (error) { setMessage(error instanceof Error ? error.message : "Could not load this profile section."); }
+    finally { setProfileUtilityBusy(false); }
+  }
+
+  async function copyProfileLink() {
+    const url = new URL(window.location.href); url.hash = "profile-" + (profile?.username ?? "");
+    try { await navigator.clipboard.writeText(url.toString()); setMessage("Profile link copied."); }
+    catch { setMessage("Could not copy the profile link."); }
+    setProfileMenuOpen(false);
+  }
   async function managePostAction(action: "pin" | "archive" | "trash" | "copy" | "delete_shared") {
     const post = postActionTarget;
     if (!supabase || !session?.user || !post || post.author_id !== session.user.id) return;
@@ -4443,6 +4480,16 @@ export function App() {
                           </>
                         )}
                       </div>
+
+                      {profileMenuOpen && !viewAs && (
+                        <div className="profile-options-menu glass" role="menu" aria-label="Profile options">
+                          <button type="button" onClick={() => void copyProfileLink()}><Link2 size={16} /><span>Copy link to profile</span></button>
+                          <button type="button" onClick={() => { setProfileMenuOpen(false); setViewAs(true); }}><Eye size={16} /><span>View as</span></button>
+                          <button type="button" onClick={() => void openProfileUtility("archive")}><Archive size={16} /><span>Archive</span></button>
+                          <button type="button" onClick={() => void openProfileUtility("activity")}><Clock size={16} /><span>Activity log</span></button>
+                          <button type="button" onClick={() => void openProfileUtility("review")}><Tag size={16} /><span>Review posts and tags</span></button>
+                        </div>
+                      )}
 
                       <div className="profile-meta">
                         <span>
@@ -5547,6 +5594,28 @@ export function App() {
             <button className="danger" type="button" onClick={() => void manageComment(commentActionPostId, commentActionTarget, "delete")}>
               <Trash2 size={16} /> Delete comment
             </button>
+          </section>
+        </div>
+      )}
+
+      {profileUtilityView && profile && (
+        <div className="sheet-backdrop" role="presentation" onClick={() => !profileUtilityBusy && setProfileUtilityView(null)}>
+          <section className="profile-utility-sheet glass" role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
+            <div className="sheet-heading">
+              <div><span className="support-section-label">PROFILE</span><h3>{profileUtilityView === "archive" ? "Archive" : profileUtilityView === "activity" ? "Activity log" : "Review posts and tags"}</h3></div>
+              <button className="icon-button" type="button" aria-label="Close" onClick={() => setProfileUtilityView(null)} disabled={profileUtilityBusy}><X size={18} /></button>
+            </div>
+            {profileUtilityBusy ? <p className="profile-utility-empty">Loading…</p> :
+              profileUtilityView === "archive" ? (archivedProfilePosts.length ? archivedProfilePosts.map((post) => (
+                <div className="profile-utility-item" key={post.id}><div><strong>{post.content || "Media post"}</strong><span>Archived {exactTime(post.archived_at || post.created_at)}</span></div><button type="button" onClick={() => { setPostActionTarget(post); setProfileUtilityView(null); }}>Options</button></div>
+              )) : <p className="profile-utility-empty">No archived posts yet.</p>) :
+              profileUtilityView === "review" ? (reviewTaggedPosts.length ? reviewTaggedPosts.map((post) => (
+                <div className="profile-utility-item" key={post.id}><div><strong>{post.profile?.display_name || "RP WORLD user"}</strong><span>{post.content || "Tagged in a media post"}</span></div><button type="button" onClick={() => { setProfileUtilityView(null); setOpenComments(post.id); }}>View</button></div>
+              )) : <p className="profile-utility-empty">No posts or tags to review.</p>) :
+              <div className="profile-activity-list">
+                <div className="profile-utility-item"><div><strong>Profile opened</strong><span>{exactTime(new Date().toISOString())}</span></div></div>
+                {profilePosts.slice(0, 20).map((post) => <div className="profile-utility-item" key={post.id}><div><strong>Post created</strong><span>{exactTime(post.created_at)}</span></div></div>)}
+              </div>}
           </section>
         </div>
       )}
