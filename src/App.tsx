@@ -1175,6 +1175,7 @@ export function App() {
     if (view === "public") return publicProfile?.display_name ?? "Profile";
     if (view === "menu") return "RP WORLD";
     if (view === "suggestions") return "Suggestions";
+    if (view === "support") return "Get verified";
 
     return profile
       ? getElegantGreeting(profile.display_name)
