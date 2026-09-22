@@ -6429,3 +6429,9 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
   border: 0 !important;
   border-color: transparent !important;
 }
+
+
+/* iOS-style pill shape for the View As action. */
+.profile-page .profile-social-actions .primary-profile-action {
+  border-radius: 999px !important;
+}
