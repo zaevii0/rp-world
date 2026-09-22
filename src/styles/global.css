@@ -4997,3 +4997,136 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
     animation-duration: .01ms !important;
   }
 }
+
+/* RP WORLD — messaging layout repair
+   Scoped to the real JSX structure in App.tsx.
+   Keeps existing messaging behavior intact.
+*/
+.message-sheet {
+  box-sizing: border-box !important;
+}
+.message-sheet,
+.message-sheet * {
+  box-sizing: border-box;
+}
+.message-inbox-sheet .sheet-header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 16px !important;
+}
+.message-inbox-sheet .sheet-header > div {
+  min-width: 0;
+}
+.message-inbox-sheet .sheet-header .icon-button {
+  flex: 0 0 44px !important;
+  width: 44px !important;
+  height: 44px !important;
+}
+.message-conversation .avatar {
+  flex: 0 0 52px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  overflow: hidden !important;
+  background-size: cover !important;
+  background-position: center !important;
+}
+.message-chat-header {
+  flex-shrink: 0 !important;
+}
+.message-chat-actions {
+  flex: 0 0 auto !important;
+}
+.message-list {
+  position: relative !important;
+}
+.message-row {
+  position: relative !important;
+}
+.message-row.received {
+  padding-left: 0 !important;
+}
+.message-row.mine {
+  padding-left: 0 !important;
+}
+.message-row-avatar {
+  flex: 0 0 30px !important;
+  align-self: flex-end !important;
+}
+.message-bubble {
+  min-width: 0 !important;
+  word-break: break-word !important;
+}
+.message-bubble > span:not(.message-unsent) {
+  white-space: pre-wrap !important;
+}
+.message-bubble-meta {
+  width: 100% !important;
+}
+.message-form {
+  min-width: 0 !important;
+  flex-wrap: nowrap !important;
+}
+.message-input-shell {
+  min-width: 0 !important;
+}
+.message-input-shell textarea {
+  overflow-y: auto !important;
+}
+.message-compose-action {
+  flex-shrink: 0 !important;
+}
+.message-send-button {
+  flex-shrink: 0 !important;
+}
+.message-reply-composer,
+.message-attachment-chip {
+  z-index: 10 !important;
+}
+.message-reply-composer + .message-attachment-chip {
+  bottom: calc(100% + 52px) !important;
+}
+.message-chat-empty .message-empty-avatar {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background-size: cover !important;
+  background-position: center !important;
+}
+.message-chat-empty .message-empty-avatar > span {
+  width: 100%;
+  height: 100%;
+  display: block;
+  border-radius: inherit;
+  background-size: cover;
+  background-position: center;
+}
+.app.light .message-sheet {
+  color-scheme: light;
+}
+@media (max-width: 640px) {
+  .message-chat-actions .message-header-action[aria-label="Call"] {
+    display: none !important;
+  }
+  .message-header-avatar {
+    width: 40px !important;
+    height: 40px !important;
+    flex-basis: 40px !important;
+  }
+  .message-chat-header {
+    gap: 6px !important;
+  }
+  .message-chat-identity strong {
+    font-size: 15px !important;
+  }
+  .message-bubble {
+    max-width: calc(100vw - 88px) !important;
+  }
+  .message-row.mine .message-bubble {
+    max-width: calc(100vw - 32px) !important;
+  }
+  .message-form {
+    overflow: visible !important;
+  }
+}
