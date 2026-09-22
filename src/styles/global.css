@@ -3999,3 +3999,131 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
   .support-card { padding: 15px; border-radius: 22px; }
   .support-card-heading .circle-button { width: 34px; height: 34px; }
 }
+
+
+/* RP WORLD — iOS Liquid Glass profile actions */
+.profile-page .profile-hero {
+  border: 1px solid color-mix(in srgb, var(--text-primary, #fff) 8%, transparent);
+  background: color-mix(in srgb, var(--surface, #17171a) 94%, var(--accent) 6%);
+  box-shadow: 0 18px 55px color-mix(in srgb, #000 24%, transparent), inset 0 1px 0 color-mix(in srgb, #fff 8%, transparent);
+}
+
+.profile-page .profile-edit-float {
+  width: 38px;
+  height: 38px;
+  border: 1px solid color-mix(in srgb, #fff 18%, transparent);
+  color: #fff;
+  background: color-mix(in srgb, #111 42%, transparent);
+  box-shadow: 0 8px 24px color-mix(in srgb, #000 24%, transparent), inset 0 1px 0 color-mix(in srgb, #fff 14%, transparent);
+  backdrop-filter: blur(22px) saturate(170%);
+  -webkit-backdrop-filter: blur(22px) saturate(170%);
+  transition: transform .18s ease, background .18s ease, border-color .18s ease;
+}
+.profile-page .profile-edit-float:hover,
+.profile-page .profile-edit-float:focus-visible {
+  background: color-mix(in srgb, var(--accent) 34%, #111 38%);
+  border-color: color-mix(in srgb, var(--accent) 48%, transparent);
+  outline: none;
+}
+.profile-page .profile-edit-float:active { transform: scale(.94); }
+
+.profile-page .profile-social-actions {
+  display: flex;
+  gap: 8px;
+  width: min(100%, 520px);
+  margin: 14px auto 0;
+}
+
+.profile-page .profile-social-actions .profile-action-button {
+  min-height: 38px;
+  padding: 8px 15px;
+  border: 1px solid color-mix(in srgb, var(--text-primary, #fff) 11%, transparent);
+  border-radius: 14px;
+  color: var(--text-primary, #f5f5f7);
+  background: color-mix(in srgb, var(--text-primary, #fff) 5%, transparent);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 6%, transparent), 0 5px 16px color-mix(in srgb, #000 8%, transparent);
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  font-size: 11px;
+  font-weight: 650;
+  transition: transform .18s ease, background .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+
+.profile-page .profile-social-actions .profile-action-button:hover,
+.profile-page .profile-social-actions .profile-action-button:focus-visible {
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 38%, transparent);
+  background: color-mix(in srgb, var(--accent) 11%, transparent);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 9%, transparent), 0 7px 20px color-mix(in srgb, var(--accent) 10%, transparent);
+  outline: none;
+}
+
+.profile-page .profile-social-actions .profile-action-button:active { transform: scale(.96); }
+
+.profile-page .profile-social-actions .follow-button {
+  color: #fff;
+  border-color: color-mix(in srgb, var(--accent) 62%, transparent);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 88%, #fff 12%), color-mix(in srgb, var(--accent) 76%, #000 24%));
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 22%, transparent), 0 8px 24px color-mix(in srgb, var(--accent) 20%, transparent);
+}
+.profile-page .profile-social-actions .follow-button:hover,
+.profile-page .profile-social-actions .follow-button:focus-visible {
+  color: #fff;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 94%, #fff 6%), color-mix(in srgb, var(--accent) 84%, #000 16%));
+}
+
+.profile-page .profile-social-actions .message-button svg,
+.profile-page .profile-social-actions .view-profile-button svg,
+.profile-page .profile-social-actions .follow-button svg { color: currentColor; }
+
+.profile-page .profile-info-actions,
+.profile-page .profile-actions {
+  gap: 8px;
+}
+
+.profile-page .profile-link-button {
+  border: 1px solid color-mix(in srgb, var(--text-primary, #fff) 9%, transparent);
+  border-radius: 12px;
+  padding: 7px 10px;
+  background: color-mix(in srgb, var(--text-primary, #fff) 4%, transparent);
+  transition: background .16s ease, border-color .16s ease, transform .16s ease;
+}
+.profile-page .profile-link-button:hover,
+.profile-page .profile-link-button:focus-visible {
+  background: var(--accent-soft);
+  border-color: color-mix(in srgb, var(--accent) 32%, transparent);
+  outline: none;
+}
+.profile-page .profile-link-button:active { transform: scale(.97); }
+
+.app.light .profile-page .profile-hero {
+  border-color: color-mix(in srgb, #000 8%, transparent);
+  background: color-mix(in srgb, #fff 96%, var(--accent) 4%);
+  box-shadow: 0 18px 50px color-mix(in srgb, #000 10%, transparent), inset 0 1px 0 rgba(255,255,255,.85);
+}
+.app.light .profile-page .profile-edit-float {
+  color: #111;
+  background: color-mix(in srgb, #fff 62%, transparent);
+  border-color: color-mix(in srgb, #000 10%, transparent);
+}
+.app.light .profile-page .profile-social-actions .profile-action-button {
+  color: #1c1c1e;
+  border-color: color-mix(in srgb, #000 9%, transparent);
+  background: color-mix(in srgb, #fff 54%, transparent);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.8), 0 5px 16px color-mix(in srgb, #000 7%, transparent);
+}
+.app.light .profile-page .profile-social-actions .profile-action-button:hover,
+.app.light .profile-page .profile-social-actions .profile-action-button:focus-visible {
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 9%, #fff 91%);
+}
+.app.light .profile-page .profile-social-actions .follow-button {
+  color: #fff;
+  border-color: color-mix(in srgb, var(--accent) 68%, transparent);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 92%, #fff 8%), color-mix(in srgb, var(--accent) 82%, #000 18%));
+}
+
+@media (max-width: 560px) {
+  .profile-page .profile-social-actions { gap: 6px; margin-top: 12px; }
+  .profile-page .profile-social-actions .profile-action-button { min-height: 36px; padding: 7px 11px; border-radius: 13px; }
+}
