@@ -6797,3 +6797,17 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
 .profile-utility-empty{padding:30px 8px;text-align:center;opacity:.55;}
 .profile-page .profile-social-actions{position:relative;}
 @media(max-width:560px){.profile-page .profile-options-menu{right:-4px;width:min(270px,calc(100vw - 28px));}.profile-utility-sheet{padding:15px;border-radius:22px;}}
+
+
+/* Profile action labels: hug the text vertically without expanding the button bounds. */
+.profile-page .profile-social-actions .primary-profile-action,
+.profile-page .profile-social-actions .follow-button,
+.profile-page .profile-social-actions .compact-follow-button {
+  line-height: 1 !important;
+}
+.profile-page .profile-social-actions .primary-profile-action,
+.profile-page .profile-social-actions .follow-button,
+.profile-page .profile-social-actions .compact-follow-button {
+  text-box-trim: trim-both;
+  text-box-edge: cap alphabetic;
+}
