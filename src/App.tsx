@@ -4777,10 +4777,17 @@ export function App() {
                     <div className="profile-identity">
                       <div className="profile-name-row"><div><h2>{publicProfile.display_name}{(isVerifiedProfile(publicProfile) || isAdminProfile(publicProfile, adminUserIds)) && <span className="verified-badge" aria-label="Verified">✓</span>}</h2><span>@{publicProfile.username}</span></div></div>
                       {publicProfile.bio ? <p className="profile-bio">{publicProfile.bio}</p> : null}
-                      <div className="profile-actions profile-social-actions">
-                        <button className={publicProfileFriend ? "profile-action-button follow-button friend-button" : "profile-action-button follow-button"} type="button" onClick={() => void toggleFollowPublicProfile()}><UserPlus size={14} />{publicProfileFriend ? "Friends" : followingPublicProfile ? "Following" : "Follow"}</button>
+                      <div className="profile-actions profile-social-actions public-profile-actions">
                         <button
-                          className="profile-action-button"
+                          className={publicProfileFriend ? "profile-action-button follow-button friend-button compact-follow-button" : "profile-action-button follow-button compact-follow-button"}
+                          type="button"
+                          onClick={() => void toggleFollowPublicProfile()}
+                        >
+                          {publicProfileFriend ? "Friends" : followingPublicProfile ? "Following" : "Follow"}
+                        </button>
+
+                        <button
+                          className="profile-action-button message-icon-button"
                           type="button"
                           onClick={() => {
                             if (publicProfileFriend) {
@@ -4792,10 +4799,18 @@ export function App() {
                           aria-label="Message"
                           title={publicProfileFriend ? "Message" : "Follow each other to unlock messages"}
                         >
-                          <MessageCircle size={14} />
-                          Message
+                          <Mail size={18} />
                         </button>
-                        
+
+                        <button
+                          className="profile-action-button profile-more-button"
+                          type="button"
+                          onClick={() => setFriendActionsOpen((open) => !open)}
+                          aria-label="More options"
+                          title="More options"
+                        >
+                          <MoreVertical size={19} />
+                        </button>
                       </div>
                       {friendActionsOpen && publicProfileFriend && (
                         <div className="friend-actions-popover" role="dialog" aria-label="Friend options">
