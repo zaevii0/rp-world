@@ -6451,3 +6451,13 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
   border: 0 !important;
   border-color: transparent !important;
 }
+
+
+/* Final: remove the visible ring/border from the main profile circle. */
+.profile-page .profile-avatar,
+.public-profile-page .profile-avatar,
+.profile-card .profile-avatar {
+  border: 0 !important;
+  border-width: 0 !important;
+  border-color: transparent !important;
+}
