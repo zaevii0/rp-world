@@ -200,7 +200,15 @@ function isAdminProfile(profile?: Profile | null, adminIds: Set<string> = new Se
   return Boolean(profile?.id && adminIds.has(profile.id));
 }
 
-function isVerifiedProfile(profile?: Profile | null) {\n  return Boolean(profile?.verified_until && new Date(profile.verified_until).getTime() > Date.now());\n}\n\nfunction hasPremiumThemes(profile?: Profile | null) {\n  return Boolean(profile?.themes_until && new Date(profile.themes_until).getTime() > Date.now());\n}\n\nfunction initials(name: string) {
+function isVerifiedProfile(profile?: Profile | null) {
+  return Boolean(profile?.verified_until && new Date(profile.verified_until).getTime() > Date.now());
+}
+
+function hasPremiumThemes(profile?: Profile | null) {
+  return Boolean(profile?.themes_until && new Date(profile.themes_until).getTime() > Date.now());
+}
+
+function initials(name: string) {
   return name.trim().slice(0, 1).toUpperCase() || "R";
 }
 
@@ -684,7 +692,8 @@ export function App() {
     localStorage.setItem(APPEARANCE_KEY, appearance);
     document.documentElement.dataset.appearance = appearance;
   }, [appearance]);
-\n  useEffect(() => {
+
+  useEffect(() => {
     if (!profile || hasPremiumThemes(profile)) return;
     if (theme !== "midnight" && theme !== "ocean") {
       setTheme("midnight");
