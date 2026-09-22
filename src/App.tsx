@@ -3583,9 +3583,7 @@ export function App() {
     };
     try {
       if (navigator.share) { await navigator.share(shareData); return; }
-      if (navigator.clipboard) { await navigator.clipboard.writeText(shareText + "
-
-" + shareData.url); setMessage("Post link copied to clipboard."); return; }
+      if (navigator.clipboard) { await navigator.clipboard.writeText(shareText + "\n\n" + shareData.url); setMessage("Post link copied to clipboard."); return; }
       setMessage("Sharing is not available in this browser.");
     } catch (shareError) {
       if (shareError instanceof DOMException && shareError.name === "AbortError") return;
