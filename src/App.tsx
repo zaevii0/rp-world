@@ -331,6 +331,7 @@ export function App() {
   const [supportNote, setSupportNote] = useState("");
   const [supportBusy, setSupportBusy] = useState(false);
   const [supportMessage, setSupportMessage] = useState("");
+  const [supportCheckoutUrl, setSupportCheckoutUrl] = useState<string | null>(null);
 
   const [username, setUsername] = useState("");
   const [displayName, setDisplayName] = useState("");
@@ -1430,10 +1431,11 @@ export function App() {
     }
 
     setSupportNote("");
-    setSupportMessage("Secure checkout is ready. Opening PayMongo…");
+    setSupportCheckoutUrl(checkout.checkout_url);
+    setSupportMessage("Secure checkout is ready. Review the amount and complete payment on PayMongo.");
     const opened = window.open(checkout.checkout_url, "_blank", "noopener,noreferrer");
     if (!opened) {
-      setSupportMessage("Your secure checkout is ready. Use the button below if your browser blocked the new tab.");
+      setSupportMessage("Your secure checkout is ready. Tap “Open secure checkout” below.");
     }
   }
 
@@ -4911,6 +4913,7 @@ export function App() {
                   className="menu-feature-button support-menu-button"
                   onClick={() => {
                     setSupportMessage("");
+                    setSupportCheckoutUrl(null);
                     setSupportOpen(true);
                   }}
                 >
@@ -5004,6 +5007,18 @@ export function App() {
             </div>
 
             {supportMessage && <p className="support-message" role="status">{supportMessage}</p>}
+
+            {supportCheckoutUrl && supportFrequency === "one_time" && (
+              <a
+                className="support-checkout-link"
+                href={supportCheckoutUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Heart size={17} />
+                <span>Open secure checkout</span>
+              </a>
+            )}
 
             <button className="support-submit-button" type="button" disabled={supportBusy} onClick={() => void submitSupportIntent()}>
               {supportBusy ? "Preparing checkout…" : supportFrequency === "monthly" ? "Save monthly support" : "Continue to secure checkout"}
