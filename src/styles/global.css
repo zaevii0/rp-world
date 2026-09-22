@@ -7036,3 +7036,30 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
     border-radius: 14px 14px 0 0 !important;
   }
 }
+
+
+/* Bottom navigation: never show a transient browser/active button surface while switching tabs. */
+.bottom-nav .nav-item,
+.bottom-nav .nav-item:hover,
+.bottom-nav .nav-item:focus,
+.bottom-nav .nav-item:focus-visible,
+.bottom-nav .nav-item:active {
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  -webkit-tap-highlight-color: rgba(0,0,0,0) !important;
+  -webkit-focus-ring-color: transparent !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  outline: none !important;
+  box-shadow: none !important;
+  filter: none !important;
+}
+.bottom-nav .nav-item.active,
+.bottom-nav .nav-item.active:hover,
+.bottom-nav .nav-item.active:focus,
+.bottom-nav .nav-item.active:focus-visible,
+.bottom-nav .nav-item.active:active {
+  background: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
