@@ -851,7 +851,15 @@ export function App() {
         return;
       }
       const { data, error } = await supabase.rpc("get_admin_user_ids");
-      if (active) setAdminUserIds(!error && Array.isArray(data) ? new Set(data as string[]) : new Set());
+      const ids = !error && Array.isArray(data) ? new Set(data as string[]) : new Set<string>();
+
+      // Always keep the currently authenticated admin in the local badge set.
+      // This also makes the owner's own posts show the badge immediately even
+      // if the admin-ID listing migration/function has not reached the database yet.
+      const { data: currentAdmin } = await supabase.rpc("is_admin");
+      if (currentAdmin === true) ids.add(session.user.id);
+
+      if (active) setAdminUserIds(ids);
     }
 
     void checkAdmin();
