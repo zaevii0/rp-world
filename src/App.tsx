@@ -4312,6 +4312,7 @@ export function App() {
                         <div>
                           <h2>
                             {profile.display_name}
+                            {isVerifiedProfile(profile) && <span className="verified-badge" aria-label="Verified">✓</span>}
                           </h2>
 
                           <span>
