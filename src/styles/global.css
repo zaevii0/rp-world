@@ -6057,3 +6057,14 @@ nav.bottom-nav {
   .support-modal { padding: 18px; }
   .support-amounts { grid-template-columns: repeat(2, 1fr); }
 }
+
+
+/* RP WORLD admin support management */
+.admin-section-tabs{display:flex;gap:8px;padding:6px;margin-bottom:14px}
+.admin-section-tabs button{flex:1;min-height:40px;border:0;border-radius:11px;background:transparent;color:inherit;font:inherit;font-weight:650;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:7px}
+.admin-section-tabs button.active{background:var(--accent-soft);color:var(--accent)}
+.admin-support-summary{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:14px;margin-bottom:14px}
+.admin-support-summary div{display:grid;gap:4px}
+.admin-support-summary span{font-size:12px;color:var(--muted,#8d8d95)}
+.admin-support-summary strong{font-size:18px}
+@media (max-width:560px){.admin-support-summary{grid-template-columns:1fr}}
