@@ -3832,49 +3832,6 @@ export function App() {
             )}
 
             {view === "home" && (
-                  <p className="eyebrow">
-                    RP WORLD FEED
-                  </p>
-                )}
-
-                <h2 className={view === "home" ? `greeting-title greeting-${Math.min(3, Math.max(1, Math.ceil(title.length / 24)))}` : undefined}>{title}</h2>
-              </div>
-
-              <div className="page-heading-actions">
-                <button
-                  className="glass circle-button"
-                  type="button"
-                  aria-label="Search"
-                  onClick={() =>
-                    setView("search")
-                  }
-                >
-                  <Search size={17} />
-                </button>
-
-                {(view === "public" || viewAs) && (
-                  <button
-                    className="glass circle-button"
-                    type="button"
-                    onClick={() => {
-                      if (view === "public") {
-                        setView("discover");
-                        setPublicProfile(null);
-                      } else {
-                        setViewAs(false);
-                        setView("profile");
-                      }
-                    }}
-                    aria-label="Back"
-                    title="Back"
-                  >
-                    <ArrowLeft size={17} />
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {view === "home" && (
               <>
                 <Suspense fallback={<div className="stories-loading" aria-label="Loading stories" /> }><Stories session={session} profile={profile} /></Suspense>
 
