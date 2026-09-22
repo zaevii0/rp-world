@@ -1,11 +1,13 @@
 import { useState, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
-import { Check, Paintbrush, X } from "lucide-react";
+import { Check, LockKeyhole, Paintbrush, X } from "lucide-react";
 import { themes, type ThemeId } from "../types/theme";
 
 interface ThemePickerProps {
   theme: ThemeId;
   onThemeChange: (theme: ThemeId) => void;
+  canUseAllThemes?: boolean;
+  onLockedTheme?: () => void;
 }
 
 type ThemeCardStyle = CSSProperties & {
@@ -13,7 +15,7 @@ type ThemeCardStyle = CSSProperties & {
   "--theme-soft": string;
 };
 
-export function ThemePicker({ theme, onThemeChange }: ThemePickerProps) {
+export function ThemePicker({ theme, onThemeChange, canUseAllThemes = true, onLockedTheme }: ThemePickerProps) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -60,27 +62,35 @@ export function ThemePicker({ theme, onThemeChange }: ThemePickerProps) {
             </p>
 
             <div className="theme-grid">
-              {themes.map((item) => (
-                <button
-                  className={item.id === theme ? "theme-card selected" : "theme-card"}
-                  key={item.id}
-                  type="button"
-                  style={
-                    {
-                      "--theme-accent": item.accent,
-                      "--theme-soft": item.accentSoft,
-                    } as ThemeCardStyle
-                  }
-                  onClick={() => {
-                    onThemeChange(item.id);
-                    setOpen(false);
-                  }}
-                >
-                  <span className="theme-orb" />
-                  <span>{item.label}</span>
-                  {item.id === theme && <Check size={15} aria-hidden="true" />}
-                </button>
-              ))}
+              {themes.map((item) => {
+                const locked = !canUseAllThemes && item.id !== "midnight" && item.id !== "ocean";
+                return (
+                  <button
+                    className={item.id === theme ? `theme-card selected${locked ? " locked" : ""}` : `theme-card${locked ? " locked" : ""}`}
+                    key={item.id}
+                    type="button"
+                    style={
+                      {
+                        "--theme-accent": item.accent,
+                        "--theme-soft": item.accentSoft,
+                      } as ThemeCardStyle
+                    }
+                    onClick={() => {
+                      if (locked) {
+                        onLockedTheme?.();
+                        return;
+                      }
+                      onThemeChange(item.id);
+                      setOpen(false);
+                    }}
+                    aria-disabled={locked}
+                  >
+                    <span className="theme-orb" />
+                    <span>{item.label}</span>
+                    {locked ? <LockKeyhole size={14} aria-hidden="true" /> : item.id === theme && <Check size={15} aria-hidden="true" />}
+                  </button>
+                );
+              })}
             </div>
             </section>
           </div>,
