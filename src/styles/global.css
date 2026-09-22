@@ -6461,3 +6461,11 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
   border-width: 0 !important;
   border-color: transparent !important;
 }
+
+
+/* Final: remove the accent-color highlight from profile cover photos. */
+.profile-page .profile-cover,
+.public-profile-page .profile-cover {
+  background: var(--profile-cover-image, none) !important;
+  background-color: transparent !important;
+}
