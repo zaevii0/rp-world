@@ -6649,3 +6649,18 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
     min-height: 32px !important;
   }
 }
+
+
+/* Bottom navigation: active icons stay clean with no square/capsule background. */
+.bottom-nav .nav-item.active {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.bottom-nav .nav-item:focus,
+.bottom-nav .nav-item:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
