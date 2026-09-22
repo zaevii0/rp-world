@@ -3821,22 +3821,24 @@ export function App() {
       ) : (
         <main className="social-shell">
           <section className="feed-column">
-            <div className={`page-heading ${view === "home" ? "home-page-heading" : ""}`}>
-              <div>
-                {view === "home" && <p className="eyebrow">RP WORLD FEED</p>}
-                <h2 className={view === "home" ? `greeting-title greeting-${Math.min(3, Math.max(1, Math.ceil(title.length / 24)))}` : undefined}>{title}</h2>
-              </div>
-              <div className="page-heading-actions">
-                <button className="glass circle-button" type="button" aria-label="Search" onClick={() => setView("search")}>
-                  <Search size={17} />
-                </button>
-                {(view === "public" || viewAs) && (
-                  <button className="glass circle-button" type="button" onClick={() => { if (view === "public") { setView("discover"); setPublicProfile(null); } else { setViewAs(false); setView("profile"); } }} aria-label="Back" title="Back">
-                    <ArrowLeft size={17} />
+            {view !== "public" && (
+              <div className={`page-heading ${view === "home" ? "home-page-heading" : ""}`}>
+                <div>
+                  {view === "home" && <p className="eyebrow">RP WORLD FEED</p>}
+                  <h2 className={view === "home" ? `greeting-title greeting-${Math.min(3, Math.max(1, Math.ceil(title.length / 24)))}` : undefined}>{title}</h2>
+                </div>
+                <div className="page-heading-actions">
+                  <button className="glass circle-button" type="button" aria-label="Search" onClick={() => setView("search")}>
+                    <Search size={17} />
                   </button>
-                )}
+                  {viewAs && (
+                    <button className="glass circle-button" type="button" onClick={() => { setViewAs(false); setView("profile"); }} aria-label="Back" title="Back">
+                      <ArrowLeft size={17} />
+                    </button>
+                  )}
+                </div>
               </div>
-            </div>
+            )}
 
             {view === "support" && (
               <section className="support-page" aria-labelledby="support-page-title">
@@ -4769,7 +4771,16 @@ export function App() {
             {view === "public" && publicProfile && (
               <section className="profile-page public-profile-page">
                 <div className="profile-hero glass">
-                  <div className="profile-cover" style={publicProfile.cover_url ? { backgroundImage: `linear-gradient(180deg,rgba(0,0,0,.04),rgba(0,0,0,.42)),url(${publicProfile.cover_url})` } : undefined} />
+                  <div className="profile-cover" style={publicProfile.cover_url ? { backgroundImage: `linear-gradient(180deg,rgba(0,0,0,.04),rgba(0,0,0,.42)),url(${publicProfile.cover_url})` } : undefined}>
+                    <div className="public-profile-cover-actions">
+                      <button className="glass circle-button" type="button" aria-label="Back" title="Back" onClick={() => { setView("discover"); setPublicProfile(null); }}>
+                        <ArrowLeft size={17} />
+                      </button>
+                      <button className="glass circle-button" type="button" aria-label="Search" title="Search" onClick={() => setView("search")}>
+                        <Search size={17} />
+                      </button>
+                    </div>
+                  </div>
                   <div className="profile-main">
                     <div className="profile-avatar-wrap"><div className="profile-avatar avatar" style={publicProfile.avatar_url ? { backgroundImage: `url(${publicProfile.avatar_url})` } : undefined}>{!publicProfile.avatar_url && initials(publicProfile.display_name)}</div></div>
                     <div className="profile-identity">
