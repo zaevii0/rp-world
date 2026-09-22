@@ -200,7 +200,15 @@ function isAdminProfile(profile?: Profile | null, adminIds: Set<string> = new Se
   return Boolean(profile?.id && adminIds.has(profile.id));
 }
 
-function isVerifiedProfile(profile?: Profile | null) {\n  return Boolean(profile?.verified_until && new Date(profile.verified_until).getTime() > Date.now());\n}\n\nfunction hasPremiumThemes(profile?: Profile | null) {\n  return Boolean(profile?.themes_until && new Date(profile.themes_until).getTime() > Date.now());\n}\n\nfunction initials(name: string) {
+function isVerifiedProfile(profile?: Profile | null) {
+  return Boolean(profile?.verified_until && new Date(profile.verified_until).getTime() > Date.now());
+}
+
+function hasPremiumThemes(profile?: Profile | null) {
+  return Boolean(profile?.themes_until && new Date(profile.themes_until).getTime() > Date.now());
+}
+
+function initials(name: string) {
   return name.trim().slice(0, 1).toUpperCase() || "R";
 }
 
@@ -684,7 +692,8 @@ export function App() {
     localStorage.setItem(APPEARANCE_KEY, appearance);
     document.documentElement.dataset.appearance = appearance;
   }, [appearance]);
-\n  useEffect(() => {
+
+  useEffect(() => {
     if (!profile || hasPremiumThemes(profile)) return;
     if (theme !== "midnight" && theme !== "ocean") {
       setTheme("midnight");
@@ -3564,7 +3573,9 @@ export function App() {
 
   async function sharePostExternally(post: Post) {
     const original = post.shared_original ?? post;
-    const shareText = post.share_caption?.trim() ? post.share_caption.trim() + "\n\n" + original.content : original.content;
+    const shareText = post.share_caption?.trim() ? post.share_caption.trim() + "
+
+" + original.content : original.content;
     const shareData = {
       title: original.profile?.display_name ? original.profile.display_name + " on RP WORLD" : "RP WORLD post",
       text: shareText,
@@ -3572,7 +3583,9 @@ export function App() {
     };
     try {
       if (navigator.share) { await navigator.share(shareData); return; }
-      if (navigator.clipboard) { await navigator.clipboard.writeText(shareText + "\n\n" + shareData.url); setMessage("Post link copied to clipboard."); return; }
+      if (navigator.clipboard) { await navigator.clipboard.writeText(shareText + "
+
+" + shareData.url); setMessage("Post link copied to clipboard."); return; }
       setMessage("Sharing is not available in this browser.");
     } catch (shareError) {
       if (shareError instanceof DOMException && shareError.name === "AbortError") return;
