@@ -6466,36 +6466,30 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
 
 
 
-/* Black theme — refined monochrome system.
-   True-black surfaces stay black; interactive controls use neutral white/silver
-   so the UI never loses contrast or looks like black-on-black. */
+/* Black theme — behave like every other theme, using the theme accent
+   throughout the UI while adapting the accent for readable contrast. */
 :root[data-theme="black"] {
+  --accent: #000000;
+  --accent-soft: rgba(0,0,0,.12);
+  --theme-solid: #000000;
+}
+
+/* In dark mode, a pure-black accent disappears against the surface.
+   Keep the theme's black identity, but use its inverse only where an
+   accent must remain visible/readable. */
+:root[data-theme="black"] .app.dark {
   --accent: #f5f5f7;
   --accent-soft: rgba(255,255,255,.10);
-  --theme-solid: #000000;
-  --theme-ink: #0a0a0b;
-  --theme-border: rgba(255,255,255,.10);
-  --theme-muted: rgba(255,255,255,.58);
-}
-
-:root[data-theme="black"] .app.dark {
-  color: #f5f5f7;
   background:
-    radial-gradient(circle at 50% -12%, rgba(255,255,255,.055), transparent 34rem),
-    #000;
+    radial-gradient(circle at 50% -10%, rgba(255,255,255,.045), transparent 36rem),
+    #050505;
 }
 
-:root[data-theme="black"] .glass {
-  border-color: rgba(255,255,255,.085);
-  background: rgba(18,18,20,.72);
-  box-shadow:
-    0 18px 50px rgba(0,0,0,.42),
-    inset 0 1px 0 rgba(255,255,255,.035);
-}
-
-:root[data-theme="black"] .app.light .glass {
-  border-color: rgba(0,0,0,.08);
-  background: rgba(255,255,255,.66);
+/* Light mode keeps the actual black accent, matching the behavior of the
+   other themes across buttons, active states, icons and focus treatments. */
+:root[data-theme="black"] .app.light {
+  --accent: #000000;
+  --accent-soft: rgba(0,0,0,.10);
 }
 
 :root[data-theme="black"] .primary-button,
@@ -6503,10 +6497,10 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
 :root[data-theme="black"] .profile-page .profile-social-actions .compact-follow-button,
 :root[data-theme="black"] .public-profile-page .public-profile-actions .compact-follow-button,
 :root[data-theme="black"] .profile-page .profile-social-actions .primary-profile-action {
-  background: #f5f5f7 !important;
-  border-color: transparent !important;
-  color: #09090a !important;
-  box-shadow: 0 8px 22px rgba(0,0,0,.34) !important;
+  background: var(--accent) !important;
+  border-color: var(--accent) !important;
+  color: #fff !important;
+  box-shadow: 0 8px 22px color-mix(in srgb,var(--accent) 22%,transparent) !important;
 }
 
 :root[data-theme="black"] .primary-button:hover,
@@ -6514,94 +6508,55 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
 :root[data-theme="black"] .profile-page .profile-social-actions .compact-follow-button:hover,
 :root[data-theme="black"] .public-profile-page .public-profile-actions .compact-follow-button:hover,
 :root[data-theme="black"] .profile-page .profile-social-actions .primary-profile-action:hover {
-  background: #ffffff !important;
-  color: #000 !important;
+  background: color-mix(in srgb,var(--accent) 88%,#fff) !important;
+  border-color: color-mix(in srgb,var(--accent) 88%,#fff) !important;
+  color: #fff !important;
   filter: none !important;
 }
 
-:root[data-theme="black"] .nav-item.active {
-  background: rgba(255,255,255,.10) !important;
-  color: #fff !important;
-}
-
+:root[data-theme="black"] .nav-item.active,
 :root[data-theme="black"] .post-action.liked,
 :root[data-theme="black"] .post-action.active {
-  background: rgba(255,255,255,.10) !important;
-  color: #fff !important;
+  background: var(--accent-soft) !important;
+  color: var(--accent) !important;
 }
 
 :root[data-theme="black"] .post-action:hover {
-  background: rgba(255,255,255,.07) !important;
-  color: #fff !important;
+  background: var(--accent-soft) !important;
+  color: var(--accent) !important;
 }
 
 :root[data-theme="black"] .status-dot {
-  background: #fff;
-  box-shadow: 0 0 10px rgba(255,255,255,.35);
-}
-
-:root[data-theme="black"] .theme-trigger:hover,
-:root[data-theme="black"] .icon-button:hover,
-:root[data-theme="black"] .auth-icon-button:hover {
-  background: rgba(255,255,255,.08);
+  background: var(--accent);
+  box-shadow: 0 0 10px color-mix(in srgb,var(--accent) 55%,transparent);
 }
 
 :root[data-theme="black"] .input-wrap:focus-within,
 :root[data-theme="black"] .comment-form input:focus {
-  border-color: rgba(255,255,255,.30);
-  box-shadow: 0 0 0 3px rgba(255,255,255,.07);
+  border-color: color-mix(in srgb,var(--accent) 65%,transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb,var(--accent) 12%,transparent);
 }
 
 :root[data-theme="black"] .profile-cover {
   background:
-    linear-gradient(180deg, rgba(255,255,255,.035), transparent 55%),
-    #050505;
+    radial-gradient(circle at 50% 0,color-mix(in srgb,var(--accent) 22%,transparent),transparent 68%),
+    linear-gradient(135deg,color-mix(in srgb,var(--accent) 10%,#111),transparent);
 }
 
 :root[data-theme="black"] .profile-page .profile-cover::after {
-  background: linear-gradient(180deg, transparent 20%, rgba(0,0,0,.48) 100%);
+  background: linear-gradient(180deg, transparent 20%, rgba(0,0,0,.42) 100%);
 }
 
 :root[data-theme="black"] .profile-meta span,
 :root[data-theme="black"] .comments-panel,
 :root[data-theme="black"] .comment-row > div {
-  background: rgba(255,255,255,.045);
-}
-
-:root[data-theme="black"] .profile-stats {
-  border-top-color: rgba(255,255,255,.08);
-}
-
-:root[data-theme="black"] .profile-stats > div + div {
-  border-left-color: rgba(255,255,255,.08);
+  background: color-mix(in srgb,var(--accent) 5%,transparent);
 }
 
 :root[data-theme="black"] .outline-button:hover,
 :root[data-theme="black"] .small-add:hover {
-  border-color: rgba(255,255,255,.18);
-  background: rgba(255,255,255,.08);
-}
-
-:root[data-theme="black"] .primary-button,
-:root[data-theme="black"] .nav-create,
-:root[data-theme="black"] .profile-page .profile-social-actions .compact-follow-button,
-:root[data-theme="black"] .public-profile-page .public-profile-actions .compact-follow-button,
-:root[data-theme="black"] .profile-page .profile-social-actions .primary-profile-action {
-  background: #000 !important;
-  border-color: #000 !important;
-  color: #fff !important;
-  box-shadow: 0 6px 18px rgba(0,0,0,.28) !important;
-}
-
-:root[data-theme="black"] .nav-item.active {
-  background: #000 !important;
-  color: #fff !important;
-}
-
-:root[data-theme="black"] .post-action.liked,
-:root[data-theme="black"] .post-action.active {
-  background: #000 !important;
-  color: #fff !important;
+  border-color: color-mix(in srgb,var(--accent) 45%,transparent);
+  background: var(--accent-soft);
 }
 
 
