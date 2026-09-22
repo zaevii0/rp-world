@@ -196,6 +196,10 @@ function readAppearance(): Appearance {
   return saved === "light" || saved === "system" ? saved : "dark";
 }
 
+function isAdminProfile(profile?: Profile | null, adminIds: Set<string> = new Set()) {
+  return Boolean(profile?.id && adminIds.has(profile.id));
+}
+
 function isVerifiedProfile(profile?: Profile | null) {\n  return Boolean(profile?.verified_until && new Date(profile.verified_until).getTime() > Date.now());\n}\n\nfunction hasPremiumThemes(profile?: Profile | null) {\n  return Boolean(profile?.themes_until && new Date(profile.themes_until).getTime() > Date.now());\n}\n\nfunction initials(name: string) {
   return name.trim().slice(0, 1).toUpperCase() || "R";
 }
@@ -285,6 +289,7 @@ export function App() {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [adminUserIds, setAdminUserIds] = useState<Set<string>>(new Set());
 
   const [posts, setPosts] = useState<Post[]>([]);
   const [profilePosts, setProfilePosts] = useState<Post[]>([]);
@@ -840,8 +845,17 @@ export function App() {
         if (!allowed && view === "admin") setView("menu");
       }
     }
+    async function loadAdminIds() {
+      if (!supabase || !session?.user) {
+        if (active) setAdminUserIds(new Set());
+        return;
+      }
+      const { data, error } = await supabase.rpc("get_admin_user_ids");
+      if (active) setAdminUserIds(!error && Array.isArray(data) ? new Set(data as string[]) : new Set());
+    }
 
     void checkAdmin();
+    void loadAdminIds();
     return () => {
       active = false;
     };
@@ -4312,7 +4326,7 @@ export function App() {
                         <div>
                           <h2>
                             {profile.display_name}
-                            {isVerifiedProfile(profile) && <span className="verified-badge" aria-label="Verified">✓</span>}
+                            {(isVerifiedProfile(profile) || isAdminProfile(profile, adminUserIds)) && <span className="verified-badge" aria-label="Verified">✓</span>}
                           </h2>
 
                           <span>
@@ -4666,7 +4680,7 @@ export function App() {
                                 {!post.profile?.avatar_url && initials(post.profile?.display_name ?? "R")}
                               </div>
                               <div>
-                                <strong>{post.profile?.display_name ?? "RP WORLD member"}{isVerifiedProfile(post.profile) && <span className="verified-badge" aria-label="Verified">✓</span>}</strong>
+                                <strong>{post.profile?.display_name ?? "RP WORLD member"}{(isVerifiedProfile(post.profile) || isAdminProfile(post.profile, adminUserIds)) && <span className="verified-badge" aria-label="Verified">✓</span>}</strong>
                                 <span className="post-meta">
                                   @{post.profile?.username ?? "member"} ·{" "}
                                   <button
@@ -4732,7 +4746,7 @@ export function App() {
                   <div className="profile-main">
                     <div className="profile-avatar-wrap"><div className="profile-avatar avatar" style={publicProfile.avatar_url ? { backgroundImage: `url(${publicProfile.avatar_url})` } : undefined}>{!publicProfile.avatar_url && initials(publicProfile.display_name)}</div></div>
                     <div className="profile-identity">
-                      <div className="profile-name-row"><div><h2>{publicProfile.display_name}{isVerifiedProfile(publicProfile) && <span className="verified-badge" aria-label="Verified">✓</span>}</h2><span>@{publicProfile.username}</span></div></div>
+                      <div className="profile-name-row"><div><h2>{publicProfile.display_name}{(isVerifiedProfile(publicProfile) || isAdminProfile(publicProfile, adminUserIds)) && <span className="verified-badge" aria-label="Verified">✓</span>}</h2><span>@{publicProfile.username}</span></div></div>
                       {publicProfile.bio ? <p className="profile-bio">{publicProfile.bio}</p> : null}
                       <div className="profile-actions profile-social-actions">
                         <button className={publicProfileFriend ? "profile-action-button follow-button friend-button" : "profile-action-button follow-button"} type="button" onClick={() => void toggleFollowPublicProfile()}><UserPlus size={14} />{publicProfileFriend ? "Friends" : followingPublicProfile ? "Following" : "Follow"}</button>
@@ -4816,7 +4830,7 @@ export function App() {
                             <button className="profile-name-link" type="button" onClick={() => void loadPublicProfile(post.author_id)}>
                               {post.profile?.display_name ?? "RP WORLD member"}
                             </button>
-                            {post.profile?.username === "zaevii" && <span className="verified-badge" aria-label="Verified">✓</span>}
+                            {(isVerifiedProfile(post.profile) || isAdminProfile(post.profile, adminUserIds)) && <span className="verified-badge" aria-label="Verified">✓</span>}
                             <span className="post-meta">
                               @{post.profile?.username ?? "member"} ·{" "}
                               <button
