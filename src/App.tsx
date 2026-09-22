@@ -4827,7 +4827,6 @@ export function App() {
                         <span><Sparkles size={13} />{publicProfile.rp_id}</span>
                         <button className="profile-meta-button" type="button" onClick={() => void openFollowers(publicProfile.id, publicProfile.display_name)} aria-label="View followers"><User size={13} />{profileStats.followers} {profileStats.followers === 1 ? "follower" : "followers"}</button>
                         <span><Heart size={13} />{profileStats.likes} {profileStats.likes === 1 ? "like" : "likes"}</span>
-                        <span><MapPin size={13} />RP WORLD</span>
                       </div>
                     </div>
                   </div>
