@@ -6242,3 +6242,15 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
     border-radius: 16px !important;
   }
 }
+
+
+/* Tighten the space between the RP WORLD top navbar and profile content. */
+.profile-page {
+  margin-top: -10px !important;
+}
+
+@media (max-width: 640px) {
+  .profile-page {
+    margin-top: -6px !important;
+  }
+}
