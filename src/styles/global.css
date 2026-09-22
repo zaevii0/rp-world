@@ -6841,3 +6841,198 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
   text-box-trim: trim-both;
   text-box-edge: cap alphabetic;
 }
+
+/* Final mobile messaging pass: edge-to-edge iOS layout with a stable composer. */
+@media (max-width: 640px) {
+  .message-sheet {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+    min-height: 100dvh !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+    border: 0 !important;
+    overflow: hidden !important;
+  }
+
+  .message-inbox-sheet > .sheet-header {
+    min-height: calc(64px + env(safe-area-inset-top)) !important;
+    padding: max(8px, env(safe-area-inset-top)) 10px 8px !important;
+  }
+
+  .message-inbox-sheet .sheet-header h2 {
+    font-size: 24px !important;
+    line-height: 29px !important;
+  }
+
+  .message-inbox-list {
+    padding: 6px 8px max(8px, env(safe-area-inset-bottom)) !important;
+    overscroll-behavior: contain;
+  }
+
+  .message-conversation {
+    min-height: 68px !important;
+    padding: 8px 10px !important;
+    gap: 11px !important;
+    border-radius: 17px !important;
+  }
+
+  .message-conversation .avatar {
+    width: 48px !important;
+    height: 48px !important;
+    min-width: 48px !important;
+  }
+
+  .message-conversation-copy strong {
+    font-size: 15px !important;
+    line-height: 19px !important;
+  }
+
+  .message-conversation-copy > span {
+    margin-top: 2px !important;
+    font-size: 12px !important;
+  }
+
+  .message-chat-header {
+    min-height: calc(60px + env(safe-area-inset-top)) !important;
+    flex-basis: calc(60px + env(safe-area-inset-top)) !important;
+    padding: max(8px, env(safe-area-inset-top)) 8px 8px !important;
+    gap: 5px !important;
+  }
+
+  .message-back-button,
+  .message-header-action {
+    width: 40px !important;
+    height: 40px !important;
+    flex-basis: 40px !important;
+    border-radius: 12px !important;
+  }
+
+  .message-header-avatar {
+    width: 38px !important;
+    height: 38px !important;
+    flex-basis: 38px !important;
+  }
+
+  .message-chat-identity strong {
+    max-width: 42vw;
+    font-size: 15px !important;
+    line-height: 19px !important;
+  }
+
+  .message-online,
+  .message-offline {
+    font-size: 10px !important;
+    line-height: 14px !important;
+  }
+
+  .message-chat-actions {
+    gap: 0 !important;
+  }
+
+  .message-chat-actions .message-header-action {
+    width: 38px !important;
+    height: 38px !important;
+    flex-basis: 38px !important;
+  }
+
+  .message-list {
+    padding: 12px 9px 10px !important;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .message-row {
+    gap: 6px !important;
+    margin: 3px 0 !important;
+  }
+
+  .message-row-avatar {
+    width: 26px !important;
+    height: 26px !important;
+    min-width: 26px !important;
+  }
+
+  .message-bubble,
+  .message-row.mine .message-bubble {
+    max-width: min(84vw, 340px) !important;
+    padding: 8px 11px 6px !important;
+    font-size: 15px !important;
+    line-height: 1.38 !important;
+    border-radius: 18px !important;
+  }
+
+  .message-bubble-meta {
+    margin-top: 2px !important;
+    min-height: 12px !important;
+  }
+
+  .message-time {
+    font-size: 9px !important;
+    line-height: 12px !important;
+  }
+
+  .message-reaction-summary {
+    right: -5px;
+    bottom: -9px;
+    min-height: 20px;
+    padding: 1px 6px !important;
+    font-size: 10px !important;
+  }
+
+  .message-form {
+    width: 100% !important;
+    gap: 1px !important;
+    padding: 6px 6px max(7px, env(safe-area-inset-bottom)) !important;
+    min-height: calc(54px + env(safe-area-inset-bottom)) !important;
+  }
+
+  .message-compose-action {
+    width: 36px !important;
+    min-width: 36px !important;
+    height: 36px !important;
+    flex-basis: 36px !important;
+  }
+
+  /* Keep photo and voice actions available on mobile; they fit beside the input. */
+  .message-compose-action:nth-of-type(2),
+  .message-compose-action:nth-of-type(3) {
+    display: inline-flex !important;
+  }
+
+  .message-input-shell {
+    min-width: 0 !important;
+    min-height: 40px !important;
+    border-radius: 20px !important;
+    padding: 2px 3px 2px 12px !important;
+  }
+
+  .message-input-shell textarea {
+    min-height: 34px !important;
+    max-height: 96px !important;
+    padding: 6px 0 !important;
+    font-size: 16px !important;
+    line-height: 21px !important;
+  }
+
+  .message-send-button {
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
+    flex-basis: 34px !important;
+  }
+
+  .message-media-preview {
+    max-width: min(72vw, 250px) !important;
+    max-height: min(42vh, 300px) !important;
+    border-radius: 14px !important;
+  }
+
+  .message-reply-composer,
+  .message-attachment-chip {
+    left: 6px !important;
+    right: 6px !important;
+    border-radius: 14px 14px 0 0 !important;
+  }
+}
