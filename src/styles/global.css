@@ -5730,3 +5730,114 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
 }
 
 
+
+
+/* RP WORLD — Profile screenshot-friendly controls */
+.profile-page .profile-social-actions .profile-action-button {
+  min-height: 38px !important;
+  height: 38px !important;
+  padding: 0 12px !important;
+  border-radius: 13px !important;
+  font-size: 10.5px !important;
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent) !important;
+  color: var(--accent) !important;
+  background: color-mix(in srgb, var(--accent) 9%, transparent) !important;
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 8%, transparent) !important;
+}
+
+.profile-page .profile-social-actions .profile-action-button:hover,
+.profile-page .profile-social-actions .profile-action-button:focus-visible {
+  color: var(--accent) !important;
+  border-color: color-mix(in srgb, var(--accent) 48%, transparent) !important;
+  background: color-mix(in srgb, var(--accent) 14%, transparent) !important;
+}
+
+/* Edit + Follow intentionally use the exact same visual treatment. */
+.profile-page .profile-social-actions .follow-button {
+  color: var(--accent) !important;
+  border-color: color-mix(in srgb, var(--accent) 30%, transparent) !important;
+  background: color-mix(in srgb, var(--accent) 9%, transparent) !important;
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 8%, transparent) !important;
+}
+
+/* View as + Message intentionally use the same visual treatment. */
+.profile-page .profile-social-actions .profile-action-button:not(.follow-button) {
+  color: var(--accent) !important;
+}
+
+@media (max-width: 640px) {
+  .profile-page .profile-social-actions {
+    width: min(100%, 360px) !important;
+    gap: 6px !important;
+    margin-bottom: 10px !important;
+  }
+
+  .profile-page .profile-social-actions .profile-action-button {
+    min-height: 35px !important;
+    height: 35px !important;
+    padding: 0 10px !important;
+    border-radius: 11px !important;
+    font-size: 10px !important;
+  }
+
+  .profile-page .profile-social-actions .profile-action-button svg {
+    width: 13px !important;
+    height: 13px !important;
+  }
+
+  /* Compact the profile vertically so the profile + highlights fit better in screenshots. */
+  .profile-page .profile-cover {
+    height: 138px !important;
+  }
+
+  .profile-page .profile-main {
+    padding-bottom: 14px !important;
+  }
+
+  .profile-page .profile-avatar-wrap {
+    margin-top: -48px !important;
+  }
+
+  .profile-page .profile-avatar {
+    width: 96px !important;
+    height: 96px !important;
+  }
+
+  .profile-page .profile-identity {
+    padding-top: 9px !important;
+  }
+
+  .profile-page .profile-bio {
+    margin: 8px auto 9px !important;
+    font-size: 12px !important;
+    line-height: 1.45 !important;
+  }
+
+  .profile-page .profile-section {
+    gap: 9px !important;
+    padding: 11px !important;
+    border-radius: 19px !important;
+  }
+
+  .profile-page .section-heading h3 {
+    font-size: 16px !important;
+  }
+
+  .profile-page .small-add {
+    min-height: 31px !important;
+    padding: 0 9px !important;
+    border-radius: 10px !important;
+    font-size: 10px !important;
+  }
+
+  .profile-page .highlights-row {
+    gap: 7px !important;
+    padding: 1px 1px 3px !important;
+  }
+}
+
+@media (min-width: 641px) {
+  .profile-page .profile-social-actions {
+    width: min(100%, 380px) !important;
+  }
+}
