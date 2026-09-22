@@ -696,7 +696,7 @@ export function App() {
 
   useEffect(() => {
     if (!profile || hasPremiumThemes(profile)) return;
-    if (theme !== "midnight" && theme !== "ocean") {
+    if (theme !== "midnight" && theme !== "black" && theme !== "ocean") {
       setTheme("midnight");
     }
   }, [profile, theme]);
