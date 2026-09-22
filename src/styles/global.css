@@ -6165,3 +6165,18 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
     max-width: 140px !important;
   }
 }
+
+
+/* Profile follow/edit action uses the currently selected RP WORLD theme accent. */
+.profile-page .profile-social-actions .compact-follow-button,
+.public-profile-page .public-profile-actions .compact-follow-button {
+  background: var(--accent) !important;
+  border-color: var(--accent) !important;
+  color: #fff !important;
+}
+
+.profile-page .profile-social-actions .compact-follow-button:hover,
+.public-profile-page .public-profile-actions .compact-follow-button:hover {
+  background: color-mix(in srgb, var(--accent) 88%, #000) !important;
+  border-color: color-mix(in srgb, var(--accent) 88%, #000) !important;
+}
