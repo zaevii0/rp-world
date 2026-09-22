@@ -6299,3 +6299,36 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
     border-radius: 11px !important;
   }
 }
+
+
+/* View As profile actions: center Follow, Message, and More together. */
+.profile-page:not(.public-profile-page) .profile-social-actions {
+  width: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+.profile-page:not(.public-profile-page) .profile-social-actions .profile-more-button {
+  width: 38px !important;
+  min-width: 38px !important;
+  max-width: 38px !important;
+  height: 38px !important;
+  min-height: 38px !important;
+  padding: 0 !important;
+  flex: 0 0 38px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 50% !important;
+  border-color: transparent !important;
+}
+
+@media (max-width: 640px) {
+  .profile-page:not(.public-profile-page) .profile-social-actions {
+    gap: 7px !important;
+  }
+}
