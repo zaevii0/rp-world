@@ -189,7 +189,7 @@ function readTheme(): ThemeId {
   const saved = localStorage.getItem(THEME_KEY);
   return themes.some((theme) => theme.id === saved)
     ? (saved as ThemeId)
-    : "ocean";
+    : "black";
 }
 
 function readAppearance(): Appearance {
