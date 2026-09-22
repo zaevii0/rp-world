@@ -6072,3 +6072,37 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
     flex-basis: 38px !important;
   }
 }
+
+
+/* Final alignment: keep profile social actions centered like the owner controls. */
+.profile-page .profile-social-actions {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center !important;
+  align-self: center;
+  gap: 8px;
+  margin-top: 8px;
+  text-align: center;
+}
+
+.profile-page .profile-social-actions > * {
+  flex: 0 0 auto;
+}
+
+.profile-page .profile-social-actions .profile-action-button {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+.profile-page .profile-social-actions .compact-follow-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.profile-page .profile-social-actions .message-icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
