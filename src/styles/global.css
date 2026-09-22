@@ -6112,3 +6112,56 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
 .profile-page .profile-social-actions .profile-action-button {
   border-color: transparent !important;
 }
+
+
+/* Public profile: keep Follow, Message, and More on one centered row. */
+.public-profile-page .public-profile-actions {
+  width: 100% !important;
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  text-align: center !important;
+}
+
+.public-profile-page .public-profile-actions > .profile-action-button {
+  flex: 0 0 auto !important;
+  margin: 0 !important;
+}
+
+.public-profile-page .public-profile-actions .compact-follow-button {
+  width: auto !important;
+  min-width: 112px !important;
+  max-width: 160px !important;
+}
+
+.public-profile-page .public-profile-actions .message-icon-button,
+.public-profile-page .public-profile-actions .profile-more-button {
+  width: 38px !important;
+  min-width: 38px !important;
+  max-width: 38px !important;
+  height: 38px !important;
+  min-height: 38px !important;
+  flex: 0 0 38px !important;
+  padding: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 50% !important;
+  border-color: transparent !important;
+}
+
+@media (max-width: 640px) {
+  .public-profile-page .public-profile-actions {
+    gap: 7px !important;
+  }
+
+  .public-profile-page .public-profile-actions .compact-follow-button {
+    min-width: 96px !important;
+    max-width: 140px !important;
+  }
+}
