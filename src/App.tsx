@@ -389,7 +389,7 @@ export function App() {
   const [commentReactionUsersBusy, setCommentReactionUsersBusy] = useState(false);
   const [commentMediaFiles, setCommentMediaFiles] = useState<Record<string, File | null>>({});
   const [openTimestamp, setOpenTimestamp] = useState<string | null>(null);
-  const [collapsedReplyIds, setCollapsedReplyIds] = useState<Set<string>>(new Set());
+  const [expandedReplyIds, setExpandedReplyIds] = useState<Set<string>>(new Set());
   const [commentMentionQuery, setCommentMentionQuery] = useState<Record<string, string | null>>({});
   const [commentMentionStart, setCommentMentionStart] = useState<Record<string, number | null>>({});
   const [viewAs, setViewAs] = useState(false);
@@ -3109,15 +3109,22 @@ export function App() {
 
     setCommentsByPost((current) => ({
       ...current,
-      [postId]: (current[postId] ?? []).map((item) =>
-        item.id === comment.id
-          ? {
-              ...item,
-              reactionType: nextType,
-              reactionCount: Math.max(0, item.reactionCount + countDelta),
-            }
-          : item,
-      ),
+      [postId]: (current[postId] ?? []).map((item) => {
+        if (item.id !== comment.id) return item;
+        const nextCounts = { ...(item.reactionCounts ?? {}) };
+        if (previousType) {
+          nextCounts[previousType] = Math.max(0, (nextCounts[previousType] ?? 0) - 1);
+        }
+        if (nextType) {
+          nextCounts[nextType] = (nextCounts[nextType] ?? 0) + 1;
+        }
+        return {
+          ...item,
+          reactionType: nextType,
+          reactionCount: Math.max(0, item.reactionCount + countDelta),
+          reactionCounts: nextCounts,
+        };
+      }),
     }));
 
     const result = previousType
@@ -3147,7 +3154,7 @@ export function App() {
 
   function renderCommentTree(postId: string, comments: Comment[], parentId: string | null, depth = 0): ReactNode[] {
     const children = comments.filter((comment) => comment.parent_id === parentId);
-    const visible = parentId === null ? children : (collapsedReplyIds.has(parentId) ? children.slice(0, 2) : children);
+    const visible = parentId === null ? children : (expandedReplyIds.has(parentId) ? children : children.slice(0, 2));
     return visible.map((comment) => {
       const replies = comments.filter((item) => item.parent_id === comment.id);
       const isEditing = commentEditId === comment.id;
@@ -3198,13 +3205,15 @@ export function App() {
                 <>
                   <div className="comment-actions">
                     <div className="comment-reaction-wrap">
-                      <button className={comment.reactionType ? "comment-action reaction-active" : "comment-action"} type="button"
+                      <button className={comment.reactionType ? "comment-action comment-reaction-trigger reaction-active" : "comment-action comment-reaction-trigger"} type="button"
                         onClick={() => setOpenReactionPicker(openReactionPicker === comment.id ? null : comment.id)}
-                        disabled={commentReactionBusy === comment.id}>
-                        {comment.reactionType ? (commentReactionOptions.find((item) => item.type === comment.reactionType)?.label ?? "React") : "React"}
+                        disabled={commentReactionBusy === comment.id}
+                        aria-label={comment.reactionType ? `Change reaction: ${commentReactionOptions.find((item) => item.type === comment.reactionType)?.label ?? "React"}` : "React to comment"}>
+                        <span className="comment-reaction-trigger-emoji">{comment.reactionType ? reactionEmoji(comment.reactionType) : "♡"}</span>
+                        <span>{comment.reactionType ? (commentReactionOptions.find((item) => item.type === comment.reactionType)?.label ?? "React") : "React"}</span>
                       </button>
                       {openReactionPicker === comment.id && (
-                        <div className="comment-reaction-picker" role="menu">
+                        <div className="comment-reaction-picker" role="menu" aria-label="Comment reactions" onClick={(event) => event.stopPropagation()}>
                           {commentReactionOptions.map((reaction) => (
                             <button key={reaction.type} className={comment.reactionType === reaction.type ? "comment-reaction-option active" : "comment-reaction-option"} type="button"
                               onClick={() => void setCommentReaction(postId, comment, reaction.type)} aria-label={reaction.label} title={reaction.label}>{reaction.emoji}</button>
@@ -3217,7 +3226,7 @@ export function App() {
                     {comment.is_pinned && <span className="comment-pinned">Pinned</span>}
                   </div>
                   {comment.reactionCount > 0 && (
-                    <button className="comment-reaction-summary" type="button" onClick={() => void showCommentReactionUsers(comment)}>
+                    <button className="comment-reaction-summary" type="button" onClick={() => void showCommentReactionUsers(comment)} aria-label={`${comment.reactionCount} reactions`}>
                       {reactionSummary.map((reaction) => <span key={reaction.type}>{reaction.emoji}</span>)} <strong>{comment.reactionCount}</strong>
                     </button>
                   )}
@@ -3225,13 +3234,15 @@ export function App() {
               )}
 
               {replies.length > 0 && (
-                <button className="comment-replies-toggle" type="button" onClick={() => setCollapsedReplyIds((current) => {
+                <button className="comment-replies-toggle" type="button" onClick={() => setExpandedReplyIds((current) => {
                   const next = new Set(current);
                   if (next.has(comment.id)) next.delete(comment.id); else next.add(comment.id);
                   return next;
                 })}>
                   <span className="comment-replies-line" aria-hidden="true" />
-                  {collapsedReplyIds.has(comment.id) ? `View ${replies.length} ${replies.length === 1 ? "reply" : "replies"}` : "Hide replies"}
+                  {expandedReplyIds.has(comment.id)
+                    ? "Hide replies"
+                    : `View ${replies.length} ${replies.length === 1 ? "reply" : "replies"}`}
                 </button>
               )}
 
@@ -3242,7 +3253,7 @@ export function App() {
               )}
             </div>
           </div>
-          {!collapsedReplyIds.has(comment.id) && replies.length > 0 && renderCommentTree(postId, comments, comment.id, depth + 1)}
+          {replies.length > 0 && renderCommentTree(postId, comments, comment.id, depth + 1)}
         </div>
       );
     });
