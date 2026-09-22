@@ -1,0 +1,4 @@
+project_id = "rp-world"
+
+[functions.paymongo-webhook]
+verify_jwt = false
