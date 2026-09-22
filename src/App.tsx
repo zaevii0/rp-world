@@ -4777,25 +4777,21 @@ export function App() {
                       {publicProfile.bio ? <p className="profile-bio">{publicProfile.bio}</p> : null}
                       <div className="profile-actions profile-social-actions public-profile-actions">
                         <button
-                          className={publicProfileFriend ? "profile-action-button follow-button friend-button compact-follow-button" : "profile-action-button follow-button compact-follow-button"}
+                          className="profile-action-button follow-button compact-follow-button"
                           type="button"
-                          onClick={() => void toggleFollowPublicProfile()}
+                          onClick={() => setProfileOpen(true)}
+                          aria-label="Edit profile"
+                          title="Edit profile"
                         >
-                          {publicProfileFriend ? "Friends" : followingPublicProfile ? "Following" : "Follow"}
+                          <Pencil size={16} />
                         </button>
 
                         <button
                           className="profile-action-button message-icon-button"
                           type="button"
-                          onClick={() => {
-                            if (publicProfileFriend) {
-                              void openMessageConversation();
-                            } else {
-                              setMessageNoticeOpen(true);
-                            }
-                          }}
-                          aria-label="Message"
-                          title={publicProfileFriend ? "Message" : "Follow each other to unlock messages"}
+                          onClick={() => setMessageInboxOpen(true)}
+                          aria-label="Messages"
+                          title="Messages"
                         >
                           <Mail size={18} />
                         </button>
@@ -4803,7 +4799,7 @@ export function App() {
                         <button
                           className="profile-action-button profile-more-button"
                           type="button"
-                          onClick={() => setFriendActionsOpen((open) => !open)}
+                          onClick={() => setProfileOpen(true)}
                           aria-label="More options"
                           title="More options"
                         >
