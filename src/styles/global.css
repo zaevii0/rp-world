@@ -6384,3 +6384,10 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
     max-width: 140px !important;
   }
 }
+
+
+/* iOS-style pill shape for Follow / Following controls. */
+.profile-page .profile-social-actions .compact-follow-button,
+.public-profile-page .public-profile-actions .compact-follow-button {
+  border-radius: 999px !important;
+}
