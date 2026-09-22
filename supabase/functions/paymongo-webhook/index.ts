@@ -123,18 +123,15 @@ Deno.serve(async (req) => {
   const { data: payment } = await query.maybeSingle();
   if (!payment) return json({ received: true, ignored: true });
 
-  const now = new Date().toISOString();
-
   if (payment.status !== "paid") {
-    await adminClient
-      .from("support_payments")
-      .update({ status: "paid", paid_at: now, updated_at: now })
-      .eq("id", payment.id);
+    const { data: applied, error: applyError } = await adminClient.rpc("apply_verified_membership", {
+      p_payment_id: payment.id,
+    });
 
-    await adminClient
-      .from("support_intents")
-      .update({ status: "paid", updated_at: now })
-      .eq("id", payment.support_intent_id);
+    if (applyError || applied !== true) {
+      console.error("RP WORLD verified membership grant failed", applyError?.message);
+      return json({ error: "Membership grant could not be completed." }, 500);
+    }
   }
 
   return json({ received: true });
