@@ -6391,3 +6391,28 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
 .public-profile-page .public-profile-actions .compact-follow-button {
   border-radius: 999px !important;
 }
+
+
+/* Final: remove all visible borders from profile action controls. */
+.profile-page .profile-social-actions .compact-follow-button,
+.profile-page .profile-social-actions .profile-icon-action,
+.profile-page .profile-social-actions .profile-more-button,
+.public-profile-page .public-profile-actions .compact-follow-button,
+.public-profile-page .public-profile-actions .profile-more-button {
+  border: 0 !important;
+  border-color: transparent !important;
+}
+
+.profile-page .profile-social-actions .compact-follow-button:hover,
+.profile-page .profile-social-actions .compact-follow-button:focus-visible,
+.profile-page .profile-social-actions .profile-icon-action:hover,
+.profile-page .profile-social-actions .profile-icon-action:focus-visible,
+.profile-page .profile-social-actions .profile-more-button:hover,
+.profile-page .profile-social-actions .profile-more-button:focus-visible,
+.public-profile-page .public-profile-actions .compact-follow-button:hover,
+.public-profile-page .public-profile-actions .compact-follow-button:focus-visible,
+.public-profile-page .public-profile-actions .profile-more-button:hover,
+.public-profile-page .public-profile-actions .profile-more-button:focus-visible {
+  border: 0 !important;
+  border-color: transparent !important;
+}
