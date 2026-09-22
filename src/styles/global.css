@@ -5130,3 +5130,54 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
     overflow: visible !important;
   }
 }
+
+
+/* RP WORLD — Followers meta chip matches the RP ID chip */
+.profile-page .profile-meta .profile-meta-button {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 5px !important;
+  min-height: 0 !important;
+  padding: 5px 8px !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  background: rgba(127,127,127,.07) !important;
+  color: inherit !important;
+  font: inherit !important;
+  font-size: 9px !important;
+  line-height: 1.2 !important;
+  opacity: .62 !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  transition: background .16s ease, color .16s ease, opacity .16s ease, transform .16s ease !important;
+}
+
+.profile-page .profile-meta .profile-meta-button svg {
+  color: var(--accent) !important;
+  flex: 0 0 auto;
+}
+
+.profile-page .profile-meta .profile-meta-button:hover,
+.profile-page .profile-meta .profile-meta-button:focus-visible {
+  background: var(--accent-soft) !important;
+  color: var(--accent) !important;
+  opacity: 1 !important;
+  outline: none !important;
+}
+
+.profile-page .profile-meta .profile-meta-button:active {
+  transform: scale(.97) !important;
+}
+
+.app.light .profile-page .profile-meta .profile-meta-button {
+  background: rgba(127,127,127,.08) !important;
+}
+
+@media (max-width: 560px) {
+  .profile-page .profile-meta .profile-meta-button {
+    padding: 5px 8px !important;
+    font-size: 9px !important;
+  }
+}
