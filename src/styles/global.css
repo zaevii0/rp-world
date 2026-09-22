@@ -6230,3 +6230,15 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
     min-height: 34px !important;
   }
 }
+
+
+/* Profile sections: use the same softer corner radius as Highlights. */
+.profile-page .profile-section {
+  border-radius: 16px !important;
+}
+
+@media (max-width: 640px) {
+  .profile-page .profile-section {
+    border-radius: 16px !important;
+  }
+}
