@@ -3779,74 +3779,54 @@ export function App() {
           <section className="feed-column">
             <div className={`page-heading ${view === "home" ? "home-page-heading" : ""}`}>
               <div>
-                {view === "support" && (
-              <section className="support-page glass" aria-labelledby="support-page-title">
-                <div className="support-page-header">
-                  <button
-                    className="glass circle-button"
-                    type="button"
-                    aria-label="Back"
-                    title="Back"
-                    onClick={() => setView("menu")}
-                  >
-                    <ArrowLeft size={18} />
+                {view === "home" && <p className="eyebrow">RP WORLD FEED</p>}
+                <h2 className={view === "home" ? `greeting-title greeting-${Math.min(3, Math.max(1, Math.ceil(title.length / 24)))}` : undefined}>{title}</h2>
+              </div>
+              <div className="page-heading-actions">
+                <button className="glass circle-button" type="button" aria-label="Search" onClick={() => setView("search")}>
+                  <Search size={17} />
+                </button>
+                {(view === "public" || viewAs) && (
+                  <button className="glass circle-button" type="button" onClick={() => { if (view === "public") { setView("discover"); setPublicProfile(null); } else { setViewAs(false); setView("profile"); } }} aria-label="Back" title="Back">
+                    <ArrowLeft size={17} />
                   </button>
+                )}
+              </div>
+            </div>
+
+            {view === "support" && (
+              <section className="support-page" aria-labelledby="support-page-title">
+                <div className="support-hero glass">
+                  <div className="support-hero-icon"><Heart size={28} /></div>
                   <div>
-                    <span className="support-eyebrow">RP WORLD</span>
-                    <h2 id="support-page-title">Support RP WORLD</h2>
-                    <p>Help keep RP WORLD running and make room for future improvements.</p>
-                  </div>
-                  <div className="support-page-heart" aria-hidden="true">
-                    <Heart size={24} />
+                    <span className="support-eyebrow">KEEP RP WORLD ALIVE</span>
+                    <h3 id="support-page-title">Support RP WORLD</h3>
+                    <p>Your support helps keep the app online, maintained, secure, and growing.</p>
                   </div>
                 </div>
-
-                <div className="support-page-body">
-                  <div className="support-page-intro">
-                    <strong>Your support helps cover</strong>
-                    <span>hosting, database, storage, security, moderation, maintenance, and future development.</span>
+                <div className="support-card glass">
+                  <div className="support-card-heading">
+                    <div>
+                      <span className="support-section-label">CHOOSE YOUR SUPPORT</span>
+                      <strong>How much would you like to contribute?</strong>
+                    </div>
+                    <button className="glass circle-button" type="button" aria-label="Back to menu" onClick={() => setView("menu")}><ArrowLeft size={18} /></button>
                   </div>
-
                   <div className="support-amounts" aria-label="Support amount">
                     {[50, 100, 250, 500].map((amount) => (
-                      <button key={amount} type="button" className={supportAmount === String(amount) ? "support-amount active" : "support-amount"} onClick={() => setSupportAmount(String(amount))}>
-                        ₱{amount}
-                      </button>
+                      <button key={amount} type="button" className={supportAmount === String(amount) ? "support-amount active" : "support-amount"} onClick={() => setSupportAmount(String(amount))}>₱{amount}</button>
                     ))}
                   </div>
-
-                  <label className="support-field">
-                    <span>Custom amount</span>
-                    <div className="support-input-wrap"><span>₱</span><input inputMode="decimal" value={supportAmount} onChange={(event) => setSupportAmount(event.target.value)} min="10" max="1000000" /></div>
-                  </label>
-
+                  <label className="support-field"><span>Custom amount</span><div className="support-input-wrap"><span>₱</span><input inputMode="decimal" value={supportAmount} onChange={(event) => setSupportAmount(event.target.value)} min="10" max="1000000" /></div></label>
                   <div className="support-frequency" role="group" aria-label="Support frequency">
                     <button type="button" className={supportFrequency === "one_time" ? "active" : ""} onClick={() => setSupportFrequency("one_time")}>One-time</button>
                     <button type="button" className={supportFrequency === "monthly" ? "active" : ""} onClick={() => setSupportFrequency("monthly")}>Monthly</button>
                   </div>
-
-                  <label className="support-field">
-                    <span>Optional note</span>
-                    <textarea value={supportNote} onChange={(event) => setSupportNote(event.target.value)} maxLength={240} placeholder="Tell us what you'd like to support." />
-                  </label>
-
-                  <div className="support-disclosure">
-                    <strong>Secure payment</strong>
-                    <span>One-time support opens a PayMongo-hosted checkout. Your payment details stay with the payment provider.</span>
-                  </div>
-
+                  <label className="support-field"><span>Optional note</span><textarea value={supportNote} onChange={(event) => setSupportNote(event.target.value)} maxLength={240} placeholder="Tell us what you'd like to support." /></label>
+                  <div className="support-disclosure"><strong>Secure checkout</strong><span>One-time support opens a secure PayMongo-hosted checkout. Your payment details are handled by the payment provider.</span></div>
                   {supportMessage && <p className="support-message" role="status">{supportMessage}</p>}
-
-                  {supportCheckoutUrl && supportFrequency === "one_time" && (
-                    <a className="support-checkout-link" href={supportCheckoutUrl} target="_blank" rel="noopener noreferrer">
-                      <Heart size={17} />
-                      <span>Open secure checkout</span>
-                    </a>
-                  )}
-
-                  <button className="support-submit-button" type="button" disabled={supportBusy} onClick={() => void submitSupportIntent()}>
-                    {supportBusy ? "Preparing checkout…" : supportFrequency === "monthly" ? "Save monthly support" : "Continue to secure checkout"}
-                  </button>
+                  {supportCheckoutUrl && supportFrequency === "one_time" && <a className="support-checkout-link" href={supportCheckoutUrl} target="_blank" rel="noopener noreferrer"><Heart size={17} /><span>Open secure checkout</span></a>}
+                  <button className="support-submit-button" type="button" disabled={supportBusy} onClick={() => void submitSupportIntent()}>{supportBusy ? "Preparing checkout…" : supportFrequency === "monthly" ? "Save monthly support" : "Continue to secure checkout"}</button>
                 </div>
               </section>
             )}
