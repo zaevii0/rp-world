@@ -3152,6 +3152,10 @@ export function App() {
     }
   }
 
+  function reactionEmoji(type: string | null) {
+    return commentReactionOptions.find((reaction) => reaction.type === type)?.emoji ?? "♡";
+  }
+
   function renderCommentTree(postId: string, comments: Comment[], parentId: string | null, depth = 0): ReactNode[] {
     const children = comments.filter((comment) => comment.parent_id === parentId);
     const visible = parentId === null ? children : (expandedReplyIds.has(parentId) ? children : children.slice(0, 2));
