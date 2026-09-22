@@ -4316,7 +4316,7 @@ export function App() {
             )}
 
             {view === "profile" && (
-              <section className={viewAs ? "profile-page public-profile-page" : "profile-page"}>
+              <section className="profile-page">
                 <div className="profile-hero glass">
                   <div
                     className="profile-cover"
@@ -4458,7 +4458,10 @@ export function App() {
                 <div className="profile-section">
                   <div className="section-heading">
                     <div>
-                      {!viewAs && <p className="eyebrow">HIGHLIGHTS</p>}
+                      <p className="eyebrow">
+                        HIGHLIGHTS
+                      </p>
+
                       <h3>Moments</h3>
                     </div>
 
@@ -4514,7 +4517,7 @@ export function App() {
                       <p className="eyebrow">
                         {viewAs ? "PUBLIC PROFILE" : "YOUR ACTIVITY"}
                       </p>
-                      {viewAs && <h3>Posts</h3>}
+
                     </div>
 
                     {!viewAs && (
@@ -4605,13 +4608,11 @@ export function App() {
                                     <MoreVertical size={18} />
                                   </button>
                                 )}
-                                {viewAs ? (
-                                  <button className="profile-name-link" type="button" onClick={() => setView("profile")}>
-                                    {profile.display_name}
-                                  </button>
-                                ) : (
-                                  <strong>{profile.display_name}</strong>
-                                )}
+                                <strong>
+                                  {
+                                    profile.display_name
+                                  }
+                                </strong>
 
                                 <span className="post-meta">
                                   @
