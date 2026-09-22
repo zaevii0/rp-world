@@ -326,10 +326,7 @@ export function App() {
 
   const [profileOpen, setProfileOpen] = useState(false);
   const [composerOpen, setComposerOpen] = useState(false);
-  const [supportOpen, setSupportOpen] = useState(false);
-  const [supportAmount, setSupportAmount] = useState("100");
-  const [supportFrequency, setSupportFrequency] = useState<"one_time" | "monthly">("one_time");
-  const [supportNote, setSupportNote] = useState("");
+  const [supportPlan, setSupportPlan] = useState<VerifiedPlan>("verified_2w");
   const [supportBusy, setSupportBusy] = useState(false);
   const [supportMessage, setSupportMessage] = useState("");
   const [supportCheckoutUrl, setSupportCheckoutUrl] = useState<string | null>(null);
