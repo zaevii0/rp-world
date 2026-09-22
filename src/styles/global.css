@@ -6834,3 +6834,10 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
 .bottom-nav .nav-create:focus-visible {
   background: transparent !important;
 }
+
+/* View As: keep the text line box tightly matched to its font size. */
+.profile-page .profile-social-actions .primary-profile-action {
+  line-height: 1 !important;
+  text-box-trim: trim-both;
+  text-box-edge: cap alphabetic;
+}
