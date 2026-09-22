@@ -4368,12 +4368,13 @@ export function App() {
                         {!viewAs ? (
                           <>
                             <button
-                              className="profile-action-button secondary-profile-action"
+                              className="profile-action-button secondary-profile-action profile-icon-action"
                               type="button"
                               onClick={() => setProfileOpen(true)}
+                              aria-label="Edit profile"
+                              title="Edit profile"
                             >
-                              <Pencil size={14} />
-                              Edit
+                              <Pencil size={18} />
                             </button>
 
                             <button
