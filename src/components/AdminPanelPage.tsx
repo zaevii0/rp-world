@@ -36,7 +36,12 @@ function formatDate(value: string) {
   }).format(new Date(value));
 }
 
-export function AdminPanelPage() {
+interface AdminPanelPageProps {
+  allThemesUnlocked: boolean;
+  onAllThemesUnlockedChange: (value: boolean) => void;
+}
+
+export function AdminPanelPage({ allThemesUnlocked, onAllThemesUnlockedChange }: AdminPanelPageProps) {
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [supportIntents, setSupportIntents] = useState<SupportIntent[]>([]);
   const [supportStatusFilter, setSupportStatusFilter] = useState<"all" | SupportStatus>("all");
@@ -110,6 +115,25 @@ export function AdminPanelPage() {
     setMessage("Support status updated.");
   }
 
+  async function toggleAllThemes() {
+    if (!supabase) return;
+    setRefreshing(true);
+    setMessage("");
+    setError("");
+    const nextValue = !allThemesUnlocked;
+    const { error: updateError } = await supabase
+      .from("app_settings")
+      .update({ value_boolean: nextValue, updated_at: new Date().toISOString() })
+      .eq("key", "theme_colors_unlocked");
+    setRefreshing(false);
+    if (updateError) {
+      setError(updateError.message || "Theme access could not be updated.");
+      return;
+    }
+    onAllThemesUnlockedChange(nextValue);
+    setMessage(nextValue ? "All theme colors are now unlocked for everyone." : "Theme colors are locked again.");
+  }
+
   async function updateStatus(id: string, status: SuggestionStatus) {
     if (!supabase) return;
     setBusyId(id);
@@ -180,6 +204,17 @@ export function AdminPanelPage() {
         <button className="admin-refresh-button" type="button" onClick={() => void loadSuggestions()} disabled={refreshing}>
           <RefreshCw size={16} className={refreshing ? "admin-spin" : ""} />
           {refreshing ? "Refreshing…" : "Refresh"}
+        </button>
+      </div>
+
+      <div className="admin-theme-access glass">
+        <div>
+          <p className="eyebrow">THEME ACCESS</p>
+          <h3>Unlock all theme colors</h3>
+          <p>{allThemesUnlocked ? "All RP WORLD theme colors are currently available to everyone." : "Premium theme colors stay locked unless a member has theme access."}</p>
+        </div>
+        <button type="button" className={allThemesUnlocked ? "admin-theme-toggle active" : "admin-theme-toggle"} onClick={() => void toggleAllThemes()} disabled={refreshing}>
+          {allThemesUnlocked ? "Unlocked" : "Unlock all"}
         </button>
       </div>
 
