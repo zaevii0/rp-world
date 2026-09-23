@@ -7,6 +7,7 @@ interface ThemePickerProps {
   theme: ThemeId;
   onThemeChange: (theme: ThemeId) => void;
   canUseAllThemes?: boolean;
+  allThemesUnlocked?: boolean;
   onLockedTheme?: () => void;
 }
 
@@ -15,7 +16,7 @@ type ThemeCardStyle = CSSProperties & {
   "--theme-soft": string;
 };
 
-export function ThemePicker({ theme, onThemeChange, canUseAllThemes = true, onLockedTheme }: ThemePickerProps) {
+export function ThemePicker({ theme, onThemeChange, canUseAllThemes = true, allThemesUnlocked = false, onLockedTheme }: ThemePickerProps) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -63,7 +64,7 @@ export function ThemePicker({ theme, onThemeChange, canUseAllThemes = true, onLo
 
             <div className="theme-grid">
               {themes.map((item) => {
-                const locked = !canUseAllThemes && item.id !== "midnight" && item.id !== "ocean" && item.id !== "black";
+                const locked = !allThemesUnlocked && !canUseAllThemes && item.id !== "midnight" && item.id !== "ocean" && item.id !== "black";
                 return (
                   <button
                     className={item.id === theme ? `theme-card selected${locked ? " locked" : ""}` : `theme-card${locked ? " locked" : ""}`}
