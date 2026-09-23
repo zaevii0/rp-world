@@ -292,6 +292,7 @@ function isVideoMedia(value: string | null | undefined) {
 
 export function App() {
   const [theme, setTheme] = useState<ThemeId>(readTheme);
+  const [allThemesUnlocked, setAllThemesUnlocked] = useState(false);
   const [appearance, setAppearance] =
     useState<Appearance>(readAppearance);
 
@@ -322,6 +323,23 @@ export function App() {
   const [highlightStyle, setHighlightStyle] = useState<HighlightStyle>("circle");
 
   const [view, setView] = useState<AppView>(readStoredView);
+
+  useEffect(() => {
+    let active = true;
+    async function loadThemeAccess() {
+      if (!supabase) return;
+      const { data } = await supabase
+        .from("app_settings")
+        .select("value_boolean")
+        .eq("key", "theme_colors_unlocked")
+        .maybeSingle();
+      if (active) setAllThemesUnlocked(Boolean(data?.value_boolean));
+    }
+    void loadThemeAccess();
+    return () => {
+      active = false;
+    };
+  }, [session?.user?.id]);
 
   const [authOpen, setAuthOpen] = useState(false);
   const [authMode, setAuthMode] =
@@ -3561,6 +3579,7 @@ export function App() {
           <ThemePicker
             theme={theme}
             canUseAllThemes={hasPremiumThemes(profile)}
+            allThemesUnlocked={allThemesUnlocked}
             onThemeChange={(nextTheme) => {
               setTheme(nextTheme);
               setMessage("");
@@ -4872,7 +4891,7 @@ export function App() {
             )}
 
             {view === "admin" && session && profile && isAdmin && (
-              <Suspense fallback={<div className="page-loading" aria-label="Loading admin" /> }><AdminPanelPage /></Suspense>
+              <Suspense fallback={<div className="page-loading" aria-label="Loading admin" /> }><AdminPanelPage allThemesUnlocked={allThemesUnlocked} onAllThemesUnlockedChange={setAllThemesUnlocked} /></Suspense>
             )}
 
             {view === "menu" && (
