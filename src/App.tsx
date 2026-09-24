@@ -2747,6 +2747,20 @@ export function App() {
 
     const rows = (data ?? []) as Comment[];
 
+    // Keep every reply branch expanded by default. This makes the Facebook-style
+    // thread structure, indentation, connector, and "Replying to" indicator
+    // survive a refresh instead of requiring the user to reopen each thread.
+    const replyParentIds = new Set(
+      rows
+        .map((row) => row.parent_id)
+        .filter((parentId): parentId is string => Boolean(parentId)),
+    );
+    setExpandedReplyIds((current) => {
+      const next = new Set(current);
+      replyParentIds.forEach((parentId) => next.add(parentId));
+      return next;
+    });
+
     // Paint the actual comments immediately. Reactions and author profiles
     // are secondary enrichment and must not block the first visible render.
     setCommentsByPost((current) => ({
@@ -2948,6 +2962,16 @@ export function App() {
         newComment,
       ],
     }));
+
+    // Open the reply branch immediately after sending so the newly posted
+    // reply and its persistent "Replying to" indicator are visible at once.
+    if (parentId) {
+      setExpandedReplyIds((current) => {
+        const next = new Set(current);
+        next.add(parentId);
+        return next;
+      });
+    }
 
     setCommentDrafts((current) => ({ ...current, [postId]: "" }));
     setCommentMediaFiles((current) => ({ ...current, [postId]: null }));
