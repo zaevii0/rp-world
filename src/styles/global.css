@@ -7085,3 +7085,22 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
 .admin-theme-toggle.active { box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 16%,transparent); }
 .admin-theme-toggle:disabled { opacity:.55; cursor:wait; }
 @media (max-width:560px) { .admin-theme-access { align-items:flex-start; } .admin-theme-toggle { min-width:94px; } }
+
+
+/* Facebook-style nested comment/reply thread indicator */
+.comment-thread { position:relative; }
+.comment-thread-reply { position:relative; }
+.comment-thread-reply > .comment-row { margin-left:34px; position:relative; }
+.comment-thread-reply > .comment-row::before { content:""; position:absolute; left:15px; top:0; bottom:18px; width:1.5px; border-radius:999px; background:color-mix(in srgb,var(--accent) 24%,rgba(127,127,127,.18)); }
+.comment-thread-reply > .comment-row::after { content:""; position:absolute; left:15px; top:17px; width:18px; height:14px; border-left:1.5px solid color-mix(in srgb,var(--accent) 24%,rgba(127,127,127,.18)); border-bottom:1.5px solid color-mix(in srgb,var(--accent) 24%,rgba(127,127,127,.18)); border-bottom-left-radius:10px; }
+.comment-row.comment-reply { position:relative; margin-left:34px; }
+.comment-reply-context { display:flex; align-items:center; gap:6px; min-height:17px; margin:0 0 3px 8px; color:color-mix(in srgb,var(--accent) 72%,currentColor); font-size:9px; line-height:1.2; font-weight:650; }
+.comment-reply-context-line { width:13px; height:1px; flex:0 0 13px; border-radius:999px; background:color-mix(in srgb,var(--accent) 35%,rgba(127,127,127,.18)); }
+.comment-reply-context button { padding:0; border:0; color:inherit; background:transparent; font:inherit; font-weight:750; cursor:pointer; }
+.comment-reply-context button:hover,.comment-reply-context button:focus-visible { color:var(--accent); text-decoration:underline; outline:none; }
+@media (max-width:560px) {
+  .comment-thread-reply > .comment-row,.comment-row.comment-reply { margin-left:24px; }
+  .comment-thread-reply > .comment-row::before { left:11px; }
+  .comment-thread-reply > .comment-row::after { left:11px; width:14px; }
+  .comment-reply-context { margin-left:5px; }
+}
