@@ -121,16 +121,15 @@ export function AdminPanelPage({ allThemesUnlocked, onAllThemesUnlockedChange }:
     setMessage("");
     setError("");
     const nextValue = !allThemesUnlocked;
-    const { error: updateError } = await supabase
-      .from("app_settings")
-      .update({ value_boolean: nextValue, updated_at: new Date().toISOString() })
-      .eq("key", "theme_colors_unlocked");
+    const { data: updatedValue, error: updateError } = await supabase.rpc("set_theme_colors_unlocked", {
+      p_unlocked: nextValue,
+    });
     setRefreshing(false);
-    if (updateError) {
-      setError(updateError.message || "Theme access could not be updated.");
+    if (updateError || typeof updatedValue !== "boolean") {
+      setError(updateError?.message || "Theme access could not be updated.");
       return;
     }
-    onAllThemesUnlockedChange(nextValue);
+    onAllThemesUnlockedChange(updatedValue);
     setMessage(nextValue ? "All theme colors are now unlocked for everyone." : "Theme colors are locked again.");
   }
 
