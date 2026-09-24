@@ -3122,6 +3122,7 @@ export function App() {
     const visible = parentId === null ? children : (expandedReplyIds.has(parentId) ? children : children.slice(0, 2));
     return visible.map((comment) => {
       const replies = childrenByParent.get(comment.id) ?? [];
+      const parentComment = parentId ? comments.find((item) => item.id === parentId) ?? null : null;
       const isEditing = commentEditId === comment.id;
       const reactionSummary = commentReactionOptions
         .filter((reaction) => (comment.reactionCounts?.[reaction.type] ?? 0) > 0)
@@ -3136,6 +3137,12 @@ export function App() {
               {!comment.profile?.avatar_url && initials(comment.profile?.display_name ?? "RP")}
             </button>
             <div className="comment-body">
+              {depth > 0 && parentComment && (
+                <div className="comment-reply-context">
+                  <span className="comment-reply-context-line" aria-hidden="true" />
+                  <span>Replying to <button type="button" onClick={() => void loadPublicProfile(parentComment.author_id)}>{parentComment.profile?.display_name ?? "RP WORLD member"}</button></span>
+                </div>
+              )}
               <div className="comment-bubble"
                 onPointerDown={() => {
                   if (commentLongPressRef.current) clearTimeout(commentLongPressRef.current);
