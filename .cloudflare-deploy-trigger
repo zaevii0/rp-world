@@ -2,4 +2,5 @@ RP WORLD Cloudflare deployment trigger.
 
 Deployment requested from GitHub main branch.
 
-Latest main deployment trigger: 2026-09-24T00:00:00+08:00
+Latest main deployment trigger: 2026-10-19T21:00:00+08:00
+Theme access and persistence fix: merge 08c51cb569c703dbcc12541f08078ba27a39822e
