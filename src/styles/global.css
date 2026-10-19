@@ -7350,20 +7350,18 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
 .app.light .follower-row { border-bottom-color: rgba(20,20,30,.075); }
 @media (max-width: 560px) {
   .followers-backdrop {
-    padding: 0 !important;
-    align-items: flex-end !important;
-    justify-content: stretch !important;
+    padding: 16px !important;
+    align-items: center !important;
+    justify-content: center !important;
   }
   .followers-sheet {
     width: 100% !important;
-    max-width: none !important;
-    max-height: min(82dvh, 760px) !important;
+    max-width: 480px !important;
+    max-height: min(78dvh, 680px) !important;
     min-height: min(42dvh, 320px) !important;
-    border-radius: 25px 25px 0 0 !important;
-    border-left: 0 !important;
-    border-right: 0 !important;
-    border-bottom: 0 !important;
-    padding-bottom: env(safe-area-inset-bottom) !important;
+    border-radius: 26px !important;
+    border: 1px solid color-mix(in srgb, var(--accent) 14%, rgba(255,255,255,.14)) !important;
+    padding-bottom: max(8px, env(safe-area-inset-bottom)) !important;
     animation: followers-sheet-rise 240ms cubic-bezier(.2,.75,.25,1) both;
   }
   .followers-sheet > .sheet-header {
