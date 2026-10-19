@@ -138,16 +138,8 @@ type Highlight = {
   user_id: string;
   title: string;
   image_url: string | null;
-  media_urls?: string[] | null;
   created_at: string;
 };
-
-function getHighlightMedia(highlight: Highlight | null | undefined): string[] {
-  if (!highlight) return [];
-  const urls = Array.isArray(highlight.media_urls) ? highlight.media_urls.filter((url): url is string => typeof url === "string" && Boolean(url)) : [];
-  if (urls.length) return urls.slice(0, 10);
-  return highlight.image_url ? [highlight.image_url] : [];
-}
 
 type Comment = {
   id: string;
@@ -322,13 +314,11 @@ export function App() {
   const [highlightOpen, setHighlightOpen] = useState(false);
   const [highlightTitle, setHighlightTitle] = useState("");
   const [highlightImage, setHighlightImage] = useState("");
-  const [highlightFiles, setHighlightFiles] = useState<File[]>([]);
+  const [highlightFile, setHighlightFile] = useState<File | null>(null);
   const [highlightBusy, setHighlightBusy] = useState(false);
   const [highlightEditOpen, setHighlightEditOpen] = useState(false);
   const [highlightEditTitle, setHighlightEditTitle] = useState("");
-  const [highlightEditFiles, setHighlightEditFiles] = useState<File[]>([]);
-  const [highlightEditMediaUrls, setHighlightEditMediaUrls] = useState<string[]>([]);
-  const [highlightViewerIndex, setHighlightViewerIndex] = useState(0);
+  const [highlightEditFile, setHighlightEditFile] = useState<File | null>(null);
   const [highlightEditBusy, setHighlightEditBusy] = useState(false);
   const [highlightActionsOpen, setHighlightActionsOpen] = useState(false);
   const highlightAddFileRef = useRef<HTMLInputElement | null>(null);
@@ -1826,7 +1816,7 @@ export function App() {
           .limit(50),
         supabase
           .from("profile_highlights")
-          .select("id, user_id, title, image_url, media_urls, created_at")
+          .select("id, user_id, title, image_url, created_at")
           .eq("user_id", userId)
           .order("created_at", { ascending: true }),
         supabase
@@ -2338,99 +2328,136 @@ export function App() {
     return () => clearTimeout(timer);
   }, [messageTyping]);
 
-  async function uploadHighlightImages(files: File[], highlightId?: string): Promise<string[]> {
-    if (!supabase || !session?.user) throw new Error("Please sign in to upload highlight photos.");
-    const uploadedUrls: string[] = [];
-    for (const file of files) {
-      if (!file.type.startsWith("image/")) throw new Error("Highlights support image files only.");
-      const extension = file.name.split(".").pop()?.toLowerCase() || "jpg";
-      const folder = highlightId ? `highlights/${highlightId}/` : "highlights/";
-      const filePath = `${session.user.id}/${folder}${crypto.randomUUID()}.${extension}`;
-      const { error: uploadError } = await supabase.storage.from("profile-highlights").upload(filePath, file, { cacheControl: "3600", contentType: file.type || "image/jpeg", upsert: false });
-      if (uploadError) throw new Error(`Photo upload failed: ${uploadError.message}`);
-      const { data: publicUrl } = supabase.storage.from("profile-highlights").getPublicUrl(filePath);
-      uploadedUrls.push(publicUrl.publicUrl);
-    }
-    return uploadedUrls;
-  }
-
   async function loadHighlights() {
     if (!supabase || !session?.user) return;
-    const { data, error } = await supabase.from("profile_highlights").select("id, user_id, title, image_url, media_urls, created_at").eq("user_id", session.user.id).order("created_at", { ascending: true });
-    if (error) { console.error("RP WORLD highlights failed to load", error); setProfileError("Could not load your highlights. Please try again."); return; }
-    setHighlights((data ?? []) as Highlight[]);
-  }
 
-  function openHighlightViewer(highlight: Highlight) {
-    setHighlightViewerIndex(0);
-    setHighlightActionsOpen(false);
-    setActiveHighlight(highlight);
+    const { data } = await supabase
+      .from("profile_highlights")
+      .select("id, user_id, title, image_url, created_at")
+      .eq("user_id", session.user.id)
+      .order("created_at", { ascending: true });
+
+    setHighlights((data ?? []) as Highlight[]);
   }
 
   function openHighlightEditor(highlight: Highlight) {
     setHighlightActionsOpen(false);
     setHighlightEditTitle(highlight.title);
-    setHighlightEditFiles([]);
-    setHighlightEditMediaUrls(getHighlightMedia(highlight));
-    setProfileError("");
+    setHighlightEditFile(null);
     setHighlightEditOpen(true);
   }
 
   async function addHighlightMedia(event: ChangeEvent<HTMLInputElement>) {
-    const files = Array.from(event.target.files ?? []);
+    const file = event.target.files?.[0] ?? null;
     event.target.value = "";
-    if (!supabase || !session?.user || !activeHighlight || !files.length || highlightEditBusy) return;
-    const currentUrls = getHighlightMedia(activeHighlight);
-    if (currentUrls.length + files.length > 10) { setProfileError("Each highlight can contain up to 10 photos."); return; }
-    setHighlightEditBusy(true); setProfileError("");
+    if (!supabase || !session?.user || !activeHighlight || !file || highlightEditBusy) return;
+    setHighlightEditBusy(true);
+    setProfileError("");
     try {
-      const uploadedUrls = await uploadHighlightImages(files, activeHighlight.id);
-      const mediaUrls = [...currentUrls, ...uploadedUrls].slice(0, 10);
-      const { data, error } = await supabase.from("profile_highlights").update({ image_url: mediaUrls[0] ?? null, media_urls: mediaUrls }).eq("id", activeHighlight.id).eq("user_id", session.user.id).select("id, user_id, title, image_url, media_urls, created_at").single();
-      if (error || !data) throw new Error(error?.message || "Could not add highlight photos.");
-      const next = data as Highlight; setActiveHighlight(next);
-      setHighlights((current) => current.map((item) => item.id === next.id ? next : item));
-      setPublicHighlights((current) => current.map((item) => item.id === next.id ? next : item));
-      setHighlightViewerIndex(0); setHighlightActionsOpen(false);
-    } catch (caught) { setProfileError(caught instanceof Error ? caught.message : "Could not add highlight photos."); }
-    finally { setHighlightEditBusy(false); }
+      const extension = file.name.split(".").pop()?.toLowerCase() || "bin";
+      const filePath = session.user.id + "/highlights/" + activeHighlight.id + "/" + crypto.randomUUID() + "." + extension;
+      const { error: uploadError } = await supabase.storage.from("profile-highlights").upload(filePath, file, { upsert: false, contentType: file.type || undefined });
+      if (uploadError) throw uploadError;
+      const { data: publicUrl } = supabase.storage.from("profile-highlights").getPublicUrl(filePath);
+      const { error: updateError } = await supabase.from("profile_highlights").update({ image_url: publicUrl.publicUrl }).eq("id", activeHighlight.id).eq("user_id", session.user.id);
+      if (updateError) throw updateError;
+      const nextHighlight = { ...activeHighlight, image_url: publicUrl.publicUrl };
+      setActiveHighlight(nextHighlight);
+      setHighlights((current) => current.map((item) => item.id === nextHighlight.id ? nextHighlight : item));
+      setPublicHighlights((current) => current.map((item) => item.id === nextHighlight.id ? nextHighlight : item));
+      setHighlightActionsOpen(false);
+    } catch (caught) {
+      setProfileError(caught instanceof Error ? caught.message : "Could not add the highlight photo.");
+    } finally {
+      setHighlightEditBusy(false);
+    }
   }
 
   async function removeHighlightMedia() {
-    if (!supabase || !session?.user || !activeHighlight || highlightEditBusy) return;
-    const currentUrls = getHighlightMedia(activeHighlight);
-    if (!currentUrls.length || !window.confirm("Remove the first photo from this highlight?")) return;
-    const mediaUrls = currentUrls.slice(1);
-    setHighlightEditBusy(true); setProfileError("");
+    if (!supabase || !session?.user || !activeHighlight || highlightEditBusy || !activeHighlight.image_url) return;
+    if (!window.confirm("Remove the photo/video from this highlight?")) return;
+    setHighlightEditBusy(true);
+    setProfileError("");
     try {
-      const { data, error } = await supabase.from("profile_highlights").update({ image_url: mediaUrls[0] ?? null, media_urls: mediaUrls }).eq("id", activeHighlight.id).eq("user_id", session.user.id).select("id, user_id, title, image_url, media_urls, created_at").single();
-      if (error || !data) throw new Error(error?.message || "Could not remove the highlight photo.");
-      const next = data as Highlight; setActiveHighlight(next);
-      setHighlights((current) => current.map((item) => item.id === next.id ? next : item));
-      setPublicHighlights((current) => current.map((item) => item.id === next.id ? next : item));
-      setHighlightViewerIndex(0); setHighlightActionsOpen(false);
-    } catch (caught) { setProfileError(caught instanceof Error ? caught.message : "Could not remove the highlight photo."); }
-    finally { setHighlightEditBusy(false); }
+      const { error: updateError } = await supabase.from("profile_highlights").update({ image_url: null }).eq("id", activeHighlight.id).eq("user_id", session.user.id);
+      if (updateError) throw updateError;
+      const nextHighlight: Highlight = { ...activeHighlight, image_url: null };
+      setActiveHighlight(nextHighlight);
+      setHighlights((current) => current.map((item) => item.id === nextHighlight.id ? nextHighlight : item));
+      setPublicHighlights((current) => current.map((item) => item.id === nextHighlight.id ? nextHighlight : item));
+      setHighlightActionsOpen(false);
+    } catch (caught) {
+      setProfileError(caught instanceof Error ? caught.message : "Could not remove the highlight photo.");
+    } finally {
+      setHighlightEditBusy(false);
+    }
   }
+
 
   async function updateHighlight(event: FormEvent) {
     event.preventDefault();
-    if (!supabase || !session?.user || !activeHighlight || highlightEditBusy) return;
+    if (!supabase || !session?.user || !activeHighlight) return;
+
     const title = highlightEditTitle.trim();
-    if (!title) { setProfileError("Please enter a title for the highlight."); return; }
-    if (highlightEditMediaUrls.length + highlightEditFiles.length > 10) { setProfileError("Each highlight can contain up to 10 photos."); return; }
-    setHighlightEditBusy(true); setProfileError("");
+    if (!title) {
+      setProfileError("Please enter a title for the highlight.");
+      return;
+    }
+
+    setHighlightEditBusy(true);
+    setProfileError("");
+
     try {
-      const uploaded = await uploadHighlightImages(highlightEditFiles, activeHighlight.id);
-      const mediaUrls = [...highlightEditMediaUrls, ...uploaded].slice(0, 10);
-      const { data, error } = await supabase.from("profile_highlights").update({ title, image_url: mediaUrls[0] ?? null, media_urls: mediaUrls }).eq("id", activeHighlight.id).eq("user_id", session.user.id).select("id, user_id, title, image_url, media_urls, created_at").single();
-      if (error || !data) throw new Error(error?.message || "Could not update highlight.");
+      let imageUrl = activeHighlight.image_url;
+
+      if (highlightEditFile) {
+        const extension = highlightEditFile.name.split(".").pop()?.toLowerCase() || "jpg";
+        const filePath = `${session.user.id}/${crypto.randomUUID()}.${extension}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from("profile-highlights")
+          .upload(filePath, highlightEditFile, {
+            cacheControl: "3600",
+            contentType: highlightEditFile.type || "image/jpeg",
+            upsert: false,
+          });
+
+        if (uploadError) throw new Error(`Media upload failed: ${uploadError.message}`);
+
+        const { data: publicUrl } = supabase.storage
+          .from("profile-highlights")
+          .getPublicUrl(filePath);
+        imageUrl = publicUrl.publicUrl;
+      }
+
+      const { data, error: updateError } = await supabase
+        .from("profile_highlights")
+        .update({ title, image_url: imageUrl })
+        .eq("id", activeHighlight.id)
+        .eq("user_id", session.user.id)
+        .select("id, user_id, title, image_url, created_at")
+        .single();
+
+      if (updateError || !data) {
+        throw new Error(updateError?.message || "Could not update highlight.");
+      }
+
       const updated = data as Highlight;
       setHighlights((current) => current.map((item) => item.id === updated.id ? updated : item));
       setPublicHighlights((current) => current.map((item) => item.id === updated.id ? updated : item));
-      setActiveHighlight(updated); setHighlightViewerIndex(0); setHighlightEditOpen(false); setHighlightEditFiles([]); setHighlightEditMediaUrls(getHighlightMedia(updated));
-    } catch (caught) { console.error("RP WORLD highlight update failed", caught); setProfileError(caught instanceof Error ? caught.message : "Could not update highlight. Please try again."); }
-    finally { setHighlightEditBusy(false); }
+      setActiveHighlight(updated);
+      setHighlightEditOpen(false);
+      setHighlightEditFile(null);
+    } catch (highlightError) {
+      console.error("RP WORLD highlight update failed", highlightError);
+      setProfileError(
+        highlightError instanceof Error
+          ? highlightError.message
+          : "Could not update highlight. Please try again.",
+      );
+    } finally {
+      setHighlightEditBusy(false);
+    }
   }
 
   async function deleteHighlight() {
@@ -2443,12 +2470,14 @@ export function App() {
     setProfileError("");
 
     try {
+      const imageUrl = activeHighlight.image_url;
       const marker = "/storage/v1/object/public/profile-highlights/";
-      const filePaths = getHighlightMedia(activeHighlight).map((url) => {
-        const markerIndex = url.indexOf(marker);
-        return markerIndex >= 0 ? decodeURIComponent(url.slice(markerIndex + marker.length)) : null;
-      }).filter((path): path is string => Boolean(path));
-      if (filePaths.length) await supabase.storage.from("profile-highlights").remove(filePaths);
+      const markerIndex = imageUrl?.indexOf(marker) ?? -1;
+
+      if (markerIndex >= 0) {
+        const filePath = decodeURIComponent(imageUrl!.slice(markerIndex + marker.length));
+        await supabase.storage.from("profile-highlights").remove([filePath]);
+      }
 
       const { error: deleteError } = await supabase
         .from("profile_highlights")
@@ -2475,21 +2504,85 @@ export function App() {
 
   async function createHighlight(event: FormEvent) {
     event.preventDefault();
-    if (!supabase || !session?.user) return;
+
+    if (!supabase || !session?.user) {
+      return;
+    }
+
     const title = highlightTitle.trim();
-    if (!title) { setProfileError("Please enter a title for the highlight."); return; }
-    if (highlightFiles.length > 10) { setProfileError("Each highlight can contain up to 10 photos."); return; }
-    setHighlightBusy(true); setProfileError("");
+
+    if (!title) {
+      setProfileError("Please enter a title for the highlight.");
+      return;
+    }
+
+    setHighlightBusy(true);
+    setProfileError("");
+
+    let imageUrl = highlightImage.trim() || null;
+
     try {
-      const mediaUrls = await uploadHighlightImages(highlightFiles);
-      const imageUrl = mediaUrls[0] ?? (highlightImage.trim() || null);
-      const { data, error } = await supabase.from("profile_highlights").insert({ user_id: session.user.id, title, image_url: imageUrl, media_urls: mediaUrls }).select("id, user_id, title, image_url, media_urls, created_at").single();
-      if (error) throw new Error(`Could not save highlight: ${error.message}`);
-      if (!data) throw new Error("Could not save highlight: no record was returned.");
-      setHighlights((current) => [...current, data as Highlight]);
-      setHighlightTitle(""); setHighlightImage(""); setHighlightFiles([]); setProfileError(""); setHighlightOpen(false);
-    } catch (caught) { console.error("RP WORLD highlight save failed", caught); setProfileError(caught instanceof Error ? caught.message : "Could not save highlight. Please try again."); }
-    finally { setHighlightBusy(false); }
+      if (highlightFile) {
+        const extension =
+          highlightFile.name.split(".").pop()?.toLowerCase() || "jpg";
+        const filePath = `${session.user.id}/${crypto.randomUUID()}.${extension}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from("profile-highlights")
+          .upload(filePath, highlightFile, {
+            cacheControl: "3600",
+            contentType: highlightFile.type || "image/jpeg",
+            upsert: false,
+          });
+
+        if (uploadError) {
+          throw new Error(`Image upload failed: ${uploadError.message}`);
+        }
+
+        const { data: publicUrl } = supabase.storage
+          .from("profile-highlights")
+          .getPublicUrl(filePath);
+
+        imageUrl = publicUrl.publicUrl;
+      }
+
+      const { data, error: saveError } = await supabase
+        .from("profile_highlights")
+        .insert({
+          user_id: session.user.id,
+          title,
+          image_url: imageUrl,
+        })
+        .select("id, user_id, title, image_url, created_at")
+        .single();
+
+      if (saveError) {
+        throw new Error(`Could not save highlight: ${saveError.message}`);
+      }
+
+      if (!data) {
+        throw new Error("Could not save highlight: no record was returned.");
+      }
+      setHighlights((current) => [
+        ...current,
+        data as Highlight,
+      ]);
+
+      setHighlightTitle("");
+      setHighlightImage("");
+      setHighlightFile(null);
+      setProfileError("");
+      setHighlightOpen(false);
+    } catch (highlightError) {
+      console.error("RP WORLD highlight save failed", highlightError);
+      setProfileError(
+        highlightError instanceof Error
+          ? highlightError.message
+          : "Could not save highlight. Please try again.",
+      );
+    } finally {
+      setHighlightBusy(false);
+    }
   }
 
   async function repostPost(post: Post) {
@@ -4436,7 +4529,7 @@ export function App() {
                         className={highlightStyle === "portrait" ? "highlight-card highlight-card-portrait" : "highlight-card highlight-card-circle"}
                         key={item.id}
                         type="button"
-                        onClick={() => openHighlightViewer(item)}
+                        onClick={() => setActiveHighlight(item)}
                         aria-label={`Open highlight: ${item.title}`}
                       >
                         <span
@@ -4814,7 +4907,7 @@ export function App() {
                   <div className="section-heading"><div><h3>@{publicProfile.username}</h3></div></div>
                   <div className="highlights-row view-as">
                     {publicHighlights.length === 0 ? <span className="comments-empty">No highlights yet.</span> : publicHighlights.map((item) => (
-                      <button className={publicProfile.highlight_style === "portrait" ? "highlight-card highlight-card-portrait" : "highlight-card highlight-card-circle"} key={item.id} type="button" onClick={() => openHighlightViewer(item)}>
+                      <button className={publicProfile.highlight_style === "portrait" ? "highlight-card highlight-card-portrait" : "highlight-card highlight-card-circle"} key={item.id} type="button" onClick={() => setActiveHighlight(item)}>
                         <span className="highlight-image" style={item.image_url ? { backgroundImage: `url(${item.image_url})` } : undefined}>{!item.image_url && <Sparkles size={20} />}</span><strong>{item.title}</strong>
                       </button>
                     ))}
@@ -5915,8 +6008,8 @@ export function App() {
 
             <p className="sheet-copy">
               Create a highlight for your profile.
-              Add up to 10 photos to one memory and
-              give the collection a short title.
+              Choose a photo from your device and
+              give the moment a short title.
             </p>
 
             <form
@@ -5943,8 +6036,8 @@ export function App() {
 
               <label>
                 <span>
-                  Photos{" "}
-                  <small>up to 10</small>
+                  Photo{" "}
+                  <small>optional</small>
                 </span>
 
                 <div className="input-wrap">
@@ -5952,19 +6045,15 @@ export function App() {
 
                   <input
                     type="file"
-                    accept="image/jpeg,image/png,image/webp,image/gif"
-                    multiple
-                    onChange={(event) => {
-                      const files = Array.from(event.target.files ?? []);
-                      setHighlightFiles(files.slice(0, 10));
-                      if (files.length > 10) setProfileError("Choose up to 10 photos per highlight.");
-                      else setProfileError("");
-                    }}
+                    accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,video/quicktime"
+                    onChange={(event) =>
+                      setHighlightFile(
+                        event.target.files?.[0] ?? null,
+                      )
+                    }
                   />
                 </div>
               </label>
-
-              {highlightFiles.length > 0 && <p className="highlight-selection-note">{highlightFiles.length} of 10 photos selected</p>}
 
               {profileError && (
                 <p className="form-message error">
@@ -5975,7 +6064,7 @@ export function App() {
               <button
                 className="primary-button full"
                 type="submit"
-                disabled={highlightBusy || highlightFiles.length > 10}
+                disabled={highlightBusy}
               >
                 {highlightBusy
                   ? "Saving…"
@@ -6087,26 +6176,22 @@ export function App() {
             </button>
 
             <div className="highlight-viewer-image">
-              {getHighlightMedia(activeHighlight)[highlightViewerIndex] ? (
-                isVideoMedia(getHighlightMedia(activeHighlight)[highlightViewerIndex]) ? (
-                  <video src={getHighlightMedia(activeHighlight)[highlightViewerIndex]} controls autoPlay playsInline preload="metadata" />
+              {activeHighlight.image_url ? (
+                isVideoMedia(activeHighlight.image_url) ? (
+                  <video
+                    src={activeHighlight.image_url}
+                    controls
+                    autoPlay
+                    playsInline
+                    preload="metadata"
+                  />
                 ) : (
-                  <img src={getHighlightMedia(activeHighlight)[highlightViewerIndex]} alt={activeHighlight.title} />
+                  <img src={activeHighlight.image_url} alt={activeHighlight.title} />
                 )
               ) : (
                 <Sparkles size={38} />
               )}
             </div>
-
-            {getHighlightMedia(activeHighlight).length > 1 && (
-              <div className="highlight-viewer-thumbnails" aria-label="Highlight photos">
-                {getHighlightMedia(activeHighlight).map((url, index) => (
-                  <button key={url + index} type="button" className={index === highlightViewerIndex ? "is-active" : ""}
-                    aria-label={`Show photo ${index + 1} of ${getHighlightMedia(activeHighlight).length}`}
-                    onClick={() => setHighlightViewerIndex(index)}><img src={url} alt="" /></button>
-                ))}
-              </div>
-            )}
 
             <div className="highlight-viewer-caption">
               <div className="highlight-viewer-caption-row">
@@ -6134,13 +6219,13 @@ export function App() {
             {highlightActionsOpen && !viewAs && (
               <div className="highlight-actions-sheet" role="menu" aria-label="Highlight options">
                 <button type="button" onClick={() => openHighlightEditor(activeHighlight)} disabled={highlightEditBusy}>
-                  <Pencil size={16} /> Edit highlight & photos
+                  <Pencil size={16} /> Edit highlight title
                 </button>
-                <button type="button" onClick={() => highlightAddFileRef.current?.click()} disabled={highlightEditBusy || getHighlightMedia(activeHighlight).length >= 10}>
-                  <Plus size={16} /> Add photos ({getHighlightMedia(activeHighlight).length}/10)
+                <button type="button" onClick={() => highlightAddFileRef.current?.click()} disabled={highlightEditBusy}>
+                  <Plus size={16} /> Add highlight photo
                 </button>
-                <button type="button" onClick={() => void removeHighlightMedia()} disabled={highlightEditBusy || !getHighlightMedia(activeHighlight).length}>
-                  <Trash2 size={16} /> Remove first photo
+                <button type="button" onClick={() => void removeHighlightMedia()} disabled={highlightEditBusy || !activeHighlight.image_url}>
+                  <Trash2 size={16} /> Remove highlight photo
                 </button>
                 <button type="button" className="danger" onClick={() => void deleteHighlight()} disabled={highlightEditBusy}>
                   <Trash2 size={16} /> Delete entire highlight
@@ -6148,8 +6233,7 @@ export function App() {
                 <input
                   ref={highlightAddFileRef}
                   type="file"
-                  accept="image/jpeg,image/png,image/webp,image/gif"
-                  multiple
+                  accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,video/quicktime"
                   hidden
                   onChange={addHighlightMedia}
                 />
@@ -6187,37 +6271,17 @@ export function App() {
                 </div>
               </label>
 
-              <div className="highlight-editor-gallery">
-                <div className="highlight-editor-gallery-heading">
-                  <div><strong>Photos</strong><small>Keep up to 10 in each memory</small></div>
-                  <span>{highlightEditMediaUrls.length + highlightEditFiles.length}/10</span>
+              <label>
+                <span>Photo or video <small>optional</small></span>
+                <div className="input-wrap">
+                  <Image size={15} />
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,video/quicktime"
+                    onChange={(event) => setHighlightEditFile(event.target.files?.[0] ?? null)}
+                  />
                 </div>
-                {highlightEditMediaUrls.length ? (
-                  <div className="highlight-editor-photo-grid">
-                    {highlightEditMediaUrls.map((url, index) => (
-                      <div className="highlight-editor-photo" key={url + index}>
-                        {isVideoMedia(url) ? <video src={url} muted playsInline /> : <img src={url} alt={`Highlight photo ${index + 1}`} />}
-                        <button type="button" aria-label={`Remove photo ${index + 1}`} title="Remove photo" disabled={highlightEditBusy}
-                          onClick={() => setHighlightEditMediaUrls((current) => current.filter((_, itemIndex) => itemIndex !== index))}><X size={14} /></button>
-                        {index === 0 && <small>Cover</small>}
-                      </div>
-                    ))}
-                  </div>
-                ) : <div className="highlight-editor-empty"><Image size={20} /><span>No photos yet</span></div>}
-                <label className="highlight-editor-add-photos">
-                  <Plus size={16} /><span>{highlightEditFiles.length ? `${highlightEditFiles.length} new photos selected` : "Add photos"}</span>
-                  <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" multiple
-                    disabled={highlightEditBusy || highlightEditMediaUrls.length + highlightEditFiles.length >= 10}
-                    onChange={(event) => {
-                      const files = Array.from(event.target.files ?? []);
-                      const available = Math.max(0, 10 - highlightEditMediaUrls.length - highlightEditFiles.length);
-                      setHighlightEditFiles((current) => [...current, ...files.slice(0, available)]);
-                      if (files.length > available) setProfileError("Each highlight can contain up to 10 photos.");
-                      else setProfileError("");
-                      event.target.value = "";
-                    }} />
-                </label>
-              </div>
+              </label>
 
               {profileError && <p className="form-message error">{profileError}</p>}
 
