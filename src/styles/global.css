@@ -7388,3 +7388,66 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
   .followers-sheet { animation: none !important; }
   .follower-action { transition: none !important; }
 }
+
+
+/* Navigation alignment fix: keep each icon and its label visually grouped. */
+.bottom-nav .nav-item {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 4px !important;
+  min-width: 0 !important;
+  min-height: 50px !important;
+  padding: 5px 2px !important;
+  line-height: 1 !important;
+  text-align: center !important;
+}
+
+.bottom-nav .nav-item > svg {
+  display: block !important;
+  flex: 0 0 auto !important;
+  width: 19px;
+  height: 19px;
+  margin: 0 !important;
+  transform: none !important;
+}
+
+.bottom-nav .nav-item > span {
+  display: block !important;
+  flex: 0 0 auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  font-size: 9px !important;
+  line-height: 1.15 !important;
+  font-weight: 650 !important;
+  letter-spacing: 0 !important;
+  white-space: nowrap !important;
+  text-align: center !important;
+}
+
+.bottom-nav .nav-create {
+  display: grid !important;
+  place-items: center !important;
+  align-self: center !important;
+  justify-self: stretch !important;
+  margin: 0 !important;
+}
+
+@media (max-width: 560px) {
+  .bottom-nav .nav-item {
+    gap: 3px !important;
+    min-height: 50px !important;
+    padding: 4px 1px !important;
+  }
+
+  .bottom-nav .nav-item > svg {
+    width: 19px;
+    height: 19px;
+  }
+
+  .bottom-nav .nav-item > span {
+    font-size: 8.5px !important;
+    line-height: 1.1 !important;
+  }
+}
