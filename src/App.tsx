@@ -719,6 +719,9 @@ export function App() {
         setBio(data.bio ?? "");
         setAvatarUrl(data.avatar_url ?? "");
         setCoverUrl(data.cover_url ?? "");
+        if (themes.some((item) => item.id === data.theme_id)) {
+          setTheme(data.theme_id as ThemeId);
+        }
         setHighlightStyle(data.highlight_style === "portrait" ? "portrait" : "circle");
       }
     }
