@@ -342,8 +342,10 @@ export function App() {
     void loadThemeAccess();
 
     // Keep access current for members who already have the app open.
-    const refreshOnFocus = () => void loadThemeAccess();
-    const refreshOnVisibility = () => {
+    const refreshOnFocus: () => void = () => {
+      void loadThemeAccess();
+    };
+    const refreshOnVisibility: () => void = () => {
       if (document.visibilityState === "visible") void loadThemeAccess();
     };
     window.addEventListener("focus", refreshOnFocus);
