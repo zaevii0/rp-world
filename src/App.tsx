@@ -4375,9 +4375,7 @@ export function App() {
                             {(isVerifiedProfile(profile) || isAdminProfile(profile, adminUserIds)) && <span className="verified-badge" aria-label="Verified">✓</span>}
                           </h2>
 
-                          <span>
-                            @{profile.username}
-                          </span>
+
                         </div>
                       </div>
 
@@ -4478,7 +4476,7 @@ export function App() {
                 <div className="profile-section">
                   <div className="section-heading">
                     <div>
-                      <h3>Moments</h3>
+                      <h3>@{profile.username}</h3>
                     </div>
 
                     {!viewAs && (
@@ -4817,7 +4815,7 @@ export function App() {
                   <div className="profile-main">
                     <div className="profile-avatar-wrap"><div className="profile-avatar avatar" style={publicProfile.avatar_url ? { backgroundImage: `url(${publicProfile.avatar_url})` } : undefined}>{!publicProfile.avatar_url && initials(publicProfile.display_name)}</div></div>
                     <div className="profile-identity">
-                      <div className="profile-name-row"><div><h2>{publicProfile.display_name}{(isVerifiedProfile(publicProfile) || isAdminProfile(publicProfile, adminUserIds)) && <span className="verified-badge" aria-label="Verified">✓</span>}</h2><span>@{publicProfile.username}</span></div></div>
+                      <div className="profile-name-row"><div><h2>{publicProfile.display_name}{(isVerifiedProfile(publicProfile) || isAdminProfile(publicProfile, adminUserIds)) && <span className="verified-badge" aria-label="Verified">✓</span>}</h2></div></div>
                       {publicProfile.bio ? <p className="profile-bio">{publicProfile.bio}</p> : null}
                       <div className="profile-actions profile-social-actions public-profile-actions">
                         <button
@@ -4876,7 +4874,7 @@ export function App() {
                   </div>
                 </div>
                 <div className="profile-section">
-                  <div className="section-heading"><div><h3>Moments</h3></div></div>
+                  <div className="section-heading"><div><h3>@{publicProfile.username}</h3></div></div>
                   <div className="highlights-row view-as">
                     {publicHighlights.length === 0 ? <span className="comments-empty">No highlights yet.</span> : publicHighlights.map((item) => (
                       <button className={publicProfile.highlight_style === "portrait" ? "highlight-card highlight-card-portrait" : "highlight-card highlight-card-circle"} key={item.id} type="button" onClick={() => setActiveHighlight(item)}>
