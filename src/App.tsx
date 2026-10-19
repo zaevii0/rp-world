@@ -33,6 +33,7 @@ import {
   MapPin,
   Menu,
   Share2,
+  Forward,
   Repeat2,
   MoreVertical,
   Pin,
@@ -4137,7 +4138,7 @@ export function App() {
                             <MessageCircle
                               size={17}
                             />{" "}
-                            {post.comments || "Reply"}
+                            {post.comments}
                           </button>
 
                                           <button
@@ -4156,8 +4157,7 @@ export function App() {
                             type="button"
                             onClick={() => void sharePost(post)}
                           >
-                            <Share2 size={17} />
-                            Share
+                            <Forward size={17} />
                           </button>
                         </div>
 
@@ -4948,13 +4948,13 @@ export function App() {
                             <Heart size={17} fill={post.liked ? "currentColor" : "none"} />{post.likes}
                           </button>
                           <button className={openComments === post.id ? "post-action active" : "post-action"} type="button" onClick={() => void toggleComments(post.id)}>
-                            <MessageCircle size={17} /> {post.comments || "Reply"}
+                            <MessageCircle size={17} /> {post.comments}
                           </button>
                           <button className={post.reposted ? "post-action reposted" : "post-action"} type="button" onClick={() => void repostPost(post)} disabled={repostBusy === post.id} title={post.reposted ? "Reposted" : "Repost"}>
                             <Repeat2 size={17} />{post.reposts || 0}
                           </button>
                           <button className="post-action" type="button" onClick={() => void sharePost(post)}>
-                            <Share2 size={17} /> Share
+                            <Forward size={17} />
                           </button>
                         </div>
                         {openComments === post.id && (
