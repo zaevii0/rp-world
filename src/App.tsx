@@ -6118,7 +6118,8 @@ export function App() {
                 <input
                   ref={highlightAddFileRef}
                   type="file"
-                  accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,video/quicktime"
+                  accept="image/jpeg,image/png,image/webp,image/gif"
+                  multiple
                   hidden
                   onChange={addHighlightMedia}
                 />
