@@ -7128,3 +7128,16 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
   color: var(--accent) !important;
   background: var(--accent-soft) !important;
 }
+
+
+/* Circle-style Moments: use the active profile theme color for a subtle accent ring. */
+.profile-page .highlight-card-circle .highlight-image {
+  border: 2px solid color-mix(in srgb, var(--accent) 68%, rgba(127, 127, 127, .24)) !important;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 12%, transparent), 0 5px 16px rgba(0, 0, 0, .12) !important;
+}
+.profile-page .highlight-card-circle:hover .highlight-image,
+.profile-page .highlight-card-circle:focus-visible .highlight-image {
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent), 0 7px 20px rgba(0, 0, 0, .14) !important;
+  outline: none !important;
+}
