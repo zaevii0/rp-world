@@ -4134,6 +4134,8 @@ export function App() {
                                 post.id,
                               )
                             }
+                            aria-label={`Comments: ${post.comments}`}
+                            title="Comments"
                           >
                             <MessageCircle
                               size={17}
@@ -4156,6 +4158,8 @@ export function App() {
                             className="post-action"
                             type="button"
                             onClick={() => void sharePost(post)}
+                            aria-label="Share post"
+                            title="Share post"
                           >
                             <Forward size={17} />
                           </button>
@@ -4953,7 +4957,7 @@ export function App() {
                           <button className={post.reposted ? "post-action reposted" : "post-action"} type="button" onClick={() => void repostPost(post)} disabled={repostBusy === post.id} title={post.reposted ? "Reposted" : "Repost"}>
                             <Repeat2 size={17} />{post.reposts || 0}
                           </button>
-                          <button className="post-action" type="button" onClick={() => void sharePost(post)}>
+                          <button className="post-action" type="button" onClick={() => void sharePost(post)} aria-label="Share post" title="Share post">
                             <Forward size={17} />
                           </button>
                         </div>
