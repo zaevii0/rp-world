@@ -1523,30 +1523,7 @@ export function App() {
       return;
     }
 
-    const savedProfile = result.data as Profile;
-
-    // Remove replaced or cleared images from this user's own storage folder.
-    async function removePreviousProfileImage(previousUrl: string | null | undefined, nextUrl: string | null | undefined) {
-      if (!previousUrl || previousUrl === nextUrl) return;
-      try {
-        const marker = "/profile-media/";
-        const markerIndex = previousUrl.indexOf(marker);
-        if (markerIndex < 0) return;
-        const objectPath = decodeURIComponent(previousUrl.slice(markerIndex + marker.length).split("?")[0]);
-        if (!objectPath.startsWith(`${user.id}/`)) return;
-        const { error: removalError } = await client.storage.from("profile-media").remove([objectPath]);
-        if (removalError) console.warn("RP WORLD could not clean up replaced profile media", removalError);
-      } catch (removalError) {
-        console.warn("RP WORLD could not clean up replaced profile media", removalError);
-      }
-    }
-
-    await Promise.all([
-      removePreviousProfileImage(profile?.avatar_url, savedProfile.avatar_url),
-      removePreviousProfileImage(profile?.cover_url, savedProfile.cover_url),
-    ]);
-
-    setProfile(savedProfile);
+    setProfile(result.data as Profile);
     setAvatarFile(null);
     setCoverFile(null);
     setProfileOpen(false);
@@ -6406,26 +6383,13 @@ export function App() {
                   <input
                     type="file"
                     accept="image/jpeg,image/png,image/webp,image/gif"
-                    onChange={(event) => {
-                      setAvatarFile(event.target.files?.[0] ?? null);
-                    }}
+                    onChange={(event) =>
+                      setAvatarFile(
+                        event.target.files?.[0] ?? null,
+                      )
+                    }
                   />
                 </div>
-
-                {(avatarUrl || avatarFile) && (
-                  <button
-                    className="secondary-button full"
-                    type="button"
-                    disabled={profileBusy}
-                    onClick={() => {
-                      setAvatarUrl("");
-                      setAvatarFile(null);
-                    }}
-                  >
-                    <Trash2 size={15} />
-                    Remove profile photo
-                  </button>
-                )}
               </label>
 
               <label>
@@ -6440,26 +6404,13 @@ export function App() {
                   <input
                     type="file"
                     accept="image/jpeg,image/png,image/webp,image/gif"
-                    onChange={(event) => {
-                      setCoverFile(event.target.files?.[0] ?? null);
-                    }}
+                    onChange={(event) =>
+                      setCoverFile(
+                        event.target.files?.[0] ?? null,
+                      )
+                    }
                   />
                 </div>
-
-                {(coverUrl || coverFile) && (
-                  <button
-                    className="secondary-button full"
-                    type="button"
-                    disabled={profileBusy}
-                    onClick={() => {
-                      setCoverUrl("");
-                      setCoverFile(null);
-                    }}
-                  >
-                    <Trash2 size={15} />
-                    Remove cover photo
-                  </button>
-                )}
               </label>
 
               <div className="highlight-style-field">
