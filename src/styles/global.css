@@ -7130,17 +7130,18 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
 }
 
 
-/* Moments section: remove its surrounding square/card container, not the individual moment items. */
-.profile-page .profile-section:has(> .highlights-row),
-.profile-page .profile-section:has(> .highlights-row)::before,
-.profile-page .profile-section:has(> .highlights-row)::after {
+/* Moments: show only the heading and moment items, with no white/card container around them. */
+.profile-page .profile-section:has(.highlights-row),
+.profile-page .profile-section:has(.highlights-row)::before,
+.profile-page .profile-section:has(.highlights-row)::after {
   background: transparent !important;
+  background-color: transparent !important;
   border: 0 !important;
   box-shadow: none !important;
   outline: none !important;
 }
 
-.profile-page .profile-section:has(> .highlights-row) {
+.profile-page .profile-section:has(.highlights-row) {
   padding: 0 !important;
   margin-top: 18px !important;
 }
