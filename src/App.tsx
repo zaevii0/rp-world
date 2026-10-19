@@ -293,6 +293,8 @@ function isVideoMedia(value: string | null | undefined) {
 export function App() {
   const [theme, setTheme] = useState<ThemeId>(readTheme);
   const [allThemesUnlocked, setAllThemesUnlocked] = useState(false);
+  const [themeAccessLoaded, setThemeAccessLoaded] = useState(false);
+  const [themeAccessLoadFailed, setThemeAccessLoadFailed] = useState(false);
   const [appearance, setAppearance] =
     useState<Appearance>(readAppearance);
 
@@ -334,9 +336,17 @@ export function App() {
         .select("value_boolean")
         .eq("key", "theme_colors_unlocked")
         .maybeSingle();
-      if (active && !accessError) {
+      if (!active) return;
+
+      if (accessError) {
+        // Do not downgrade a saved premium theme while the global access
+        // setting is unavailable; a failed read is not proof that access is off.
+        setThemeAccessLoadFailed(true);
+      } else {
         setAllThemesUnlocked(Boolean(data?.value_boolean));
+        setThemeAccessLoadFailed(false);
       }
+      setThemeAccessLoaded(true);
     }
 
     void loadThemeAccess();
@@ -587,12 +597,17 @@ export function App() {
   }, [appearance]);
 
   useEffect(() => {
+    // Wait until the global setting has been read. Otherwise a refresh can
+    // briefly see the default "locked" state and overwrite a premium theme
+    // before the persisted admin unlock arrives from Supabase.
+    if (!themeAccessLoaded || themeAccessLoadFailed) return;
+
     // The admin-controlled global unlock takes precedence over individual plans.
     if (!profile || allThemesUnlocked || hasPremiumThemes(profile)) return;
     if (theme !== "midnight" && theme !== "black" && theme !== "ocean") {
       setTheme("midnight");
     }
-  }, [profile, theme, allThemesUnlocked]);
+  }, [profile, theme, allThemesUnlocked, themeAccessLoaded, themeAccessLoadFailed]);
 
 
   // Preserve the current SPA page across a browser/app refresh. This uses
