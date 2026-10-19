@@ -77,6 +77,8 @@ function RPWorldMark() {
 }
 
 const THEME_KEY = "rpw-theme";
+const THEME_USER_SELECTED_KEY = "rpw-theme-user-selected";
+const FREE_THEME_IDS: ThemeId[] = ["midnight", "black", "ocean"];
 const APPEARANCE_KEY = "rpw-appearance";
 const VIEW_KEY = "rpw-current-view";
 const PUBLIC_PROFILE_KEY = "rpw-current-public-profile";
@@ -747,7 +749,29 @@ export function App() {
         setBio(data.bio ?? "");
         setAvatarUrl(data.avatar_url ?? "");
         setCoverUrl(data.cover_url ?? "");
-        if (themes.some((item) => item.id === data.theme_id)) {
+        const locallySelectedTheme = localStorage.getItem(THEME_KEY);
+        const hasExplicitLocalTheme = localStorage.getItem(THEME_USER_SELECTED_KEY) === "true";
+        const savedLocalFreeTheme = hasExplicitLocalTheme && FREE_THEME_IDS.includes(locallySelectedTheme as ThemeId)
+          ? (locallySelectedTheme as ThemeId)
+          : null;
+
+        if (savedLocalFreeTheme) {
+          // Keep a user's explicitly chosen free color stable on this device
+          // even if an older profile theme value is returned during refresh.
+          setTheme(savedLocalFreeTheme);
+          if (data.theme_id !== savedLocalFreeTheme && supabase && session?.user) {
+            void supabase.from("profiles")
+              .update({ theme_id: savedLocalFreeTheme, updated_at: new Date().toISOString() })
+              .eq("id", session.user.id)
+              .then(({ data: syncedProfile, error: syncError }) => {
+                if (syncError) {
+                  console.error("RP WORLD free theme preference sync failed", syncError);
+                  return;
+                }
+                if (syncedProfile) setProfile(syncedProfile as Profile);
+              });
+          }
+        } else if (themes.some((item) => item.id === data.theme_id)) {
           setTheme(data.theme_id as ThemeId);
         }
         setHighlightStyle(data.highlight_style === "portrait" ? "portrait" : "circle");
@@ -1388,7 +1412,13 @@ export function App() {
   }
 
   async function handleThemeChange(nextTheme: ThemeId) {
-    // Apply immediately so the interface responds without waiting for the network.
+    // Apply and persist immediately so a refresh keeps the user's selection.
+    try {
+      localStorage.setItem(THEME_KEY, nextTheme);
+      localStorage.setItem(THEME_USER_SELECTED_KEY, "true");
+    } catch {
+      // Storage may be unavailable in private browsing; profile persistence still runs.
+    }
     setTheme(nextTheme);
     setMessage("");
 
