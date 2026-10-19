@@ -7104,3 +7104,27 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
   .comment-thread-reply > .comment-row::after { left:11px; width:14px; }
   .comment-reply-context { margin-left:5px; }
 }
+
+
+/* Light appearance: profile posts should use a light surface instead of the dark theme fallback. */
+.app.light .profile-page .profile-posts .post-card {
+  color: #17171b !important;
+  border-color: rgba(20, 20, 28, .08) !important;
+  background: linear-gradient(135deg, rgba(255, 255, 255, .98), color-mix(in srgb, var(--accent) 4%, #fff)) !important;
+  box-shadow: 0 10px 28px rgba(20, 20, 28, .055), inset 0 1px 0 rgba(255, 255, 255, .96) !important;
+}
+
+.app.light .profile-page .profile-posts .post-card .post-actions {
+  border-top-color: rgba(20, 20, 28, .09) !important;
+}
+
+.app.light .profile-page .profile-posts .post-card .post-action {
+  color: #55545d;
+}
+
+.app.light .profile-page .profile-posts .post-card .post-action:hover,
+.app.light .profile-page .profile-posts .post-card .post-action.liked,
+.app.light .profile-page .profile-posts .post-card .post-action.active {
+  color: var(--accent) !important;
+  background: var(--accent-soft) !important;
+}
