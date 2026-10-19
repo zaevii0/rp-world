@@ -326,18 +326,52 @@ export function App() {
 
   useEffect(() => {
     let active = true;
+    if (!supabase) return;
+
     async function loadThemeAccess() {
-      if (!supabase) return;
-      const { data } = await supabase
+      const { data, error: accessError } = await supabase
         .from("app_settings")
         .select("value_boolean")
         .eq("key", "theme_colors_unlocked")
         .maybeSingle();
-      if (active) setAllThemesUnlocked(Boolean(data?.value_boolean));
+      if (active && !accessError) {
+        setAllThemesUnlocked(Boolean(data?.value_boolean));
+      }
     }
+
     void loadThemeAccess();
+
+    // Keep access current for members who already have the app open.
+    const refreshOnFocus = () => void loadThemeAccess();
+    const refreshOnVisibility = () => {
+      if (document.visibilityState === "visible") void loadThemeAccess();
+    };
+    window.addEventListener("focus", refreshOnFocus);
+    document.addEventListener("visibilitychange", refreshOnVisibility);
+
+    const accessChannel = supabase
+      .channel("rp-world-theme-access")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "app_settings",
+          filter: "key=eq.theme_colors_unlocked",
+        },
+        (payload) => {
+          const row = payload.new as { value_boolean?: boolean } | null;
+          if (active && row) setAllThemesUnlocked(Boolean(row.value_boolean));
+          else void loadThemeAccess();
+        },
+      )
+      .subscribe();
+
     return () => {
       active = false;
+      window.removeEventListener("focus", refreshOnFocus);
+      document.removeEventListener("visibilitychange", refreshOnVisibility);
+      void supabase?.removeChannel(accessChannel);
     };
   }, [session?.user?.id]);
 
@@ -551,11 +585,12 @@ export function App() {
   }, [appearance]);
 
   useEffect(() => {
-    if (!profile || hasPremiumThemes(profile)) return;
+    // The admin-controlled global unlock takes precedence over individual plans.
+    if (!profile || allThemesUnlocked || hasPremiumThemes(profile)) return;
     if (theme !== "midnight" && theme !== "black" && theme !== "ocean") {
       setTheme("midnight");
     }
-  }, [profile, theme]);
+  }, [profile, theme, allThemesUnlocked]);
 
 
   // Preserve the current SPA page across a browser/app refresh. This uses
@@ -1319,6 +1354,29 @@ export function App() {
     setSupportMessage("Secure checkout is ready for ₱" + selected.amount + " · " + selected.label + ".");
     const opened = window.open(checkout.checkout_url, "_blank", "noopener,noreferrer");
     if (!opened) setSupportMessage("Your secure checkout is ready. Tap “Open secure checkout” below.");
+  }
+
+  async function handleThemeChange(nextTheme: ThemeId) {
+    // Apply immediately so the interface responds without waiting for the network.
+    setTheme(nextTheme);
+    setMessage("");
+
+    if (!supabase || !session?.user || !profile) return;
+
+    const { data, error: themeSaveError } = await supabase
+      .from("profiles")
+      .update({ theme_id: nextTheme, updated_at: new Date().toISOString() })
+      .eq("id", session.user.id)
+      .select("*")
+      .single();
+
+    if (themeSaveError || !data) {
+      console.error("RP WORLD theme preference save failed", themeSaveError);
+      setMessage("Theme changed on this device, but your preference could not be saved to your profile.");
+      return;
+    }
+
+    setProfile(data as Profile);
   }
 
   async function handleProfileSubmit(event: FormEvent) {
@@ -3612,8 +3670,7 @@ export function App() {
             canUseAllThemes={hasPremiumThemes(profile)}
             allThemesUnlocked={allThemesUnlocked}
             onThemeChange={(nextTheme) => {
-              setTheme(nextTheme);
-              setMessage("");
+              void handleThemeChange(nextTheme);
             }}
             onLockedTheme={() => {
               setView("support");
