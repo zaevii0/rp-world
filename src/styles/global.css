@@ -7584,3 +7584,17 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
   .highlight-editor-photo { border-radius: 10px; }
   .highlight-viewer-thumbnails { padding-inline: 10px; }
 }
+
+.highlight-edit-sheet {
+  max-height: min(88dvh, 780px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+.highlight-editor-photo > video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: #000;
+}
