@@ -6166,7 +6166,7 @@ export function App() {
                   <div className="highlight-editor-photo-grid">
                     {highlightEditMediaUrls.map((url, index) => (
                       <div className="highlight-editor-photo" key={url + index}>
-                        <img src={url} alt={`Highlight photo ${index + 1}`} />
+                        {isVideoMedia(url) ? <video src={url} muted playsInline /> : <img src={url} alt={`Highlight photo ${index + 1}`} />}
                         <button type="button" aria-label={`Remove photo ${index + 1}`} title="Remove photo" disabled={highlightEditBusy}
                           onClick={() => setHighlightEditMediaUrls((current) => current.filter((_, itemIndex) => itemIndex !== index))}><X size={14} /></button>
                         {index === 0 && <small>Cover</small>}
@@ -6177,11 +6177,11 @@ export function App() {
                 <label className="highlight-editor-add-photos">
                   <Plus size={16} /><span>{highlightEditFiles.length ? `${highlightEditFiles.length} new photos selected` : "Add photos"}</span>
                   <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" multiple
-                    disabled={highlightEditBusy || highlightEditMediaUrls.length >= 10}
+                    disabled={highlightEditBusy || highlightEditMediaUrls.length + highlightEditFiles.length >= 10}
                     onChange={(event) => {
                       const files = Array.from(event.target.files ?? []);
-                      const available = Math.max(0, 10 - highlightEditMediaUrls.length);
-                      setHighlightEditFiles(files.slice(0, available));
+                      const available = Math.max(0, 10 - highlightEditMediaUrls.length - highlightEditFiles.length);
+                      setHighlightEditFiles((current) => [...current, ...files.slice(0, available)]);
                       if (files.length > available) setProfileError("Each highlight can contain up to 10 photos.");
                       else setProfileError("");
                       event.target.value = "";
