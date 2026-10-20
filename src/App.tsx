@@ -145,6 +145,8 @@ type Highlight = {
   created_at: string;
 };
 
+type ProfileCollection = { id: string; user_id: string; title: string; description: string; collection_type: "album" | "group"; visibility: "public" | "private"; created_at: string; post_ids: string[]; };
+
 type Comment = {
   id: string;
   post_id: string;
@@ -340,7 +342,17 @@ export function App() {
   });
   const [profilePosts, setProfilePosts] = useState<Post[]>([]);
   const [profileReposts, setProfileReposts] = useState<Post[]>([]);
-  const [profileSection, setProfileSection] = useState<"posts" | "reposts">("posts");
+  const [profileSection, setProfileSection] = useState<"posts" | "reposts" | "albums" | "groups">("posts");
+  const [profileCollections, setProfileCollections] = useState<ProfileCollection[]>([]);
+  const [publicProfileCollections, setPublicProfileCollections] = useState<ProfileCollection[]>([]);
+  const [collectionEditorOpen, setCollectionEditorOpen] = useState(false);
+  const [collectionTitle, setCollectionTitle] = useState("");
+  const [collectionDescription, setCollectionDescription] = useState("");
+  const [collectionType, setCollectionType] = useState<"album" | "group">("album");
+  const [collectionVisibility, setCollectionVisibility] = useState<"public" | "private">("public");
+  const [collectionPostIds, setCollectionPostIds] = useState<string[]>([]);
+  const [collectionBusy, setCollectionBusy] = useState(false);
+  const [activeCollection, setActiveCollection] = useState<ProfileCollection | null>(null);
   const [highlights, setHighlights] = useState<Highlight[]>([]);
   const [highlightOpen, setHighlightOpen] = useState(false);
   const [highlightTitle, setHighlightTitle] = useState("");
@@ -916,6 +928,7 @@ export function App() {
       void loadProfilePosts();
       void loadProfileReposts();
       void loadHighlights();
+      void loadProfileCollections(session.user.id, true);
       void loadProfileStats(session.user.id);
     }
   }, [view, session, profile]);
