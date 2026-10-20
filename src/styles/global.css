@@ -8325,3 +8325,9 @@ body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; 
     min-height: 48px !important;
   }
 }
+
+
+/* Keep the auth heading and supporting copy closely and consistently spaced in login and signup. */
+.auth-sheet[aria-labelledby="auth-title"] > .sheet-copy {
+  margin-top: 6px !important;
+}
