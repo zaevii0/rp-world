@@ -4131,17 +4131,6 @@ export function App() {
                         ) : null}
                         <div className="post-actions">
                           <button
-                            className={openComments === post.id ? "post-action active" : "post-action"}
-                            type="button"
-                            onClick={() => void toggleComments(post.id)}
-                            aria-label={`Comments: ${post.comments}`}
-                            title="Comments"
-                          >
-                            <svg className="rpw-action-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5a8.5 8.5 0 0 0-7.1 13.2L4 20l3.7-1.2A8.5 8.5 0 1 0 12 3.5Z" /></svg>
-                            <span>{post.comments}</span>
-                          </button>
-
-                          <button
                             className={post.liked ? "post-action liked" : "post-action"}
                             type="button"
                             onClick={() => void toggleLike(post)}
@@ -4150,6 +4139,17 @@ export function App() {
                           >
                             <svg className="rpw-action-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 8.8c0 5.2-8.8 11-8.8 11S3.2 14 3.2 8.8A4.8 4.8 0 0 1 12 6.1a4.8 4.8 0 0 1 8.8 2.7Z" fill={post.liked ? "currentColor" : "none"} /></svg>
                             <span>{post.likes}</span>
+                          </button>
+
+                          <button
+                            className={openComments === post.id ? "post-action active" : "post-action"}
+                            type="button"
+                            onClick={() => void toggleComments(post.id)}
+                            aria-label={`Comments: ${post.comments}`}
+                            title="Comments"
+                          >
+                            <svg className="rpw-action-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5a8.5 8.5 0 0 0-7.1 13.2L4 20l3.7-1.2A8.5 8.5 0 1 0 12 3.5Z" /></svg>
+                            <span>{post.comments}</span>
                           </button>
 
                           <div className="post-action post-view-count" aria-label={`Views: ${post.views || 0}`} title="Post views">
