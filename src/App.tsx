@@ -4650,12 +4650,6 @@ export function App() {
                 </div>
 
                 <div className="profile-section profile-highlights-section glass">
-                  <div className="section-heading profile-highlights-heading">
-                    <div>
-                      <h3>@{profile.username}</h3>
-                    </div>
-                  </div>
-
                   <div className={viewAs ? "highlights-row view-as" : "highlights-row"}>
                     {highlights.map((item) => (
                       <button
@@ -4702,10 +4696,10 @@ export function App() {
                 <div className="profile-section profile-posts">
                   <div className="section-heading profile-content-heading">
                     <div>
+                      <h3 className="profile-activity-username">@{profile.username}</h3>
                       <p className="eyebrow">
                         {viewAs ? "PUBLIC PROFILE" : "YOUR ACTIVITY"}
                       </p>
-
                     </div>
 
                     {!viewAs && (
