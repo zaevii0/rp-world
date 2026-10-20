@@ -697,8 +697,7 @@ h1 { margin:3px 0 0; font-size:17px; letter-spacing:-.03em; }
 .highlight-card-portrait { position:relative; width:83px; flex-basis:83px; min-height:132px; grid-template-rows:132px; gap:0; }
 .highlight-card-portrait strong { position:absolute; z-index:2; left:0; right:0; bottom:0; width:100%; padding:26px 9px 8px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:10px; font-weight:700; line-height:1.2; text-align:left; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.72), 0 2px 8px rgba(0,0,0,.5); background:linear-gradient(to bottom,transparent 0%,rgba(0,0,0,.08) 28%,rgba(0,0,0,.62) 100%); border-radius:0 0 13px 13px; pointer-events:none; }
 .highlight-card-portrait .highlight-image { width:83px; height:132px; aspect-ratio:83 / 132; border-radius:13px; border:1px solid rgba(127,127,127,.18); padding:0; box-shadow:0 5px 18px rgba(0,0,0,.12); }
-.highlight-card-portrait:hover .highlight-image,
-.highlight-card-portrait:focus-visible .highlight-image { border-color:rgba(127,127,127,.18); box-shadow:0 8px 22px rgba(0,0,0,.12); outline:none; }.highlight-card-portrait .add-highlight > span { border-radius:13px; aspect-ratio:11 / 19; }
+.highlight-card-portrait:hover .highlight-image,.highlight-card-portrait:focus-visible .highlight-image { border-color:rgba(127,127,127,.18); box-shadow:0 8px 22px rgba(0,0,0,.12); outline:none; }.highlight-card-portrait .add-highlight > span { border-radius:13px; aspect-ratio:11 / 19; }
 @media (max-width:560px) {
   .highlight-card-portrait { width:83px; flex-basis:83px; min-height:142px; grid-template-rows:142px; }
   .highlight-card-portrait strong { left:7px; right:7px; bottom:8px; }
@@ -1397,8 +1396,7 @@ h1 { margin:3px 0 0; font-size:17px; letter-spacing:-.03em; }
   min-height: 36px;
   max-height: 120px;
   height: 36px;  margin: 0;
-  padding: 8px 0;
-  resize: none;
+  padding: 8px 0;  resize: none;
   overflow-y: auto;
   border: 0;
   outline: none;
@@ -2097,8 +2095,7 @@ b,
 .post-media-viewer-content video {
   width: min(100%, 1040px);
   max-height: 100%;
-}
-.post-media-viewer-close {
+}.post-media-viewer-close {
   position: absolute;
   top: 14px;
   right: 14px;
@@ -2797,8 +2794,7 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
 }
 .message-send-button:hover:not(:disabled),
 .message-send-button:focus-visible:not(:disabled) {
-  background: color-mix(in srgb, var(--accent) 90%, #000);
-  box-shadow: none;
+  background: color-mix(in srgb, var(--accent) 90%, #000);  box-shadow: none;
 }
 .message-send-button:disabled {
   opacity: .32;
@@ -3497,8 +3493,7 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
   transition:
     transform .18s cubic-bezier(.2,.8,.2,1),
     background .18s ease,
-    border-color .18s ease,
-    opacity .18s ease,
+    border-color .18s ease,    opacity .18s ease,
     color .18s ease;
 }
 
@@ -4197,8 +4192,7 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
   box-shadow:
     0 40px 110px rgba(0,0,0,.55),
     inset 0 1px 0 rgba(255,255,255,.10) !important;
-  backdrop-filter: blur(36px) saturate(180%) !important;
-  -webkit-backdrop-filter: blur(36px) saturate(180%) !important;
+  backdrop-filter: blur(36px) saturate(180%) !important;  -webkit-backdrop-filter: blur(36px) saturate(180%) !important;
 }
 
 .app.light .message-sheet {
@@ -4897,7 +4891,6 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
   font-size: 22px !important;
   transition: transform .16s ease, background .16s ease;
 }
-
 .message-reaction-picker button:hover {
   background: rgba(120,120,128,.14) !important;
   transform: scale(1.12);
@@ -5597,8 +5590,7 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
 .profile-page .profile-meta .profile-meta-button:focus-visible {
   border-color: color-mix(in srgb, var(--accent) 26%, transparent) !important;
   background: var(--accent-soft) !important;
-  color: var(--accent) !important;
-  opacity: 1 !important;
+  color: var(--accent) !important;  opacity: 1 !important;
 }
 
 .profile-page .profile-section {
@@ -6297,8 +6289,7 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
     min-height: 36px !important;
     min-width: 78px !important;
     padding: 0 12px !important;
-    border-radius: 11px !important;
-  }
+    border-radius: 11px !important;  }
 }
 
 
@@ -6998,801 +6989,41 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
   /* Keep photo and voice actions available on mobile; they fit beside the input. */
   .message-compose-action:nth-of-type(2),
   .message-compose-action:nth-of-type(3) {
-    display: inline-flex !important;
-  }
 
-  .message-input-shell {
-    min-width: 0 !important;
-    min-height: 40px !important;
-    border-radius: 20px !important;
-    padding: 2px 3px 2px 12px !important;
-  }
-
-  .message-input-shell textarea {
-    min-height: 34px !important;
-    max-height: 96px !important;
-    padding: 6px 0 !important;
-    font-size: 16px !important;
-    line-height: 21px !important;
-  }
-
-  .message-send-button {
-    width: 34px !important;
-    height: 34px !important;
-    min-width: 34px !important;
-    flex-basis: 34px !important;
-  }
-
-  .message-media-preview {
-    max-width: min(72vw, 250px) !important;
-    max-height: min(42vh, 300px) !important;
-    border-radius: 14px !important;
-  }
-
-  .message-reply-composer,
-  .message-attachment-chip {
-    left: 6px !important;
-    right: 6px !important;
-    border-radius: 14px 14px 0 0 !important;
-  }
-}
-
-
-/* Bottom navigation: never show a transient browser/active button surface while switching tabs. */
-.bottom-nav .nav-item,
-.bottom-nav .nav-item:hover,
-.bottom-nav .nav-item:focus,
-.bottom-nav .nav-item:focus-visible,
-.bottom-nav .nav-item:active {
-  -webkit-appearance: none !important;
-  appearance: none !important;
-  -webkit-tap-highlight-color: rgba(0,0,0,0) !important;
-  -webkit-focus-ring-color: transparent !important;
-  background: transparent !important;
-  background-color: transparent !important;
-  outline: none !important;
-  box-shadow: none !important;
-  filter: none !important;
-}
-.bottom-nav .nav-item.active,
-.bottom-nav .nav-item.active:hover,
-.bottom-nav .nav-item.active:focus,
-.bottom-nav .nav-item.active:focus-visible,
-.bottom-nav .nav-item.active:active {
-  background: transparent !important;
-  background-color: transparent !important;
-  box-shadow: none !important;
-}
-
-
-/* Moments: remove the section container/surface completely; keep only its content. */
-.profile-page .highlights-row,
-.profile-page .highlights-row.glass,
-.profile-page .highlights-row::before,
-.profile-page .highlights-row::after {
-  background: transparent !important;
-  border: 0 !important;
-  box-shadow: none !important;
-  outline: none !important;
-}
-
-
-/* Admin global theme-access control */
-.admin-theme-access { display:flex; align-items:center; justify-content:space-between; gap:18px; padding:18px; margin-bottom:14px; }
-.admin-theme-access h3 { margin:4px 0 5px; font-size:16px; }
-.admin-theme-access p:not(.eyebrow) { margin:0; opacity:.62; font-size:12px; line-height:1.5; }
-.admin-theme-toggle { flex:0 0 auto; min-height:38px; padding:0 15px; border:0; border-radius:999px; color:#fff; background:var(--accent); cursor:pointer; font-weight:700; }
-.admin-theme-toggle.active { box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 16%,transparent); }
-.admin-theme-toggle:disabled { opacity:.55; cursor:wait; }
-@media (max-width:560px) { .admin-theme-access { align-items:flex-start; } .admin-theme-toggle { min-width:94px; } }
-
-
-/* Facebook-style nested comment/reply thread indicator */
-.comment-thread { position:relative; }
-.comment-thread-reply { position:relative; }
-.comment-thread-reply > .comment-row { margin-left:34px; position:relative; }
-.comment-thread-reply > .comment-row::before { content:""; position:absolute; left:15px; top:0; bottom:18px; width:1.5px; border-radius:999px; background:color-mix(in srgb,var(--accent) 24%,rgba(127,127,127,.18)); }
-.comment-thread-reply > .comment-row::after { content:""; position:absolute; left:15px; top:17px; width:18px; height:14px; border-left:1.5px solid color-mix(in srgb,var(--accent) 24%,rgba(127,127,127,.18)); border-bottom:1.5px solid color-mix(in srgb,var(--accent) 24%,rgba(127,127,127,.18)); border-bottom-left-radius:10px; }
-.comment-row.comment-reply { position:relative; margin-left:34px; }
-.comment-reply-context { display:flex; align-items:center; gap:6px; min-height:17px; margin:0 0 3px 8px; color:color-mix(in srgb,var(--accent) 72%,currentColor); font-size:9px; line-height:1.2; font-weight:650; }
-.comment-reply-context-line { width:13px; height:1px; flex:0 0 13px; border-radius:999px; background:color-mix(in srgb,var(--accent) 35%,rgba(127,127,127,.18)); }
-.comment-reply-context button { padding:0; border:0; color:inherit; background:transparent; font:inherit; font-weight:750; cursor:pointer; }
-.comment-reply-context button:hover,.comment-reply-context button:focus-visible { color:var(--accent); text-decoration:underline; outline:none; }
-@media (max-width:560px) {
-  .comment-thread-reply > .comment-row,.comment-row.comment-reply { margin-left:24px; }
-  .comment-thread-reply > .comment-row::before { left:11px; }
-  .comment-thread-reply > .comment-row::after { left:11px; width:14px; }
-  .comment-reply-context { margin-left:5px; }
-}
-
-
-/* Light appearance: profile posts should use a light surface instead of the dark theme fallback. */
-.app.light .profile-page .profile-posts .post-card {
-  color: #17171b !important;
-  border-color: rgba(20, 20, 28, .08) !important;
-  background: linear-gradient(135deg, rgba(255, 255, 255, .98), color-mix(in srgb, var(--accent) 4%, #fff)) !important;
-  box-shadow: 0 10px 28px rgba(20, 20, 28, .055), inset 0 1px 0 rgba(255, 255, 255, .96) !important;
-}
-
-.app.light .profile-page .profile-posts .post-card .post-actions {
-  border-top-color: rgba(20, 20, 28, .09) !important;
-}
-
-.app.light .profile-page .profile-posts .post-card .post-action {
-  color: #55545d;
-}
-
-.app.light .profile-page .profile-posts .post-card .post-action:hover,
-.app.light .profile-page .profile-posts .post-card .post-action.liked,
-.app.light .profile-page .profile-posts .post-card .post-action.active {
-  color: var(--accent) !important;
-  background: var(--accent-soft) !important;
-}
-
-
-/* Circle-style Moments: use the active profile theme color for a subtle accent ring. */
-.profile-page .highlight-card-circle .highlight-image {
-  border: 2px solid color-mix(in srgb, var(--accent) 68%, rgba(127, 127, 127, .24)) !important;
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 12%, transparent), 0 5px 16px rgba(0, 0, 0, .12) !important;
-}
-.profile-page .highlight-card-circle:hover .highlight-image,
-.profile-page .highlight-card-circle:focus-visible .highlight-image {
-  border-color: var(--accent) !important;
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent), 0 7px 20px rgba(0, 0, 0, .14) !important;
-  outline: none !important;
-}
-
-
-/* iOS-style Followers sheet — refined hierarchy, calm surfaces, and mobile-safe spacing. */
-.profile-page ~ .followers-backdrop,
-.followers-backdrop {
-  padding: 20px !important;
-  align-items: center !important;
-  justify-content: center !important;
-  background: rgba(5, 8, 16, .48) !important;
-  -webkit-backdrop-filter: blur(18px) saturate(135%) !important;
-  backdrop-filter: blur(18px) saturate(135%) !important;
-}
-.followers-sheet {
-  width: min(100%, 480px) !important;
-  max-width: 480px !important;
-  max-height: min( min(78dvh, 720px), calc(100dvh - 40px) ) !important;
-  min-height: 260px;
-  display: flex !important;
-  flex-direction: column !important;
-  overflow: hidden !important;
-  padding: 0 !important;
-  border: 1px solid color-mix(in srgb, var(--accent) 14%, rgba(255,255,255,.14)) !important;
-  border-radius: 28px !important;
-  background: color-mix(in srgb, var(--surface, #17171b) 88%, transparent) !important;
-  box-shadow: 0 24px 80px rgba(0,0,0,.3), inset 0 1px 0 rgba(255,255,255,.09) !important;
-  -webkit-backdrop-filter: blur(32px) saturate(165%) !important;
-  backdrop-filter: blur(32px) saturate(165%) !important;
-}
-.followers-sheet > .sheet-header {
-  flex: 0 0 auto;
-  min-height: 82px;
-  margin: 0 !important;
-  padding: 19px 20px 16px !important;
+/* Google OAuth controls in the RP WORLD sign-in sheet. */
+.google-sign-in-button {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  border-bottom: 1px solid rgba(127,127,127,.14);
-  background: color-mix(in srgb, var(--accent) 4%, transparent);
-}
-.followers-sheet > .sheet-header .eyebrow {
-  margin: 0 0 5px !important;
-  font-size: 10px !important;
-  font-weight: 750 !important;
-  letter-spacing: .12em !important;
-  color: var(--accent) !important;
-}
-.followers-sheet > .sheet-header h2 {
-  margin: 0 !important;
-  font-size: 21px !important;
-  line-height: 1.2 !important;
-  font-weight: 720 !important;
-  letter-spacing: -.035em !important;
-}
-.followers-sheet > .sheet-header .icon-button {
-  width: 34px !important;
-  height: 34px !important;
-  min-width: 34px !important;
-  border-radius: 50% !important;
-  display: grid !important;
-  place-items: center !important;
-  color: inherit !important;
-  background: rgba(127,127,127,.12) !important;
-  border: 1px solid rgba(127,127,127,.1) !important;
-  -webkit-tap-highlight-color: transparent;
-}
-.followers-list {
-  min-height: 0;
-  overflow-y: auto !important;
-  overscroll-behavior: contain;
-  -webkit-overflow-scrolling: touch;
-  padding: 8px 12px 12px !important;
-}
-.follower-row {
-  display: flex !important;
-  align-items: center !important;
-  gap: 10px !important;
-  padding: 12px 7px !important;
-  min-width: 0;
-  border-bottom: 1px solid rgba(127,127,127,.12);
-}
-.follower-row:last-child { border-bottom: 0; }
-.follower-identity {
-  flex: 1 1 auto !important;
-  min-width: 0 !important;
-  display: flex !important;
-  align-items: center !important;
-  gap: 12px !important;
-  padding: 0 !important;
-  border: 0 !important;
-  border-radius: 13px !important;
-  background: transparent !important;
-  color: inherit !important;
-  text-align: left !important;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-}
-.follower-identity:focus-visible { outline: 2px solid color-mix(in srgb,var(--accent) 70%,transparent); outline-offset: 3px; }
-.follower-avatar {
-  flex: 0 0 48px !important;
-  width: 48px !important;
-  height: 48px !important;
-  min-width: 48px !important;
-  border-radius: 50% !important;
-  border: 1.5px solid color-mix(in srgb,var(--accent) 22%,rgba(127,127,127,.18)) !important;
-  box-shadow: 0 2px 8px rgba(0,0,0,.1);
-  background-color: color-mix(in srgb,var(--accent) 10%,rgba(127,127,127,.12)) !important;
-}
-.follower-identity > span {
-  min-width: 0 !important;
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: flex-start !important;
-  gap: 3px !important;
-}
-.follower-identity strong {
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: 14px !important;
-  line-height: 18px !important;
-  font-weight: 680 !important;
-  letter-spacing: -.015em;
-}
-.follower-identity small {
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  color: color-mix(in srgb,currentColor 62%,transparent) !important;
-  font-size: 12px !important;
-  line-height: 15px !important;
-}
-.follower-identity em {
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  margin-top: 1px;
-  color: color-mix(in srgb,currentColor 46%,transparent) !important;
-  font-size: 10px !important;
-  line-height: 13px !important;
-  font-style: normal !important;
-}
-.follower-actions {
-  flex: 0 0 auto;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: flex-end !important;
-  gap: 6px !important;
-}
-.follower-action {
-  min-height: 34px !important;
-  padding: 0 12px !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 5px !important;
-  border: 1px solid color-mix(in srgb,var(--accent) 12%,rgba(127,127,127,.12)) !important;
-  border-radius: 999px !important;
-  color: var(--accent) !important;
-  background: color-mix(in srgb,var(--accent) 10%,transparent) !important;
-  font-size: 11px !important;
-  line-height: 1 !important;
-  font-weight: 700 !important;
-  white-space: nowrap;
-  cursor: pointer;
-  transition: background 160ms ease, transform 160ms ease, border-color 160ms ease;
-  -webkit-tap-highlight-color: transparent;
-}
-.follower-action:active { transform: scale(.97); }
-.follower-action:disabled { opacity: .72; cursor: default; }
-.follower-action.following {
-  color: color-mix(in srgb,currentColor 70%,transparent) !important;
-  background: rgba(127,127,127,.08) !important;
-  border-color: rgba(127,127,127,.14) !important;
-}
-.follower-action.follower-hide {
-  min-width: 46px;
-  color: color-mix(in srgb,currentColor 62%,transparent) !important;
-  background: transparent !important;
-  border-color: transparent !important;
-}
-.followers-loading,
-.followers-empty {
-  flex: 1 1 auto;
-  min-height: 210px;
-  padding: 30px 24px !important;
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 10px !important;
-  text-align: center !important;
-  color: color-mix(in srgb,currentColor 72%,transparent);
-}
-.followers-empty > svg { color: var(--accent); opacity: .82; }
-.followers-empty strong { color: inherit; font-size: 15px; font-weight: 700; }
-.followers-empty span { max-width: 260px; font-size: 12px; line-height: 1.55; opacity: .72; }
-.app.light .followers-sheet {
-  background: rgba(250,250,252,.94) !important;
-  border-color: rgba(30,30,40,.1) !important;
-  box-shadow: 0 24px 80px rgba(20,20,30,.18), inset 0 1px 0 rgba(255,255,255,.9) !important;
-}
-.app.light .followers-sheet > .sheet-header { border-bottom-color: rgba(20,20,30,.08); }
-.app.light .follower-row { border-bottom-color: rgba(20,20,30,.075); }
-@media (max-width: 560px) {
-  .followers-backdrop {
-    padding: 16px !important;
-    align-items: center !important;
-    justify-content: center !important;
-  }
-  .followers-sheet {
-    width: 100% !important;
-    max-width: 480px !important;
-    max-height: min(78dvh, 680px) !important;
-    min-height: min(42dvh, 320px) !important;
-    border-radius: 26px !important;
-    border: 1px solid color-mix(in srgb, var(--accent) 14%, rgba(255,255,255,.14)) !important;
-    padding-bottom: max(8px, env(safe-area-inset-bottom)) !important;
-    animation: followers-sheet-rise 240ms cubic-bezier(.2,.75,.25,1) both;
-  }
-  .followers-sheet > .sheet-header {
-    min-height: 76px;
-    padding: 17px 18px 14px !important;
-  }
-  .followers-sheet > .sheet-header h2 { font-size: 20px !important; }
-  .followers-list { padding: 5px 12px 10px !important; }
-  .follower-row { gap: 7px !important; padding: 11px 3px !important; }
-  .follower-identity { gap: 10px !important; }
-  .follower-avatar { flex-basis: 44px !important; width: 44px !important; height: 44px !important; min-width: 44px !important; }
-  .follower-identity strong { font-size: 13px !important; }
-  .follower-identity small { font-size: 11px !important; }
-  .follower-identity em { font-size: 9px !important; }
-  .follower-actions { gap: 3px !important; }
-  .follower-action { min-height: 32px !important; padding: 0 9px !important; font-size: 10px !important; }
-  .follower-action.follower-hide { min-width: 0; padding: 0 5px !important; }
-}
-@keyframes followers-sheet-rise {
-  from { opacity: .65; transform: translateY(16px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-@media (prefers-reduced-motion: reduce) {
-  .followers-sheet { animation: none !important; }
-  .follower-action { transition: none !important; }
-}
-
-
-/* Navigation alignment fix: keep each icon and its label visually grouped. */
-.bottom-nav .nav-item {
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 4px !important;
-  min-width: 0 !important;
-  min-height: 50px !important;
-  padding: 5px 2px !important;
-  line-height: 1 !important;
-  text-align: center !important;
-}
-
-.bottom-nav .nav-item > svg {
-  display: block !important;
-  flex: 0 0 auto !important;
-  width: 19px;
-  height: 19px;
-  margin: 0 !important;
-  transform: none !important;
-}
-
-.bottom-nav .nav-item > span {
-  display: block !important;
-  flex: 0 0 auto !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  font-size: 9px !important;
-  line-height: 1.15 !important;
-  font-weight: 650 !important;
-  letter-spacing: 0 !important;
-  white-space: nowrap !important;
-  text-align: center !important;
-}
-
-.bottom-nav .nav-create {
-  display: grid !important;
-  place-items: center !important;
-  align-self: center !important;
-  justify-self: stretch !important;
-  margin: 0 !important;
-}
-
-@media (max-width: 560px) {
-  .bottom-nav .nav-item {
-    gap: 3px !important;
-    min-height: 50px !important;
-    padding: 4px 1px !important;
-  }
-
-  .bottom-nav .nav-item > svg {
-    width: 19px;
-    height: 19px;
-  }
-
-  .bottom-nav .nav-item > span {
-    font-size: 8.5px !important;
-    line-height: 1.1 !important;
-  }
-}
-
-
-/* Center the Messages action precisely in the bottom navigation. */
-.bottom-nav {
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 56px minmax(0, 1fr) minmax(0, 1fr) !important;
-}
-.bottom-nav .nav-create {
-  grid-column: 3 !important;
-  justify-self: center !important;
-  align-self: center !important;
-  width: 48px !important;
-  min-width: 48px !important;
-  max-width: 48px !important;
-  height: 48px !important;
-  margin: 0 !important;
-  transform: none !important;
-}
-@media (max-width: 560px) {
-  .bottom-nav {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 56px minmax(0, 1fr) minmax(0, 1fr) !important;
-  }
-}
-
-
-/* Clean, icon-first social action row inspired by modern community feeds. */
-.post-card .post-actions {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  flex-wrap: nowrap;
-  padding-top: 12px;
-}
-.post-card .post-actions .post-action {
-  display: inline-flex;
   align-items: center;
   justify-content: center;
-  flex: 1 1 0;
-  min-width: 0;
-  min-height: 36px;
-  padding: 4px 5px;
-  gap: 6px;
-  border-radius: 10px;
-  font-size: 12px;
-  font-weight: 500;
-  line-height: 1.2;
+  gap: 12px;
+  min-height: 46px;
+}
+.google-sign-in-mark {
+  display: inline-grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  color: #4285f4;
+  font: 700 15px/1 Arial, sans-serif;
+  box-shadow: 0 0 0 1px rgba(127,127,127,.18);
+}
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 18px 0;
+  color: var(--muted, #92929a);
+}
+.auth-divider span {
+  flex: 1;
+  height: 1px;
+  background: currentColor;
+  opacity: .22;
+}
+.auth-divider small {
+  font-size: 11px;
+  letter-spacing: .02em;
   white-space: nowrap;
-  opacity: .82;
-}
-.post-card .post-actions .post-action svg {
-  width: 19px;
-  height: 19px;
-  flex: 0 0 auto;
-  stroke-width: 1.9;
-}
-.post-card .post-actions .post-action:hover,
-.post-card .post-actions .post-action:focus-visible {
-  opacity: 1;
-}
-.post-card .post-actions .post-action.liked svg,
-.post-card .post-actions .post-action.reposted svg,
-.post-card .post-actions .post-action.active svg {
-  stroke-width: 2.2;
-}
-.profile-page .profile-posts .post-card .post-actions {
-  justify-content: space-between;
-}
-@media (max-width: 560px) {
-  .post-card .post-actions .post-action { min-height: 34px; gap: 5px; font-size: 11px; }
-  .post-card .post-actions .post-action svg { width: 18px; height: 18px; }
-}
-
-/* Refined social action controls: thin outline icons, visible counts, no active button backgrounds. */
-.post-card .post-actions { gap: 4px !important; padding-top: 10px !important; }
-.post-card .post-actions .post-action,
-.post-card .post-actions .post-action:hover,
-.post-card .post-actions .post-action:active,
-.post-card .post-actions .post-action:focus,
-.post-card .post-actions .post-action:focus-visible,
-.post-card .post-actions .post-action.active,
-.post-card .post-actions .post-action.liked,
-.post-card .post-actions .post-action.reposted {
-  background: transparent !important;
-  box-shadow: none !important;
-  outline-offset: 2px;
-}
-.post-card .post-actions .post-action {
-  min-height: 32px !important; padding: 3px 4px !important; gap: 5px !important;
-  border: 0 !important; border-radius: 0 !important; opacity: 1 !important;
-  color: var(--text-secondary, currentColor);
-  transition: color 140ms ease, transform 140ms ease;
-}
-.post-card .post-actions .post-action svg {
-  width: 18px !important; height: 18px !important; stroke-width: 1.7 !important;
-}
-.post-card .post-actions .post-action span {
-  font-size: 11px !important; line-height: 1 !important; font-weight: 500 !important;
-  font-variant-numeric: tabular-nums;
-}
-.post-card .post-actions .post-action.liked,
-.post-card .post-actions .post-action.liked svg,
-.post-card .post-actions .post-action.active,
-.post-card .post-actions .post-action.active svg,
-.post-card .post-actions .post-action.reposted,
-.post-card .post-actions .post-action.reposted svg {
-  color: var(--accent, #e84a76) !important;
-}
-.post-card .post-actions .post-action:active { transform: scale(.96); }
-@media (max-width: 560px) {
-  .post-card .post-actions .post-action { min-height: 30px !important; gap: 4px !important; }
-  .post-card .post-actions .post-action svg { width: 17px !important; height: 17px !important; }
-  .post-card .post-actions .post-action span { font-size: 10.5px !important; }
-}
-
-/* Hand-drawn action glyphs matching the supplied reference, independent of icon libraries. */
-.post-card .post-actions .rpw-action-icon {
-  display: block;
-  width: 18px !important;
-  height: 18px !important;
-  flex: 0 0 18px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 2.15;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  overflow: visible;
-}
-.post-card .post-actions .post-action.liked .rpw-action-icon,
-.post-card .post-actions .post-action.active .rpw-action-icon,
-.post-card .post-actions .post-action.reposted .rpw-action-icon {
-  color: var(--accent, #e84a76);
-}
-.post-card .post-actions .post-action.liked .rpw-action-icon path {
-  fill: currentColor;
-}
-.post-card .post-actions .post-action:not(.liked) .rpw-action-icon path {
-  fill: none;
-}
-.post-card .post-actions .post-action,
-.post-card .post-actions .post-action:hover,
-.post-card .post-actions .post-action:active,
-.post-card .post-actions .post-action:focus-visible {
-  background: transparent !important;
-  box-shadow: none !important;
-}
-@media (max-width: 560px) {
-  .post-card .post-actions .rpw-action-icon { width: 17px !important; height: 17px !important; flex-basis: 17px; }
-}
-
-/* Compact four-action engagement row matching the supplied layout; preserve existing icon artwork. */
-.post-card .post-actions {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: flex-start !important;
-  gap: clamp(18px, 4vw, 34px) !important;
-  padding: 10px 0 2px !important;
-}
-.post-card .post-actions .post-action {
-  display: inline-flex !important;
-  flex: 0 0 auto !important;
-  align-items: center !important;
-  justify-content: flex-start !important;
-  min-height: 30px !important;
-  min-width: 0 !important;
-  padding: 2px 0 !important;
-  gap: 7px !important;
-}
-.post-card .post-actions .post-action span {
-  font-size: 14px !important;
-  line-height: 1 !important;
-  font-weight: 400 !important;
-  color: inherit !important;
-  font-variant-numeric: tabular-nums;
-}
-.post-card .post-actions .rpw-action-icon {
-  width: 21px !important;
-  height: 21px !important;
-  flex: 0 0 21px !important;
-}
-@media (max-width: 560px) {
-  .post-card .post-actions { gap: clamp(20px, 7vw, 34px) !important; }
-  .post-card .post-actions .post-action span { font-size: 14px !important; }
-  .post-card .post-actions .rpw-action-icon { width: 21px !important; height: 21px !important; flex-basis: 21px !important; }
-}
-
-/* Minimalist engagement row: charcoal line art, matched stroke weight, no active backgrounds. */
-.post-card .post-actions {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: flex-start !important;
-  gap: clamp(22px, 4.5vw, 38px) !important;
-  padding: 10px 0 2px !important;
-}
-.post-card .post-actions .post-action,
-.post-card .post-actions .post-action:hover,
-.post-card .post-actions .post-action:active,
-.post-card .post-actions .post-action:focus,
-.post-card .post-actions .post-action:focus-visible,
-.post-card .post-actions .post-action.active,
-.post-card .post-actions .post-action.liked,
-.post-card .post-actions .post-action.reposted {
-  background: transparent !important;
-  box-shadow: none !important;
-}
-.post-card .post-actions .post-action {
-  color: #343434 !important;
-  border: 0 !important;
-  border-radius: 0 !important;
-  min-height: 30px !important;
-  min-width: 0 !important;
-  padding: 2px 0 !important;
-  gap: 7px !important;
-  flex: 0 0 auto !important;
-}
-.post-card .post-actions .rpw-action-icon {
-  display: block;
-  width: 22px !important;
-  height: 22px !important;
-  flex: 0 0 22px !important;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.9;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  overflow: visible;
-}
-.post-card .post-actions .post-action span {
-  font-size: 14px !important;
-  line-height: 1 !important;
-  font-weight: 400 !important;
-  color: #454545 !important;
-  font-variant-numeric: tabular-nums;
-}
-.post-card .post-actions .post-action.liked,
-.post-card .post-actions .post-action.liked span,
-.post-card .post-actions .post-action.active,
-.post-card .post-actions .post-action.reposted {
-  color: var(--accent, #e84a76) !important;
-}
-.post-card .post-actions .post-action.liked .rpw-action-icon path {
-  fill: currentColor;
-}
-.post-card .post-actions .post-action:active { transform: scale(.97); }
-@media (max-width: 560px) {
-  .post-card .post-actions { gap: clamp(22px, 6.5vw, 34px) !important; }
-  .post-card .post-actions .rpw-action-icon { width: 21px !important; height: 21px !important; flex-basis: 21px !important; }
-  .post-card .post-actions .post-action span { font-size: 14px !important; }
-}
-
-
-/* RP WORLD typography system: modern, clean sans-serif across every screen. */
-html, body, #root, button, input, textarea, select, option {
-  font-family: "Inter", -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
-}
-body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
-
-
-/* Center the post engagement icons as a balanced row. */
-.post-card .post-actions {
-  justify-content: center !important;
-  align-items: center !important;
-}
-.post-card .post-actions .post-action,
-.post-card .post-actions .post-view-count {
-  align-items: center !important;
-  justify-content: center !important;
-}
-
-/* Slightly bolder engagement icons for clearer visibility while keeping the minimal look. */
-.post-card .post-actions .rpw-action-icon {
-  stroke-width: 2.35 !important;
-}
-.post-card .post-actions .post-action.liked .rpw-action-icon,
-.post-card .post-actions .post-action.active .rpw-action-icon {
-  stroke-width: 2.45 !important;
-}
-
-
-/* Match engagement numbers to the post timestamp typography. */
-.post-card .post-actions .post-action span,
-.post-card .post-actions .post-view-count,
-.post-card .post-actions .post-view-count span {
-  font-family: inherit !important;
-  font-size: 11px !important;
-  line-height: 1.2 !important;
-  font-weight: 400 !important;
-  letter-spacing: normal !important;
-}
-
-
-/* Slightly larger post engagement icons for better visibility. */
-.post-card .post-actions .rpw-action-icon {
-  width: 24px !important;
-  height: 24px !important;
-  flex-basis: 24px !important;
-}
-@media (max-width: 560px) {
-  .post-card .post-actions .rpw-action-icon {
-    width: 23px !important;
-    height: 23px !important;
-    flex-basis: 23px !important;
-  }
-}
-
-
-/* Telegram-inspired ambient doodle wallpaper; post cards remain translucent and blurred. */
-.app {
-  background-attachment: fixed !important;
-  background-image:
-    radial-gradient(circle at 18px 18px, color-mix(in srgb, var(--accent) 11%, transparent) 1.4px, transparent 1.8px),
-    radial-gradient(circle at 54px 54px, color-mix(in srgb, var(--accent) 9%, transparent) 1.4px, transparent 1.8px),
-    repeating-linear-gradient(135deg, transparent 0 34px, color-mix(in srgb, var(--accent) 3.5%, transparent) 35px 36px, transparent 37px 70px) !important;
-  background-size: 72px 72px, 72px 72px, 140px 140px !important;
-}
-.app.dark {
-  background-color: #050505 !important;
-  background-image:
-    radial-gradient(circle at 50% -10%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 36rem),
-    radial-gradient(circle at 18px 18px, color-mix(in srgb, var(--accent) 13%, transparent) 1.4px, transparent 1.8px),
-    radial-gradient(circle at 54px 54px, color-mix(in srgb, var(--accent) 10%, transparent) 1.4px, transparent 1.8px),
-    repeating-linear-gradient(135deg, transparent 0 34px, rgba(255,255,255,.018) 35px 36px, transparent 37px 70px),
-    #050505 !important;
-  background-size: auto, 72px 72px, 72px 72px, 140px 140px, auto !important;
-}
-.app.light {
-  background-color: #f4f4f7 !important;
-  background-image:
-    radial-gradient(circle at 50% -10%, color-mix(in srgb, var(--accent) 10%, transparent), transparent 36rem),
-    radial-gradient(circle at 18px 18px, color-mix(in srgb, var(--accent) 14%, transparent) 1.4px, transparent 1.8px),
-    radial-gradient(circle at 54px 54px, color-mix(in srgb, var(--accent) 11%, transparent) 1.4px, transparent 1.8px),
-    repeating-linear-gradient(135deg, transparent 0 34px, rgba(20,20,30,.025) 35px 36px, transparent 37px 70px),
-    #f4f4f7 !important;
-  background-size: auto, 72px 72px, 72px 72px, 140px 140px, auto !important;
-}
-/* Keep feed posts glassy so the wallpaper softly shows through them. */
-.post-card {
-  background: rgba(255,255,255,.055) !important;
-  -webkit-backdrop-filter: blur(22px) saturate(145%) !important;
-  backdrop-filter: blur(22px) saturate(145%) !important;
-}
-.app.light .post-card {
-  background: rgba(255,255,255,.58) !important;
-  -webkit-backdrop-filter: blur(22px) saturate(145%) !important;
-  backdrop-filter: blur(22px) saturate(145%) !important;
 }
