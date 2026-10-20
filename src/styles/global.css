@@ -7522,3 +7522,45 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
   .post-card .post-actions .post-action { min-height: 34px; gap: 5px; font-size: 11px; }
   .post-card .post-actions .post-action svg { width: 18px; height: 18px; }
 }
+
+/* Refined social action controls: thin outline icons, visible counts, no active button backgrounds. */
+.post-card .post-actions { gap: 4px !important; padding-top: 10px !important; }
+.post-card .post-actions .post-action,
+.post-card .post-actions .post-action:hover,
+.post-card .post-actions .post-action:active,
+.post-card .post-actions .post-action:focus,
+.post-card .post-actions .post-action:focus-visible,
+.post-card .post-actions .post-action.active,
+.post-card .post-actions .post-action.liked,
+.post-card .post-actions .post-action.reposted {
+  background: transparent !important;
+  box-shadow: none !important;
+  outline-offset: 2px;
+}
+.post-card .post-actions .post-action {
+  min-height: 32px !important; padding: 3px 4px !important; gap: 5px !important;
+  border: 0 !important; border-radius: 0 !important; opacity: 1 !important;
+  color: var(--text-secondary, currentColor);
+  transition: color 140ms ease, transform 140ms ease;
+}
+.post-card .post-actions .post-action svg {
+  width: 18px !important; height: 18px !important; stroke-width: 1.7 !important;
+}
+.post-card .post-actions .post-action span {
+  font-size: 11px !important; line-height: 1 !important; font-weight: 500 !important;
+  font-variant-numeric: tabular-nums;
+}
+.post-card .post-actions .post-action.liked,
+.post-card .post-actions .post-action.liked svg,
+.post-card .post-actions .post-action.active,
+.post-card .post-actions .post-action.active svg,
+.post-card .post-actions .post-action.reposted,
+.post-card .post-actions .post-action.reposted svg {
+  color: var(--accent, #e84a76) !important;
+}
+.post-card .post-actions .post-action:active { transform: scale(.96); }
+@media (max-width: 560px) {
+  .post-card .post-actions .post-action { min-height: 30px !important; gap: 4px !important; }
+  .post-card .post-actions .post-action svg { width: 17px !important; height: 17px !important; }
+  .post-card .post-actions .post-action span { font-size: 10.5px !important; }
+}
