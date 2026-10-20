@@ -8064,7 +8064,7 @@ body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; 
 .auth-sheet[aria-labelledby="auth-title"] .stay-signed-in-option input {
   width: 15px;
   height: 15px;
-  accent-color: var(--accent);
+  accent-color: #fff;
 }
 
 .auth-sheet[aria-labelledby="auth-title"] .primary-button.full {
