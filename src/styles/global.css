@@ -17,6 +17,13 @@
 :root[data-theme="emerald"] { --accent:#57b98b; --accent-soft:rgba(87,185,139,.16); }
 :root[data-theme="gold"] { --accent:#9B7253; --accent-soft:rgba(155,114,83,.18); }
 :root[data-theme="coquette"] { --accent:#f28bb5; --accent-soft:rgba(242,139,181,.18); }
+:root[data-theme="sage"] { --accent:#849780; --accent-soft:rgba(132,151,128,.18); }
+:root[data-theme="oat-milk"] { --accent:#B69A78; --accent-soft:rgba(182,154,120,.18); }
+:root[data-theme="cherry"] { --accent:#B5364B; --accent-soft:rgba(181,54,75,.18); }
+:root[data-theme="plum"] { --accent:#95749A; --accent-soft:rgba(149,116,154,.18); }
+:root[data-theme="powder-blue"] { --accent:#86B6D9; --accent-soft:rgba(134,182,217,.18); }
+:root[data-theme="graphite"] { --accent:#9298A3; --accent-soft:rgba(146,152,163,.18); }
+
 * { box-sizing:border-box; }
 html,body,#root { min-width:320px; min-height:100%; margin:0; }
 body { min-height:100vh; }
