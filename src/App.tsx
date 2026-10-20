@@ -4823,11 +4823,41 @@ export function App() {
                         >
                           Reposts <span>{profileReposts.length}</span>
                         </button>
+                        <button className={profileSection === "albums" ? "profile-content-tab active" : "profile-content-tab"} type="button" role="tab" aria-selected={profileSection === "albums"} onClick={() => { setProfileSection("albums"); setActiveCollection(null); }}>Albums <span>{profileCollections.filter((item) => item.collection_type === "album").length}</span></button>
+                        <button className={profileSection === "groups" ? "profile-content-tab active" : "profile-content-tab"} type="button" role="tab" aria-selected={profileSection === "groups"} onClick={() => { setProfileSection("groups"); setActiveCollection(null); }}>Groups <span>{profileCollections.filter((item) => item.collection_type === "group").length}</span></button>
                       </div>
                     )}
                   </div>
 
-                  {profileSection === "posts" ? (
+                  {profileSection === "albums" || profileSection === "groups" ? (
+                    <div className="rpw-collections-area">
+                      {activeCollection ? (
+                        <div className="rpw-collection-detail">
+                          <button className="rpw-collection-back" type="button" onClick={() => setActiveCollection(null)}><ChevronLeft size={16} /> All {profileSection === "albums" ? "albums" : "groups"}</button>
+                          <div className="rpw-collection-detail-heading"><div><span className="eyebrow">{activeCollection.visibility === "private" ? "PRIVATE COLLECTION" : "ON YOUR PROFILE"}</span><h3>{activeCollection.title}</h3>{activeCollection.description && <p>{activeCollection.description}</p>}</div>{!viewAs && <button className="icon-button" type="button" aria-label="Delete collection" onClick={() => void deleteProfileCollection(activeCollection)}><Trash2 size={16} /></button>}</div>
+                          <div className="rpw-collection-posts">{profilePosts.filter((post) => activeCollection.post_ids.includes(post.id)).map((post) => <article className="rpw-collection-post glass" key={post.id}><strong>{post.content || "Photo or video post"}</strong>{post.media_url && <button type="button" className="rpw-collection-media" onClick={() => setActivePostMedia({url: signedMediaUrls[post.media_url!] ?? post.media_url!, type: isVideoMedia(post.media_url) ? "video" : "image"})}>{isVideoMedia(post.media_url) ? <video src={signedMediaUrls[post.media_url] ?? post.media_url} muted /> : <img src={signedMediaUrls[post.media_url] ?? post.media_url} alt="" />}</button>}<time>{new Date(post.created_at).toLocaleDateString()}</time></article>)}</div>
+                          {!activeCollection.post_ids.some((id) => profilePosts.some((post) => post.id === id)) && <p className="comments-empty">No available posts in this collection yet.</p>}
+                        </div>
+                      ) : (
+                        <>
+                          <div className="rpw-collections-toolbar"><div><h3>{profileSection === "albums" ? "Albums" : "Post collections"}</h3><p>{profileSection === "albums" ? "Keep your favorite moments together." : "Curate your story, one theme at a time."}</p></div>{!viewAs && <button type="button" className="rpw-create-collection" onClick={() => { setCollectionType(profileSection === "albums" ? "album" : "group"); setCollectionEditorOpen(true); }}><Plus size={15} /> Create</button>}</div>
+                          <div className="rpw-collection-grid">
+                            {(viewAs ? publicProfileCollections : profileCollections).filter((item) => item.collection_type === (profileSection === "albums" ? "album" : "group") && (!viewAs || item.visibility === "public")).map((item) => {
+                              const sourcePosts = viewAs ? publicProfilePosts : profilePosts;
+                              const cover = sourcePosts.find((post) => item.post_ids.includes(post.id) && post.media_url);
+                              return <button className="rpw-collection-card glass" type="button" key={item.id} onClick={() => setActiveCollection(item)}>
+                                <span className="rpw-collection-cover" style={cover?.media_url ? {backgroundImage: "url(" + (signedMediaUrls[cover.media_url] ?? cover.media_url) + ")"} : undefined}><span className="rpw-collection-cover-icon">{item.collection_type === "album" ? <Image size={22} /> : <Sparkles size={22} />}</span><span className="rpw-collection-count">{item.post_ids.length} {item.post_ids.length === 1 ? "post" : "posts"}</span></span>
+                                <span className="rpw-collection-card-copy"><strong>{item.title}</strong><small>{item.description || (item.collection_type === "album" ? "A little gallery of moments" : "A curated post collection")}</small><span className="rpw-collection-meta">{item.visibility === "private" ? <><LockKeyhole size={11} /> Private</> : <><Globe2 size={11} /> Public</>}</span></span>
+                                {!viewAs && <span className="rpw-collection-delete" onClick={(event) => { event.stopPropagation(); void deleteProfileCollection(item); }} role="button" aria-label={"Delete " + item.title}><Trash2 size={14} /></span>}
+                              </button>;
+                            })}
+                            {!viewAs && <button className="rpw-collection-create-card" type="button" onClick={() => { setCollectionType(profileSection === "albums" ? "album" : "group"); setCollectionEditorOpen(true); }}><span><Plus size={21} /></span><strong>Create {profileSection === "albums" ? "album" : "collection"}</strong><small>Make it yours</small></button>}
+                          </div>
+                          {(viewAs ? publicProfileCollections : profileCollections).filter((item) => item.collection_type === (profileSection === "albums" ? "album" : "group") && (!viewAs || item.visibility === "public")).length === 0 && <div className="rpw-collections-empty"><Sparkles size={22} /><strong>No {profileSection === "albums" ? "albums" : "collections"} yet</strong><span>Create a collection to give your posts a home.</span></div>}
+                        </>
+                      )}
+                    </div>
+                  ) : profileSection === "posts" ? (
                     profilePosts.length === 0 ? (
                     <div className="empty-state glass">
                       <Image size={22} />
