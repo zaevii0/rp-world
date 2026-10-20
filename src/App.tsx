@@ -79,7 +79,7 @@ function RPWorldMark() {
 
 const THEME_KEY = "rpw-theme";
 const THEME_USER_SELECTED_KEY = "rpw-theme-user-selected";
-const FREE_THEME_IDS: ThemeId[] = ["midnight", "black", "ocean"];
+const FREE_THEME_IDS: ThemeId[] = ["black", "sage", "powder-blue"];
 const APPEARANCE_KEY = "rpw-appearance";
 const VIEW_KEY = "rpw-current-view";
 const PUBLIC_PROFILE_KEY = "rpw-current-public-profile";
