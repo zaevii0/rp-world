@@ -3840,16 +3840,17 @@ export function App() {
             </button>
           ) : (
             <button
-              className="primary-button"
+              className="primary-button auth-entry-button"
               type="button"
               onClick={() => {
-                setAuthMode("signup");
+                setAuthMode("login");
                 setAuthOpen(true);
                 resetAuthMessages();
               }}
             >
-              <UserPlus size={17} />
-              Create your account
+              <LogIn size={17} />
+              Log in or sign up
+              <ArrowUp size={16} className="auth-entry-arrow" aria-hidden="true" />
             </button>
           )}
 
