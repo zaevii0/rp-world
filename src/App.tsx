@@ -4655,18 +4655,6 @@ export function App() {
                       <h3>@{profile.username}</h3>
                     </div>
 
-                    {!viewAs && (
-                      <button
-                        className="small-add"
-                        type="button"
-                        onClick={() =>
-                          setHighlightOpen(true)
-                        }
-                      >
-                        <Plus size={14} />
-                        Add
-                      </button>
-                    )}
                   </div>
 
                   <div className={viewAs ? "highlights-row view-as" : "highlights-row"}>
@@ -4698,6 +4686,17 @@ export function App() {
                         </strong>
                       </button>
                     ))}
+                    {!viewAs && (
+                      <button
+                        className="small-add highlight-add-inline"
+                        type="button"
+                        onClick={() => setHighlightOpen(true)}
+                        aria-label="Add highlight"
+                      >
+                        <Plus size={14} />
+                        Add
+                      </button>
+                    )}
                   </div>
                 </div>
 
