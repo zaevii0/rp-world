@@ -2463,14 +2463,20 @@ export function App() {
         .select("id, user_id, title, description, collection_type, visibility, created_at")
         .single();
       if (insertError) throw insertError;
-      if (collectionPostIds.length) {
-        const { error: itemsError } = await supabase.from("profile_collection_posts").insert(collectionPostIds.map((post_id) => ({ collection_id: inserted.id, post_id })));
+      const safePostIds = collectionPostIds.filter((post_id) => {
+        const post = profilePosts.find((item) => item.id === post_id);
+        if (!post) return false;
+        if (collectionType === "album" && !post.media_url) return false;
+        return collectionVisibility === "private" || post.privacy === "public";
+      });
+      if (safePostIds.length) {
+        const { error: itemsError } = await supabase.from("profile_collection_posts").insert(safePostIds.map((post_id) => ({ collection_id: inserted.id, post_id })));
         if (itemsError) {
           await supabase.from("profile_collections").delete().eq("id", inserted.id).eq("user_id", session.user.id);
           throw itemsError;
         }
       }
-      const saved: ProfileCollection = { ...inserted, post_ids: collectionPostIds };
+      const saved: ProfileCollection = { ...inserted, post_ids: safePostIds };
       setProfileCollections((current) => [saved, ...current]);
       setCollectionEditorOpen(false);
       setCollectionTitle("");
@@ -6282,7 +6288,7 @@ export function App() {
               <label>Title<input required maxLength={60} value={collectionTitle} onChange={(event) => setCollectionTitle(event.target.value)} placeholder={collectionType === "album" ? "e.g. Little moments" : "e.g. After dark"} /></label>
               <label>Description <span className="rpw-optional-label">OPTIONAL</span><textarea maxLength={240} value={collectionDescription} onChange={(event) => setCollectionDescription(event.target.value)} placeholder="A short note about this collection" rows={2} /></label>
               <div className="rpw-collection-visibility"><span>Who can see it?</span><button type="button" className={collectionVisibility === "public" ? "active" : ""} onClick={() => setCollectionVisibility("public")}><Globe2 size={15} /> Public</button><button type="button" className={collectionVisibility === "private" ? "active" : ""} onClick={() => setCollectionVisibility("private")}><LockKeyhole size={15} /> Private</button></div>
-              <div className="rpw-collection-post-picker"><div><strong>Add posts</strong><small>Choose posts to include. Empty collections are allowed.</small></div>{profilePosts.filter((post) => collectionType === "album" ? Boolean(post.media_url) : true).length ? profilePosts.filter((post) => collectionType === "album" ? Boolean(post.media_url) : true).map((post) => <label className="rpw-collection-post-option" key={post.id}><input type="checkbox" checked={collectionPostIds.includes(post.id)} onChange={(event) => setCollectionPostIds((current) => event.target.checked ? [...current, post.id] : current.filter((id) => id !== post.id))} /><span><strong>{post.content.trim().slice(0, 80) || (post.media_url ? "Photo or video post" : "Untitled post")}</strong><small>{new Date(post.created_at).toLocaleDateString()}{post.media_url ? " · Media" : ""}</small></span></label>) : <p className="comments-empty">{collectionType === "album" ? "Photo and video posts will appear here." : "Your posts will appear here once you publish some."}</p>}</div>
+              <div className="rpw-collection-post-picker"><div><strong>Add posts</strong><small>Choose posts to include. Empty collections are allowed.</small></div>{profilePosts.filter((post) => collectionType === "album" ? Boolean(post.media_url) : true).length ? profilePosts.filter((post) => collectionType === "album" ? Boolean(post.media_url) : true).map((post) => <label className="rpw-collection-post-option" key={post.id}><input type="checkbox" checked={collectionPostIds.includes(post.id)} disabled={collectionVisibility === "public" && post.privacy !== "public"} onChange={(event) => setCollectionPostIds((current) => event.target.checked ? [...current, post.id] : current.filter((id) => id !== post.id))} /><span><strong>{post.content.trim().slice(0, 80) || (post.media_url ? "Photo or video post" : "Untitled post")}</strong><small>{new Date(post.created_at).toLocaleDateString()}{post.media_url ? " · Media" : ""}</small></span></label>) : <p className="comments-empty">{collectionType === "album" ? "Photo and video posts will appear here." : "Your posts will appear here once you publish some."}</p>}</div>
               {profileError && <p className="form-message error">{profileError}</p>}
               <button className="primary-button full" type="submit" disabled={collectionBusy || !collectionTitle.trim()}>{collectionBusy ? "Creating…" : collectionType === "album" ? "Create album" : "Create collection"}</button>
             </form>
