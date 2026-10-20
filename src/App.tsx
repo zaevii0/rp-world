@@ -1888,6 +1888,7 @@ export function App() {
     setViewAs(false);
     setPublicProfilePosts([]);
     setPublicHighlights([]);
+    setPublicProfileCollections([]);
     setFollowingPublicProfile(false);
     setFollowedByPublicProfile(false);
     setPublicProfileFriend(false);
@@ -1898,7 +1899,7 @@ export function App() {
       // Ignore unavailable session storage.
     }
 
-    const [{ data: target }, { data: targetPosts }, { data: targetHighlights }, { data: myFollow }, { data: reverseFollow }] =
+    const [{ data: target }, { data: targetPosts }, { data: targetHighlights }, { data: targetCollections }, { data: myFollow }, { data: reverseFollow }] =
       await Promise.all([
         supabase.from("profiles").select("*").eq("id", userId).maybeSingle(),
         supabase
@@ -1915,6 +1916,12 @@ export function App() {
           .select("id, user_id, title, image_url, created_at")
           .eq("user_id", userId)
           .order("created_at", { ascending: true }),
+        supabase
+          .from("profile_collections")
+          .select("id, user_id, title, description, collection_type, visibility, created_at, profile_collection_posts(post_id)")
+          .eq("user_id", userId)
+          .eq("visibility", "public")
+          .order("created_at", { ascending: false }),
         supabase
           .from("user_follows")
           .select("follower_id")
@@ -1934,6 +1941,7 @@ export function App() {
     const targetProfile = target as Profile;
     setPublicProfile(targetProfile);
     setPublicHighlights((targetHighlights ?? []) as Highlight[]);
+    setPublicProfileCollections(((targetCollections ?? []) as Array<ProfileCollection & { profile_collection_posts?: { post_id: string }[] }>).map((item) => ({ ...item, post_ids: (item.profile_collection_posts ?? []).map((entry) => entry.post_id) })));
 
     const rows = (targetPosts ?? []) as Array<Post & {
       post_likes?: { count: number }[];
