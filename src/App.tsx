@@ -4170,7 +4170,7 @@ export function App() {
                             aria-label="Share post"
                             title="Share post"
                           >
-                            <svg className="rpw-action-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21.5 2.8 14.7 21a.8.8 0 0 1-1.5 0l-3.5-7.1-7.1-3.5a.8.8 0 0 1 0-1.5L20.8 2a.6.6 0 0 1 .7.8Z" /><path d="m9.7 13.9 6.1-6.1" /></svg>
+                            <svg className="rpw-action-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21.1 3.2 14.2 20.1c-.4 1-1.8 1-2.2 0l-2.4-5.8-5.8-2.4c-1-.4-1-1.8 0-2.2l16.9-6.9c.9-.4 1.8.5 1.4 1.4Z" /><path d="m9.6 14.4 7-7" /></svg>
                           </button>
                         </div>
 
