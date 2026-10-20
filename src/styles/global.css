@@ -8432,3 +8432,10 @@ body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; 
   background-color: color-mix(in srgb, var(--accent-soft) 100%, transparent) !important;
   border-color: color-mix(in srgb, var(--accent) 32%, transparent) !important;
 }
+
+
+/* Keep profile @usernames in sync with the selected RP WORLD theme. */
+.profile-username-accent {
+  color: var(--accent) !important;
+  overflow-wrap: anywhere;
+}
