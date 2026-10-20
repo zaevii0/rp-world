@@ -113,6 +113,7 @@ type Post = {
   comments: number;
   reposts: number;
   shares: number;
+  views: number;
   reposted: boolean;
   reposted_at?: string | null;
   pinned_at?: string | null;
@@ -4162,6 +4163,11 @@ export function App() {
                             <svg className="rpw-action-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 7.5A8.5 8.5 0 0 0 6 5L4 7" /><path d="M4 3.5V7h3.5" /><path d="M3.5 16.5A8.5 8.5 0 0 0 18 19l2-2" /><path d="M20 20.5V17h-3.5" /></svg>
                             <span>{post.reposts || 0}</span>
                           </button>
+
+                          <div className="post-action post-view-count" aria-label={`Views: ${post.views || 0}`} title="Post views">
+                            <svg className="rpw-action-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.4-6 9.5-6 9.5 6 9.5 6-3.4 6-9.5 6-9.5-6-9.5-6Z" /><circle cx="12" cy="12" r="2.7" /></svg>
+                            <span>{post.views || 0}</span>
+                          </div>
 
                           <button
                             className="post-action"
