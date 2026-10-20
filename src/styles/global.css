@@ -8372,3 +8372,23 @@ body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; 
   .notification-backdrop { align-items:flex-start; justify-content:center; padding:calc(max(10px, env(safe-area-inset-top)) + 54px) 10px 10px; }
   .notification-panel { width:100%; max-height:calc(100dvh - 90px); border-radius:22px; }
 }
+
+
+/* Match profile edit pencil styling to the theme picker brush icon. */
+.profile-page .profile-edit-float {
+  color: var(--accent) !important;
+  border-color: color-mix(in srgb, var(--accent) 22%, transparent) !important;
+  background: color-mix(in srgb, var(--accent-soft) 88%, transparent) !important;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 10%, transparent);
+}
+.profile-page .profile-edit-float:hover,
+.profile-page .profile-edit-float:focus-visible {
+  color: var(--accent) !important;
+  border-color: color-mix(in srgb, var(--accent) 40%, transparent) !important;
+  background: color-mix(in srgb, var(--accent-soft) 100%, transparent) !important;
+}
+.app.light .profile-page .profile-edit-float {
+  color: var(--accent) !important;
+  border-color: color-mix(in srgb, var(--accent) 22%, transparent) !important;
+  background: color-mix(in srgb, var(--accent-soft) 88%, white 12%) !important;
+}
