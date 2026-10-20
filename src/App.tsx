@@ -15,6 +15,7 @@ import {
   GraduationCap,
   Music,
   MessageCircle,
+  Bookmark,
   ShoppingBag,
   PenLine,
   Gamepad2,
@@ -4130,68 +4131,61 @@ export function App() {
                         <div className="post-actions">
                           <button
                             className={
-                              post.liked
-                                ? "post-action liked"
-                                : "post-action"
-                            }
-                            type="button"
-                            onClick={() =>
-                              void toggleLike(post)
-                            }
-                          >
-                            <Heart
-                              size={17}
-                              fill={
-                                post.liked
-                                  ? "currentColor"
-                                  : "none"
-                              }
-                            />
-
-                            {post.likes}
-                          </button>
-
-                          <button
-                            className={
-                              openComments ===
-                              post.id
+                              openComments === post.id
                                 ? "post-action active"
                                 : "post-action"
                             }
                             type="button"
-                            onClick={() =>
-                              void toggleComments(
-                                post.id,
-                              )
-                            }
+                            onClick={() => void toggleComments(post.id)}
                             aria-label={`Comments: ${post.comments}`}
                             title="Comments"
                           >
-                            <MessageCircle
-                              size={17}
-                            />{" "}
-                            {post.comments}
+                            <MessageCircle size={19} />
+                            <span>{post.comments}</span>
                           </button>
 
-                                          <button
-                            className={post.reposted ? "post-action reposted" : "post-action"}
+                          <button
+                            className="post-action"
                             type="button"
-                            onClick={() => void repostPost(post)}
-                            disabled={repostBusy === post.id}
-                            title={post.reposted ? "Reposted" : "Repost"}
+                            aria-label="Bookmark post"
+                            title="Bookmark (coming soon)"
+                            onClick={() => window.alert("Bookmarking is not available yet.")}
                           >
-                            <Repeat2 size={17} />
-                            {post.reposts || 0}
+                            <Bookmark size={19} />
+                          </button>
+
+                          <button
+                            className={post.liked ? "post-action liked" : "post-action"}
+                            type="button"
+                            onClick={() => void toggleLike(post)}
+                            aria-label={`Likes: ${post.likes}`}
+                            title="Like"
+                          >
+                            <Heart size={19} fill={post.liked ? "currentColor" : "none"} />
+                            <span>{post.likes}</span>
                           </button>
 
                           <button
                             className="post-action"
                             type="button"
                             onClick={() => void sharePost(post)}
-                            aria-label="Share post"
+                            aria-label={`Shares: ${post.shares || 0}`}
                             title="Share post"
                           >
-                            <Forward size={17} />
+                            <Send size={19} />
+                            <span>{post.shares || 0}</span>
+                          </button>
+
+                          <button
+                            className={post.reposted ? "post-action reposted" : "post-action"}
+                            type="button"
+                            onClick={() => void repostPost(post)}
+                            disabled={repostBusy === post.id}
+                            aria-label={`Reposts: ${post.reposts || 0}`}
+                            title={post.reposted ? "Reposted" : "Repost"}
+                          >
+                            <Repeat2 size={19} />
+                            <span>{post.reposts || 0}</span>
                           </button>
                         </div>
 
