@@ -4654,27 +4654,20 @@ export function App() {
                         </div>
                       )}
 
-                      <div className="profile-meta">
-                        <span>
-                          <Sparkles size={13} />
-                          {profile.rp_id}
-                        </span>
-                        <button className="profile-meta-button" type="button" onClick={() => void openFollowers(session?.user.id ?? profile.id, profile.display_name)} aria-label="View followers">
-                          <User size={13} />
-                          {profileStats.followers} {profileStats.followers === 1 ? "follower" : "followers"}
-                        </button>
-                        <span>
-                          <Heart size={13} />
-                          {profileStats.likes} {profileStats.likes === 1 ? "like" : "likes"}
-                        </span>
 
-                      </div>
                     </div>
                   </div>
 
                 </div>
 
                 <div className="profile-section profile-highlights-section glass">
+                  <div className="profile-meta">
+                    <span><Sparkles size={13} />{profile.rp_id}</span>
+                    <button className="profile-meta-button" type="button" onClick={() => void openFollowers(session?.user.id ?? profile.id, profile.display_name)} aria-label="View followers">
+                      <User size={13} />{profileStats.followers} {profileStats.followers === 1 ? "follower" : "followers"}
+                    </button>
+                    <span><Heart size={13} />{profileStats.likes} {profileStats.likes === 1 ? "like" : "likes"}</span>
+                  </div>
                   <div className={viewAs ? "highlights-row view-as" : "highlights-row"}>
                     {highlights.map((item) => (
                       <button
@@ -5058,15 +5051,18 @@ export function App() {
                           </button>
                         </div>
                       )}
-                      <div className="profile-meta">
-                        <span><Sparkles size={13} />{publicProfile.rp_id}</span>
-                        <button className="profile-meta-button" type="button" onClick={() => void openFollowers(publicProfile.id, publicProfile.display_name)} aria-label="View followers"><User size={13} />{profileStats.followers} {profileStats.followers === 1 ? "follower" : "followers"}</button>
-                        <span><Heart size={13} />{profileStats.likes} {profileStats.likes === 1 ? "like" : "likes"}</span>
-                      </div>
+
                     </div>
                   </div>
                 </div>
                 <div className="profile-section profile-highlights-section glass">
+                  <div className="profile-meta">
+                    <span><Sparkles size={13} />{publicProfile.rp_id}</span>
+                    <button className="profile-meta-button" type="button" onClick={() => void openFollowers(publicProfile.id, publicProfile.display_name)} aria-label="View followers">
+                      <User size={13} />{profileStats.followers} {profileStats.followers === 1 ? "follower" : "followers"}
+                    </button>
+                    <span><Heart size={13} />{profileStats.likes} {profileStats.likes === 1 ? "like" : "likes"}</span>
+                  </div>
                   <div className="highlights-row view-as">
                     {publicHighlights.length === 0 ? <span className="comments-empty">No highlights yet.</span> : publicHighlights.map((item) => (
                       <button className={publicProfile.highlight_style === "portrait" ? "highlight-card highlight-card-portrait" : "highlight-card highlight-card-circle"} key={item.id} type="button" onClick={() => setActiveHighlight(item)}>
