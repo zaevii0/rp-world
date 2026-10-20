@@ -8486,6 +8486,38 @@ body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; 
 }
 
 
+/* Make the + Add tile match the selected highlight card dimensions. */
+.highlights-row .highlight-add-inline.highlight-add-circle {
+  box-sizing: border-box;
+  flex: 0 0 82px;
+  width: 82px;
+  min-height: 112px;
+}
+.highlights-row .highlight-add-inline.highlight-add-portrait {
+  box-sizing: border-box;
+  flex: 0 0 83px;
+  width: 83px;
+  min-height: 132px;
+  height: 132px;
+  border-radius: 13px;
+}
+.highlights-row .highlight-add-inline.highlight-add-portrait svg {
+  border-radius: 10px;
+}
+@media (max-width: 560px) {
+  .highlights-row .highlight-add-inline.highlight-add-circle {
+    flex-basis: 74px;
+    width: 74px;
+    min-height: 101px;
+  }
+  .highlights-row .highlight-add-inline.highlight-add-portrait {
+    flex-basis: 83px;
+    width: 83px;
+    min-height: 142px;
+    height: 142px;
+  }
+}
+
 /* Keep the profile username centered and group highlights in one surface. */
 .profile-highlights-section {
   padding: 14px 14px 10px;
