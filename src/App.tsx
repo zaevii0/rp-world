@@ -4161,10 +4161,11 @@ export function App() {
                             className="post-action"
                             type="button"
                             onClick={() => void sharePost(post)}
-                            aria-label="Share post"
+                            aria-label={`Shares: ${post.shares || 0}`}
                             title="Share post"
                           >
                             <svg className="rpw-action-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V3" /><path d="m7.5 7.5 4.5-4.5 4.5 4.5" /><path d="M5 12.5v6A2.5 2.5 0 0 0 7.5 21h9a2.5 2.5 0 0 0 2.5-2.5v-6" /></svg>
+                            <span>{post.shares || 0}</span>
                           </button>
                         </div>
 
