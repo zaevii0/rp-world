@@ -8284,3 +8284,44 @@ body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; 
   color: #aeb4c0 !important;
   background: rgba(127,127,127,.12);
 }
+
+
+/* Refine auth form spacing after removing the divider beneath Password. */
+.auth-sheet[aria-labelledby="auth-title"] .auth-form {
+  gap: 12px !important;
+}
+
+.auth-sheet[aria-labelledby="auth-title"] .auth-form > label:not(.stay-signed-in-option) {
+  gap: 7px !important;
+}
+
+.auth-sheet[aria-labelledby="auth-title"] .stay-signed-in-option {
+  margin-top: 0 !important;
+  margin-bottom: 1px;
+}
+
+.auth-sheet[aria-labelledby="auth-title"] .primary-button.full {
+  margin-top: 0 !important;
+}
+
+.auth-sheet[aria-labelledby="auth-title"] .auth-divider {
+  margin: 1px 0 !important;
+}
+
+.auth-sheet[aria-labelledby="auth-title"] .google-sign-in-button {
+  margin-top: 0 !important;
+}
+
+.auth-sheet[aria-labelledby="auth-title"] .mode-switch {
+  margin-top: 10px !important;
+  padding-top: 8px !important;
+}
+
+@media (max-width: 560px) {
+  .auth-sheet[aria-labelledby="auth-title"] .auth-form {
+    gap: 11px !important;
+  }
+  .auth-sheet[aria-labelledby="auth-title"] .input-wrap {
+    min-height: 48px !important;
+  }
+}
