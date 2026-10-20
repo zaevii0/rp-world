@@ -7729,9 +7729,13 @@ body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; 
 }
 
 
-/* Keep engagement counts regular; slightly emphasize only the icons. */
+/* Match engagement numbers to the post timestamp typography. */
 .post-card .post-actions .post-action span,
 .post-card .post-actions .post-view-count,
 .post-card .post-actions .post-view-count span {
+  font-family: inherit !important;
+  font-size: 11px !important;
+  line-height: 1.2 !important;
   font-weight: 400 !important;
+  letter-spacing: normal !important;
 }
