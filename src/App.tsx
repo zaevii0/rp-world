@@ -1,5 +1,6 @@
 import {
   ArrowLeft,
+  ChevronLeft,
   ArrowUp,
   Camera,
   ShieldCheck,
@@ -4508,7 +4509,7 @@ export function App() {
                   >
                     <div className="public-profile-cover-actions">
                       <button className="glass circle-button" type="button" aria-label="Back" title="Back" onClick={() => setView("home")}>
-                        <ArrowLeft size={17} />
+                        <ChevronLeft size={19} strokeWidth={2} />
                       </button>
                       <button
                         className="glass circle-button profile-cover-more"
@@ -4980,7 +4981,7 @@ export function App() {
                   <div className="profile-cover" style={publicProfile.cover_url ? { backgroundImage: `linear-gradient(180deg,rgba(0,0,0,.04),rgba(0,0,0,.42)),url(${publicProfile.cover_url})` } : undefined}>
                     <div className="public-profile-cover-actions">
                       <button className="glass circle-button" type="button" aria-label="Back" title="Back" onClick={() => { setView("discover"); setPublicProfile(null); }}>
-                        <ArrowLeft size={17} />
+                        <ChevronLeft size={19} strokeWidth={2} />
                       </button>
                       <button className="glass circle-button" type="button" aria-label="Search" title="Search" onClick={() => setView("search")}>
                         <Search size={17} />
