@@ -7706,3 +7706,15 @@ html, body, #root, button, input, textarea, select, option {
   font-family: "Inter", -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
 }
 body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+
+
+/* Center the post engagement icons as a balanced row. */
+.post-card .post-actions {
+  justify-content: center !important;
+  align-items: center !important;
+}
+.post-card .post-actions .post-action,
+.post-card .post-actions .post-view-count {
+  align-items: center !important;
+  justify-content: center !important;
+}
