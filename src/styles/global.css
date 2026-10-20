@@ -7718,3 +7718,12 @@ body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; 
   align-items: center !important;
   justify-content: center !important;
 }
+
+/* Slightly bolder engagement icons for clearer visibility while keeping the minimal look. */
+.post-card .post-actions .rpw-action-icon {
+  stroke-width: 2.35 !important;
+}
+.post-card .post-actions .post-action.liked .rpw-action-icon,
+.post-card .post-actions .post-action.active .rpw-action-icon {
+  stroke-width: 2.45 !important;
+}
