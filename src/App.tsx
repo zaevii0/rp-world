@@ -5833,9 +5833,7 @@ export function App() {
                 className="auth-form"
                 onSubmit={handleAuth}
               >
-                <label>
-                  <span>Email</span>
-
+                <label className="auth-input-label">
                   <div className="input-wrap">
                     <Mail size={16} />
 
@@ -5847,16 +5845,15 @@ export function App() {
                           event.target.value,
                         )
                       }
-                      placeholder="you@example.com"
+                      placeholder="Email"
+                      aria-label="Email"
                       autoComplete="email"
                       required
                     />
                   </div>
                 </label>
 
-                <label>
-                  <span>Password</span>
-
+                <label className="auth-input-label">
                   <div className="input-wrap password-input-wrap">
                     <input
                       type={passwordVisible ? "text" : "password"}
@@ -5866,7 +5863,8 @@ export function App() {
                           event.target.value,
                         )
                       }
-                      placeholder="At least 6 characters"
+                      placeholder="Password"
+                      aria-label="Password"
                       autoComplete={
                         authMode === "login"
                           ? "current-password"
