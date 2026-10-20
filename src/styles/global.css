@@ -7754,3 +7754,45 @@ body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; 
     flex-basis: 23px !important;
   }
 }
+
+
+/* Telegram-inspired ambient doodle wallpaper; post cards remain translucent and blurred. */
+.app {
+  background-attachment: fixed !important;
+  background-image:
+    radial-gradient(circle at 18px 18px, color-mix(in srgb, var(--accent) 11%, transparent) 1.4px, transparent 1.8px),
+    radial-gradient(circle at 54px 54px, color-mix(in srgb, var(--accent) 9%, transparent) 1.4px, transparent 1.8px),
+    repeating-linear-gradient(135deg, transparent 0 34px, color-mix(in srgb, var(--accent) 3.5%, transparent) 35px 36px, transparent 37px 70px) !important;
+  background-size: 72px 72px, 72px 72px, 140px 140px !important;
+}
+.app.dark {
+  background-color: #050505 !important;
+  background-image:
+    radial-gradient(circle at 50% -10%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 36rem),
+    radial-gradient(circle at 18px 18px, color-mix(in srgb, var(--accent) 13%, transparent) 1.4px, transparent 1.8px),
+    radial-gradient(circle at 54px 54px, color-mix(in srgb, var(--accent) 10%, transparent) 1.4px, transparent 1.8px),
+    repeating-linear-gradient(135deg, transparent 0 34px, rgba(255,255,255,.018) 35px 36px, transparent 37px 70px),
+    #050505 !important;
+  background-size: auto, 72px 72px, 72px 72px, 140px 140px, auto !important;
+}
+.app.light {
+  background-color: #f4f4f7 !important;
+  background-image:
+    radial-gradient(circle at 50% -10%, color-mix(in srgb, var(--accent) 10%, transparent), transparent 36rem),
+    radial-gradient(circle at 18px 18px, color-mix(in srgb, var(--accent) 14%, transparent) 1.4px, transparent 1.8px),
+    radial-gradient(circle at 54px 54px, color-mix(in srgb, var(--accent) 11%, transparent) 1.4px, transparent 1.8px),
+    repeating-linear-gradient(135deg, transparent 0 34px, rgba(20,20,30,.025) 35px 36px, transparent 37px 70px),
+    #f4f4f7 !important;
+  background-size: auto, 72px 72px, 72px 72px, 140px 140px, auto !important;
+}
+/* Keep feed posts glassy so the wallpaper softly shows through them. */
+.post-card {
+  background: rgba(255,255,255,.055) !important;
+  -webkit-backdrop-filter: blur(22px) saturate(145%) !important;
+  backdrop-filter: blur(22px) saturate(145%) !important;
+}
+.app.light .post-card {
+  background: rgba(255,255,255,.58) !important;
+  -webkit-backdrop-filter: blur(22px) saturate(145%) !important;
+  backdrop-filter: blur(22px) saturate(145%) !important;
+}
