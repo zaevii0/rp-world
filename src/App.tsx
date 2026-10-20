@@ -2423,6 +2423,68 @@ export function App() {
     return () => clearTimeout(timer);
   }, [messageTyping]);
 
+
+  async function loadProfileCollections(userId: string, own = false) {
+    if (!supabase) return;
+    const { data, error: collectionsError } = await supabase
+      .from("profile_collections")
+      .select("id, user_id, title, description, collection_type, visibility, created_at, profile_collection_posts(post_id)")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false });
+    if (collectionsError) {
+      console.warn("RP WORLD collections are unavailable until the profile collections migration is applied.", collectionsError.message);
+      if (own) setProfileCollections([]);
+      return;
+    }
+    const normalized = ((data ?? []) as Array<ProfileCollection & { profile_collection_posts?: { post_id: string }[] }>)
+      .map((item) => ({ ...item, post_ids: (item.profile_collection_posts ?? []).map((entry) => entry.post_id) }));
+    if (own) setProfileCollections(normalized);
+    else setPublicProfileCollections(normalized.filter((item) => item.visibility === "public"));
+  }
+
+  async function saveProfileCollection(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!supabase || !session?.user || !collectionTitle.trim() || collectionBusy) return;
+    setCollectionBusy(true);
+    setProfileError("");
+    try {
+      const { data: inserted, error: insertError } = await supabase
+        .from("profile_collections")
+        .insert({ user_id: session.user.id, title: collectionTitle.trim(), description: collectionDescription.trim(), collection_type: collectionType, visibility: collectionVisibility })
+        .select("id, user_id, title, description, collection_type, visibility, created_at")
+        .single();
+      if (insertError) throw insertError;
+      if (collectionPostIds.length) {
+        const { error: itemsError } = await supabase.from("profile_collection_posts").insert(collectionPostIds.map((post_id) => ({ collection_id: inserted.id, post_id })));
+        if (itemsError) {
+          await supabase.from("profile_collections").delete().eq("id", inserted.id).eq("user_id", session.user.id);
+          throw itemsError;
+        }
+      }
+      const saved: ProfileCollection = { ...inserted, post_ids: collectionPostIds };
+      setProfileCollections((current) => [saved, ...current]);
+      setCollectionEditorOpen(false);
+      setCollectionTitle("");
+      setCollectionDescription("");
+      setCollectionPostIds([]);
+      setProfileSection(collectionType === "album" ? "albums" : "groups");
+      setActiveCollection(null);
+      setMessage(collectionType === "album" ? "Album created." : "Collection created.");
+    } catch (caught) {
+      setProfileError(caught instanceof Error ? caught.message : "Could not save this collection. Please try again.");
+    } finally {
+      setCollectionBusy(false);
+    }
+  }
+
+  async function deleteProfileCollection(item: ProfileCollection) {
+    if (!supabase || !session?.user || !window.confirm("Delete this collection?")) return;
+    const { error: deleteError } = await supabase.from("profile_collections").delete().eq("id", item.id).eq("user_id", session.user.id);
+    if (deleteError) { setProfileError(deleteError.message); return; }
+    setProfileCollections((current) => current.filter((entry) => entry.id !== item.id));
+    setActiveCollection(null);
+  }
+
   async function loadHighlights() {
     if (!supabase || !session?.user) return;
 
