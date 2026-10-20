@@ -5897,12 +5897,6 @@ export function App() {
                   </div>
                 </label>
 
-                <div className="auth-divider" aria-hidden="true">
-                  <span />
-                  <small>or sign in with</small>
-                  <span />
-                </div>
-
                 {authMode === "login" && (
                   <label className="stay-signed-in-option">
                     <input
