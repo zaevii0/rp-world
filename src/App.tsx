@@ -16,6 +16,8 @@ import {
   Music,
   MessageCircle,
   Bookmark,
+  Bell,
+  CheckCheck,
   ShoppingBag,
   PenLine,
   Gamepad2,
@@ -51,7 +53,6 @@ import {
   User,
   UserPlus,
   X,
-  CheckCheck,
   Settings,
   Mic,
   Paintbrush,
@@ -161,6 +162,20 @@ type Comment = {
   reactionCount: number;
   reactionType: string | null;
   reactionCounts?: Record<string, number>;
+};
+
+type RPNotification = {
+  id: string;
+  recipient_id: string;
+  actor_id: string | null;
+  actor_name: string;
+  actor_avatar_url: string | null;
+  type: "follow" | "like" | "comment" | "reply";
+  message: string;
+  post_id: string | null;
+  comment_id: string | null;
+  created_at: string;
+  read_at: string | null;
 };
 
 type MessageStatus = "sending" | "sent" | "delivered" | "read" | "failed";
@@ -305,6 +320,10 @@ export function App() {
 
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [notifications, setNotifications] = useState<RPNotification[]>([]);
+  const [notificationsLoading, setNotificationsLoading] = useState(false);
+  const [notificationsError, setNotificationsError] = useState("");
   const [isAdmin, setIsAdmin] = useState(false);
   const [adminUserIds, setAdminUserIds] = useState<Set<string>>(new Set());
 
@@ -3689,6 +3708,49 @@ export function App() {
     }
   }
 
+  async function loadNotifications() {
+    if (!supabase || !session) return;
+    setNotificationsLoading(true);
+    setNotificationsError("");
+    const { data, error } = await supabase
+      .from("notifications")
+      .select("id, recipient_id, actor_id, actor_name, actor_avatar_url, type, message, post_id, comment_id, created_at, read_at")
+      .eq("recipient_id", session.user.id)
+      .order("created_at", { ascending: false })
+      .limit(100);
+    if (error) {
+      setNotificationsError("Notifications are unavailable right now. Please try again later.");
+    } else {
+      setNotifications((data ?? []) as RPNotification[]);
+    }
+    setNotificationsLoading(false);
+  }
+
+  async function openNotifications() {
+    setNotificationsOpen(true);
+    await loadNotifications();
+  }
+
+  async function markNotificationRead(notification: RPNotification) {
+    if (!supabase || !session || notification.read_at) return;
+    const readAt = new Date().toISOString();
+    setNotifications((current) => current.map((item) => item.id === notification.id ? { ...item, read_at: readAt } : item));
+    const { error } = await supabase.from("notifications").update({ read_at: readAt }).eq("id", notification.id).eq("recipient_id", session.user.id);
+    if (error) {
+      setNotifications((current) => current.map((item) => item.id === notification.id ? { ...item, read_at: null } : item));
+    }
+  }
+
+  async function markAllNotificationsRead() {
+    if (!supabase || !session) return;
+    const unreadIds = notifications.filter((item) => !item.read_at).map((item) => item.id);
+    if (!unreadIds.length) return;
+    const readAt = new Date().toISOString();
+    setNotifications((current) => current.map((item) => item.read_at ? item : { ...item, read_at: readAt }));
+    const { error } = await supabase.from("notifications").update({ read_at: readAt }).eq("recipient_id", session.user.id).is("read_at", null);
+    if (error) await loadNotifications();
+  }
+
   async function handleLogout() {
     if (!supabase) return;
 
@@ -3783,12 +3845,18 @@ export function App() {
 
           {session ? (
             <button
-              className="auth-icon-button glass"
+              className="auth-icon-button glass notification-trigger"
               type="button"
-              aria-label="Sign out"
-              onClick={handleLogout}
+              aria-label={notificationsOpen ? "Close notifications" : "Open notifications"}
+              aria-expanded={notificationsOpen}
+              onClick={() => void openNotifications()}
             >
-              <LogOut size={17} />
+              <Bell size={18} />
+              {notifications.some((item) => !item.read_at) && (
+                <span className="notification-count" aria-label={`${notifications.filter((item) => !item.read_at).length} unread notifications`}>
+                  {notifications.filter((item) => !item.read_at).length > 99 ? "99+" : notifications.filter((item) => !item.read_at).length}
+                </span>
+              )}
             </button>
           ) : (
             <button
@@ -3806,6 +3874,53 @@ export function App() {
           )}
         </div>
       </header>
+
+      {notificationsOpen && session && (
+        <div className="notification-backdrop" role="presentation" onClick={() => setNotificationsOpen(false)}>
+          <section className="notification-panel glass" role="dialog" aria-modal="true" aria-labelledby="notifications-title" onClick={(event) => event.stopPropagation()}>
+            <div className="notification-panel-header">
+              <div>
+                <p className="eyebrow">RP WORLD</p>
+                <h2 id="notifications-title">Notifications</h2>
+              </div>
+              <div className="notification-panel-actions">
+                <button type="button" className="notification-mark-all" onClick={() => void markAllNotificationsRead()} disabled={!notifications.some((item) => !item.read_at)}>Mark all read</button>
+                <button type="button" className="icon-button" aria-label="Close notifications" onClick={() => setNotificationsOpen(false)}><X size={18} /></button>
+              </div>
+            </div>
+            {notificationsLoading ? (
+              <p className="notification-empty">Loading notifications…</p>
+            ) : notificationsError ? (
+              <p className="notification-empty" role="alert">{notificationsError}</p>
+            ) : notifications.length === 0 ? (
+              <div className="notification-empty-state">
+                <Bell size={25} />
+                <strong>You’re all caught up</strong>
+                <span>New follows, likes, comments, and replies will appear here.</span>
+              </div>
+            ) : (
+              <div className="notification-list">
+                {notifications.map((item) => (
+                  <button key={item.id} type="button" className={`notification-item${item.read_at ? "" : " unread"}`} onClick={() => {
+                    void markNotificationRead(item);
+                    if (item.post_id) {
+                      setView("home");
+                      setNotificationsOpen(false);
+                    }
+                  }}>
+                    {item.actor_avatar_url ? <img className="notification-avatar" src={item.actor_avatar_url} alt="" /> : <span className="notification-avatar notification-avatar-fallback">{item.actor_name.trim().charAt(0).toUpperCase() || "R"}</span>}
+                    <span className="notification-copy">
+                      <span>{item.message}</span>
+                      <time dateTime={item.created_at}>{timeAgo(item.created_at)}</time>
+                    </span>
+                    {!item.read_at && <span className="notification-unread-dot" aria-label="Unread" />}
+                  </button>
+                ))}
+              </div>
+            )}
+          </section>
+        </div>
+      )}
 
       {!session || !profile ? (
         <main className="hero">
