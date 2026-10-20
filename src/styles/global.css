@@ -8433,3 +8433,9 @@ body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; 
   border-color: color-mix(in srgb, var(--accent) 32%, transparent) !important;
 }
 
+
+
+/* More-options control on the profile cover photo */
+.profile-cover .public-profile-cover-actions .profile-cover-more {
+  margin-left: auto;
+}
