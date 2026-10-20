@@ -6199,9 +6199,11 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
   position: absolute;
   top: 12px;
   left: 12px;
+  right: 12px;
   z-index: 4;
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 7px;
 }
 
@@ -8438,4 +8440,5 @@ body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; 
 /* More-options control on the profile cover photo */
 .profile-cover .public-profile-cover-actions .profile-cover-more {
   margin-left: auto;
+  flex-shrink: 0;
 }
