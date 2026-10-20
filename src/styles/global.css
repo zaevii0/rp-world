@@ -7599,3 +7599,39 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
 @media (max-width: 560px) {
   .post-card .post-actions .rpw-action-icon { width: 17px !important; height: 17px !important; flex-basis: 17px; }
 }
+
+/* Compact four-action engagement row matching the supplied layout; preserve existing icon artwork. */
+.post-card .post-actions {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: clamp(18px, 4vw, 34px) !important;
+  padding: 10px 0 2px !important;
+}
+.post-card .post-actions .post-action {
+  display: inline-flex !important;
+  flex: 0 0 auto !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  min-height: 30px !important;
+  min-width: 0 !important;
+  padding: 2px 0 !important;
+  gap: 7px !important;
+}
+.post-card .post-actions .post-action span {
+  font-size: 14px !important;
+  line-height: 1 !important;
+  font-weight: 400 !important;
+  color: inherit !important;
+  font-variant-numeric: tabular-nums;
+}
+.post-card .post-actions .rpw-action-icon {
+  width: 21px !important;
+  height: 21px !important;
+  flex: 0 0 21px !important;
+}
+@media (max-width: 560px) {
+  .post-card .post-actions { gap: clamp(20px, 7vw, 34px) !important; }
+  .post-card .post-actions .post-action span { font-size: 14px !important; }
+  .post-card .post-actions .rpw-action-icon { width: 21px !important; height: 21px !important; flex-basis: 21px !important; }
+}
