@@ -253,37 +253,41 @@
 }
 
 
-/* Verified badge — compact social-platform style. */
+/* Facebook-inspired verified badge — blue scalloped seal with a white check. */
 .verified-badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 15px;
   height: 15px;
+  flex: 0 0 auto;
   margin-left: 5px;
-  border-radius: 50%;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  clip-path: polygon(50% 0%, 61% 7%, 75% 3%, 82% 16%, 96% 22%, 93% 37%, 100% 50%, 93% 63%, 96% 78%, 82% 84%, 75% 97%, 61% 93%, 50% 100%, 39% 93%, 25% 97%, 18% 84%, 4% 78%, 7% 63%, 0% 50%, 7% 37%, 4% 22%, 18% 16%, 25% 3%, 39% 7%);
   background: #1877f2;
   color: #fff;
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", sans-serif;
-  font-size: 10px;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 9px;
   font-weight: 800;
   line-height: 1;
   vertical-align: 2px;
-  box-shadow: 0 2px 6px rgba(24,119,242,.24);
+  box-shadow: none;
 }
 
 .post-head .verified-badge {
   width: 14px;
   height: 14px;
   margin-left: 4px;
-  font-size: 9px;
+  font-size: 8px;
 }
 
 .profile-name-row .verified-badge {
   width: 17px;
   height: 17px;
   margin-left: 6px;
-  font-size: 11px;
+  font-size: 10px;
   vertical-align: 2px;
 }
 
@@ -291,13 +295,13 @@
   .verified-badge {
     width: 14px;
     height: 14px;
-    font-size: 9px;
+    font-size: 8px;
   }
 
   .profile-name-row .verified-badge {
     width: 16px;
     height: 16px;
-    font-size: 10px;
+    font-size: 9px;
   }
 }
 
