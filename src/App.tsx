@@ -5067,7 +5067,6 @@ export function App() {
                   </div>
                 </div>
                 <div className="profile-section profile-highlights-section glass">
-                  <div className="section-heading profile-highlights-heading"><div><h3>@{publicProfile.username}</h3></div></div>
                   <div className="highlights-row view-as">
                     {publicHighlights.length === 0 ? <span className="comments-empty">No highlights yet.</span> : publicHighlights.map((item) => (
                       <button className={publicProfile.highlight_style === "portrait" ? "highlight-card highlight-card-portrait" : "highlight-card highlight-card-circle"} key={item.id} type="button" onClick={() => setActiveHighlight(item)}>
@@ -5077,7 +5076,7 @@ export function App() {
                   </div>
                 </div>
                 <div className="profile-section profile-posts">
-                  <div className="section-heading"><div><p className="eyebrow">PUBLIC PROFILE</p><h3>Posts</h3></div></div>
+                  <div className="section-heading profile-content-heading"><div><h3 className="profile-activity-username">@{publicProfile.username}</h3><p className="eyebrow">PUBLIC PROFILE</p><h3>Posts</h3></div></div>
                   {publicProfilePosts.length === 0 ? <div className="empty-state glass"><Image size={22} /><strong>No posts yet.</strong><span>This user's published posts will appear here.</span></div> : (
                     <div className="feed-list">{publicProfilePosts.map((post) => (
                       <article className="post-card glass" key={post.id}>
@@ -5141,8 +5140,28 @@ export function App() {
                           <button className={post.liked ? "post-action liked" : "post-action"} type="button" onClick={() => void toggleLike(post)}>
                             <Heart size={17} fill={post.liked ? "currentColor" : "none"} />{post.likes}
                           </button>
-                          <button className={openComments === post.id ? "post-action active" : "post-action"} type="button" onClick={() => void toggleComments(post.id)}>
+                          <button className={openComments === post.id ? "post-action active" : "post-action"} type="button" onClick={() => void toggleComments(post.id)} aria-label={`Comments: ${post.comments}`} title="Comments">
                             <MessageCircle size={17} /> {post.comments}
+                          </button>
+                          <button
+                            className={savedPostIds.includes(post.id) ? "post-action active" : "post-action"}
+                            type="button"
+                            onClick={() => setSavedPostIds((current) => {
+                              const next = current.includes(post.id)
+                                ? current.filter((id) => id !== post.id)
+                                : [...current, post.id];
+                              try {
+                                localStorage.setItem("rpw-saved-post-ids", JSON.stringify(next));
+                              } catch {
+                                // Keep the save interaction usable when storage is unavailable.
+                              }
+                              return next;
+                            })}
+                            aria-label={savedPostIds.includes(post.id) ? "Remove saved post" : "Save post"}
+                            title={savedPostIds.includes(post.id) ? "Saved" : "Save post"}
+                            aria-pressed={savedPostIds.includes(post.id)}
+                          >
+                            <Bookmark size={17} fill={savedPostIds.includes(post.id) ? "currentColor" : "none"} />
                           </button>
                           <button className="post-action" type="button" onClick={() => void sharePost(post)} aria-label="Share post" title="Share post">
                             <Forward size={17} />
