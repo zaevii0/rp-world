@@ -8205,3 +8205,61 @@ body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; 
     transition: none !important;
   }
 }
+
+
+/* Premium signed-out entry action */
+.auth-entry-button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 54px;
+  padding: 0 22px;
+  border: 1px solid color-mix(in srgb, var(--accent, #8b9cff) 45%, transparent);
+  border-radius: 17px;
+  background: linear-gradient(135deg,
+    color-mix(in srgb, var(--accent, #8b9cff) 22%, var(--surface, #171923)),
+    color-mix(in srgb, var(--accent, #8b9cff) 9%, var(--surface, #171923)));
+  box-shadow: 0 10px 28px color-mix(in srgb, var(--accent, #8b9cff) 15%, transparent),
+    inset 0 1px 0 color-mix(in srgb, white 13%, transparent);
+  font-weight: 650;
+  letter-spacing: -.015em;
+  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.auth-entry-button:hover {
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, var(--accent, #8b9cff) 68%, transparent);
+  box-shadow: 0 14px 34px color-mix(in srgb, var(--accent, #8b9cff) 22%, transparent),
+    inset 0 1px 0 color-mix(in srgb, white 16%, transparent);
+}
+
+.auth-entry-button:active {
+  transform: scale(.985);
+}
+
+.auth-entry-button > svg:first-child {
+  flex: 0 0 auto;
+  opacity: .92;
+}
+
+.auth-entry-arrow {
+  margin-left: 3px;
+  transform: rotate(45deg);
+  opacity: .68;
+}
+
+@media (max-width: 560px) {
+  .auth-entry-button {
+    width: 100%;
+    min-height: 52px;
+    border-radius: 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-entry-button {
+    transition: none;
+  }
+}
