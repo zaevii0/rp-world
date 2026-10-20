@@ -4626,16 +4626,6 @@ export function App() {
                       <button className="glass circle-button" type="button" aria-label="Back" title="Back" onClick={() => setView("home")}>
                         <ChevronLeft size={19} strokeWidth={2} />
                       </button>
-                      <button
-                        className="glass circle-button profile-cover-more"
-                        type="button"
-                        aria-label="More profile options"
-                        title="More options"
-                        aria-expanded={profileMenuOpen}
-                        onClick={() => setProfileMenuOpen((open) => !open)}
-                      >
-                        <MoreVertical size={18} />
-                      </button>
                     </div>
                   </div>
 
@@ -4692,6 +4682,16 @@ export function App() {
                               title="Edit profile"
                             >
                               <Pencil size={18} />
+                            </button>
+                            <button
+                              className="profile-action-button secondary-profile-action profile-icon-action profile-more-button"
+                              type="button"
+                              onClick={() => setProfileMenuOpen((open) => !open)}
+                              aria-label="More profile options"
+                              title="More options"
+                              aria-expanded={profileMenuOpen}
+                            >
+                              <MoreVertical size={18} />
                             </button>
                           </>
                         ) : (
