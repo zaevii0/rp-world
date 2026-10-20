@@ -4140,7 +4140,7 @@ export function App() {
                             aria-label={`Comments: ${post.comments}`}
                             title="Comments"
                           >
-                            <MessageCircle size={19} />
+                            <MessageCircle size={18} strokeWidth={1.7} fill={openComments === post.id ? "currentColor" : "none"} />
                             <span>{post.comments}</span>
                           </button>
 
@@ -4151,7 +4151,7 @@ export function App() {
                             title="Bookmark (coming soon)"
                             onClick={() => window.alert("Bookmarking is not available yet.")}
                           >
-                            <Bookmark size={19} />
+                            <Bookmark size={18} strokeWidth={1.7} />
                           </button>
 
                           <button
@@ -4161,7 +4161,7 @@ export function App() {
                             aria-label={`Likes: ${post.likes}`}
                             title="Like"
                           >
-                            <Heart size={19} fill={post.liked ? "currentColor" : "none"} />
+                            <Heart size={18} strokeWidth={1.7} fill={post.liked ? "currentColor" : "none"} />
                             <span>{post.likes}</span>
                           </button>
 
@@ -4172,7 +4172,7 @@ export function App() {
                             aria-label={`Shares: ${post.shares || 0}`}
                             title="Share post"
                           >
-                            <Send size={19} />
+                            <Send size={18} strokeWidth={1.7} />
                             <span>{post.shares || 0}</span>
                           </button>
 
@@ -4184,7 +4184,7 @@ export function App() {
                             aria-label={`Reposts: ${post.reposts || 0}`}
                             title={post.reposted ? "Reposted" : "Repost"}
                           >
-                            <Repeat2 size={19} />
+                            <Repeat2 size={18} strokeWidth={1.7} />
                             <span>{post.reposts || 0}</span>
                           </button>
                         </div>
