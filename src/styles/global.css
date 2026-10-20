@@ -7834,3 +7834,374 @@ body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; 
   letter-spacing: .02em;
   white-space: nowrap;
 }
+
+
+/* RP WORLD auth refresh — polished, accessible liquid-glass sign-in and sign-up. */
+.sheet-backdrop:has(> .auth-sheet[aria-labelledby="auth-title"]) {
+  align-items: center !important;
+  justify-content: center !important;
+  padding: clamp(16px, 4vw, 36px) !important;
+  background:
+    radial-gradient(ellipse at 50% 18%, color-mix(in srgb, var(--accent) 18%, transparent), transparent 46%),
+    rgba(3, 4, 8, .72) !important;
+  -webkit-backdrop-filter: blur(22px) saturate(135%) !important;
+  backdrop-filter: blur(22px) saturate(135%) !important;
+}
+
+.auth-sheet[aria-labelledby="auth-title"] {
+  position: relative;
+  isolation: isolate;
+  width: min(100%, 456px) !important;
+  max-width: 456px !important;
+  max-height: min(90dvh, 820px) !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  padding: clamp(24px, 4vw, 34px) !important;
+  border: 1px solid color-mix(in srgb, var(--accent) 20%, rgba(255,255,255,.15)) !important;
+  border-radius: 30px !important;
+  background:
+    radial-gradient(ellipse at 50% 0%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 42%),
+    linear-gradient(155deg, rgba(27,29,37,.96), rgba(10,11,15,.96)) !important;
+  box-shadow:
+    0 32px 100px rgba(0,0,0,.52),
+    0 0 0 1px rgba(255,255,255,.035),
+    inset 0 1px 0 rgba(255,255,255,.09) !important;
+  -webkit-backdrop-filter: blur(34px) saturate(155%) !important;
+  backdrop-filter: blur(34px) saturate(155%) !important;
+  animation: rpw-auth-arrive 320ms cubic-bezier(.2,.75,.25,1) both !important;
+}
+
+.auth-sheet[aria-labelledby="auth-title"]::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: 0;
+  left: 12%;
+  right: 12%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--accent) 80%, white), transparent);
+  opacity: .9;
+  pointer-events: none;
+}
+
+.auth-sheet[aria-labelledby="auth-title"] .sheet-header {
+  align-items: center !important;
+  gap: 14px !important;
+}
+
+.auth-sheet[aria-labelledby="auth-title"] .eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 12px !important;
+  color: color-mix(in srgb, var(--accent) 86%, white) !important;
+  font-size: 10px !important;
+  font-weight: 750 !important;
+  letter-spacing: .18em !important;
+  line-height: 1.4 !important;
+}
+
+.auth-sheet[aria-labelledby="auth-title"] .eyebrow::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  flex: 0 0 7px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 13px color-mix(in srgb, var(--accent) 72%, transparent);
+}
+
+.auth-sheet[aria-labelledby="auth-title"] .sheet-header h2 {
+  margin: 0 !important;
+  max-width: 340px;
+  font-size: clamp(28px, 4vw, 34px) !important;
+  font-weight: 720 !important;
+  letter-spacing: -.055em !important;
+  line-height: 1.12 !important;
+  text-wrap: balance;
+}
+
+.auth-sheet[aria-labelledby="auth-title"] > .sheet-header .icon-button {
+  flex: 0 0 38px;
+  width: 38px !important;
+  height: 38px !important;
+  border: 1px solid rgba(255,255,255,.09) !important;
+  border-radius: 50% !important;
+  color: rgba(255,255,255,.78) !important;
+  background: rgba(255,255,255,.055) !important;
+  transition: background 160ms ease, border-color 160ms ease, transform 160ms ease;
+}
+
+.auth-sheet[aria-labelledby="auth-title"] > .sheet-header .icon-button:hover {
+  border-color: color-mix(in srgb, var(--accent) 35%, transparent) !important;
+  background: color-mix(in srgb, var(--accent) 12%, transparent) !important;
+}
+
+.auth-sheet[aria-labelledby="auth-title"] > .sheet-header .icon-button:active {
+  transform: scale(.95);
+}
+
+.auth-sheet[aria-labelledby="auth-title"] .sheet-copy {
+  margin: 12px 0 22px !important;
+  max-width: 340px;
+  color: rgba(245,246,250,.66) !important;
+  font-size: 13px !important;
+  line-height: 1.65 !important;
+}
+
+.auth-sheet[aria-labelledby="auth-title"] .google-sign-in-button {
+  width: 100%;
+  min-height: 49px !important;
+  gap: 11px !important;
+  border: 1px solid rgba(255,255,255,.14) !important;
+  border-radius: 15px !important;
+  color: #f6f7fb !important;
+  background: rgba(255,255,255,.065) !important;
+  font-size: 13px !important;
+  font-weight: 650 !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.045);
+  transition: border-color 160ms ease, background 160ms ease, transform 160ms ease;
+}
+
+.auth-sheet[aria-labelledby="auth-title"] .google-sign-in-button:hover {
+  border-color: rgba(255,255,255,.26) !important;
+  background: rgba(255,255,255,.105) !important;
+}
+
+.auth-sheet[aria-labelledby="auth-title"] .google-sign-in-button:active {
+  transform: scale(.99);
+}
+
+.auth-sheet[aria-labelledby="auth-title"] .google-sign-in-mark {
+  width: 21px !important;
+  height: 21px !important;
+  font-size: 15px !important;
+}
+
+.auth-sheet[aria-labelledby="auth-title"] .auth-divider {
+  gap: 13px !important;
+  margin: 20px 0 !important;
+  color: rgba(235,238,245,.45) !important;
+}
+
+.auth-sheet[aria-labelledby="auth-title"] .auth-divider span {
+  opacity: .35 !important;
+}
+
+.auth-sheet[aria-labelledby="auth-title"] .auth-divider small {
+  font-size: 10px !important;
+  letter-spacing: .035em !important;
+}
+
+.auth-sheet[aria-labelledby="auth-title"] .auth-form {
+  gap: 16px !important;
+}
+
+.auth-sheet[aria-labelledby="auth-title"] .auth-form > label {
+  gap: 8px !important;
+  color: rgba(246,247,250,.86) !important;
+  font-size: 11px !important;
+  font-weight: 650 !important;
+  letter-spacing: .015em;
+}
+
+.auth-sheet[aria-labelledby="auth-title"] .input-wrap {
+  min-height: 50px !important;
+  gap: 11px !important;
+  padding: 0 15px !important;
+  border: 1px solid rgba(255,255,255,.105) !important;
+  border-radius: 15px !important;
+  color: rgba(240,242,248,.56) !important;
+  background: rgba(255,255,255,.045) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.025);
+  transition: border-color 160ms ease, background 160ms ease, box-shadow 160ms ease;
+}
+
+.auth-sheet[aria-labelledby="auth-title"] .input-wrap:focus-within {
+  border-color: color-mix(in srgb, var(--accent) 70%, white) !important;
+  background: rgba(255,255,255,.065) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 15%, transparent), inset 0 1px 0 rgba(255,255,255,.04) !important;
+}
+
+.auth-sheet[aria-labelledby="auth-title"] .input-wrap input {
+  min-height: 48px;
+  color: #f8f9fc !important;
+  font-size: 13px !important;
+}
+
+.auth-sheet[aria-labelledby="auth-title"] .input-wrap input::placeholder {
+  color: rgba(231,234,242,.34) !important;
+  opacity: 1 !important;
+}
+
+.auth-sheet[aria-labelledby="auth-title"] .password-toggle {
+  display: grid;
+  place-items: center;
+  flex: 0 0 30px;
+  width: 30px;
+  height: 30px;
+  border: 0;
+  border-radius: 9px;
+  color: rgba(240,242,248,.62);
+  background: transparent;
+  cursor: pointer;
+}
+
+.auth-sheet[aria-labelledby="auth-title"] .password-toggle:hover {
+  color: #fff;
+  background: rgba(255,255,255,.07);
+}
+
+.auth-sheet[aria-labelledby="auth-title"] .stay-signed-in-option {
+  display: flex !important;
+  align-items: center;
+  gap: 9px !important;
+  color: rgba(240,242,248,.68) !important;
+  font-size: 11px !important;
+  font-weight: 500 !important;
+}
+
+.auth-sheet[aria-labelledby="auth-title"] .stay-signed-in-option input {
+  width: 15px;
+  height: 15px;
+  accent-color: var(--accent);
+}
+
+.auth-sheet[aria-labelledby="auth-title"] .primary-button.full {
+  min-height: 50px !important;
+  margin-top: 1px;
+  border: 1px solid color-mix(in srgb, var(--accent) 82%, white) !important;
+  border-radius: 15px !important;
+  color: #fff !important;
+  background: var(--accent) !important;
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--accent) 24%, transparent), inset 0 1px 0 rgba(255,255,255,.18) !important;
+  font-size: 13px !important;
+  font-weight: 750 !important;
+  letter-spacing: .01em;
+  transition: filter 160ms ease, transform 160ms ease, box-shadow 160ms ease;
+}
+
+.auth-sheet[aria-labelledby="auth-title"] .primary-button.full:hover {
+  filter: brightness(1.08);
+  box-shadow: 0 10px 28px color-mix(in srgb, var(--accent) 32%, transparent), inset 0 1px 0 rgba(255,255,255,.2) !important;
+}
+
+.auth-sheet[aria-labelledby="auth-title"] .primary-button.full:active {
+  transform: scale(.99);
+}
+
+.auth-sheet[aria-labelledby="auth-title"] .primary-button.full:disabled,
+.auth-sheet[aria-labelledby="auth-title"] .google-sign-in-button:disabled {
+  opacity: .62;
+  cursor: wait;
+}
+
+.auth-sheet[aria-labelledby="auth-title"] .form-message {
+  padding: 11px 12px;
+  border-radius: 12px;
+  font-size: 12px !important;
+}
+
+.auth-sheet[aria-labelledby="auth-title"] .form-message.error {
+  border: 1px solid rgba(255,105,105,.2);
+  background: rgba(255,75,75,.075);
+}
+
+.auth-sheet[aria-labelledby="auth-title"] .form-message.success {
+  border: 1px solid rgba(91,210,151,.2);
+  background: rgba(65,195,128,.075);
+}
+
+.auth-sheet[aria-labelledby="auth-title"] .mode-switch {
+  margin-top: 17px !important;
+  padding: 12px 6px 2px !important;
+  color: color-mix(in srgb, var(--accent) 88%, white) !important;
+  font-size: 11px !important;
+  line-height: 1.55;
+  font-weight: 650 !important;
+  transition: opacity 150ms ease;
+}
+
+.auth-sheet[aria-labelledby="auth-title"] .mode-switch:hover {
+  opacity: .8;
+}
+
+.app.light .auth-sheet[aria-labelledby="auth-title"] {
+  border-color: color-mix(in srgb, var(--accent) 18%, rgba(30,35,50,.12)) !important;
+  background:
+    radial-gradient(ellipse at 50% 0%, color-mix(in srgb, var(--accent) 8%, transparent), transparent 42%),
+    linear-gradient(155deg, rgba(255,255,255,.98), rgba(247,248,252,.98)) !important;
+  box-shadow: 0 32px 90px rgba(20,25,40,.2), inset 0 1px 0 rgba(255,255,255,.95) !important;
+}
+
+.app.light .auth-sheet[aria-labelledby="auth-title"] .sheet-copy,
+.app.light .auth-sheet[aria-labelledby="auth-title"] .auth-form > label,
+.app.light .auth-sheet[aria-labelledby="auth-title"] .stay-signed-in-option {
+  color: rgba(28,32,44,.72) !important;
+}
+
+.app.light .auth-sheet[aria-labelledby="auth-title"] .sheet-header .icon-button {
+  border-color: rgba(30,35,50,.1) !important;
+  color: rgba(28,32,44,.72) !important;
+  background: rgba(30,35,50,.045) !important;
+}
+
+.app.light .auth-sheet[aria-labelledby="auth-title"] .google-sign-in-button {
+  border-color: rgba(30,35,50,.13) !important;
+  color: #222530 !important;
+  background: rgba(255,255,255,.8) !important;
+}
+
+.app.light .auth-sheet[aria-labelledby="auth-title"] .auth-divider {
+  color: rgba(40,44,56,.48) !important;
+}
+
+.app.light .auth-sheet[aria-labelledby="auth-title"] .input-wrap {
+  border-color: rgba(30,35,50,.13) !important;
+  color: rgba(35,40,52,.55) !important;
+  background: rgba(30,35,50,.035) !important;
+}
+
+.app.light .auth-sheet[aria-labelledby="auth-title"] .input-wrap input {
+  color: #202330 !important;
+}
+
+.app.light .auth-sheet[aria-labelledby="auth-title"] .input-wrap input::placeholder {
+  color: rgba(35,40,52,.4) !important;
+}
+
+@keyframes rpw-auth-arrive {
+  from { opacity: 0; transform: translateY(10px) scale(.985); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (max-width: 560px) {
+  .sheet-backdrop:has(> .auth-sheet[aria-labelledby="auth-title"]) {
+    align-items: center !important;
+    padding: max(14px, env(safe-area-inset-top)) 14px max(14px, env(safe-area-inset-bottom)) !important;
+  }
+  .auth-sheet[aria-labelledby="auth-title"] {
+    width: 100% !important;
+    max-width: 430px !important;
+    max-height: min(92dvh, 780px) !important;
+    padding: 25px 21px 21px !important;
+    border-radius: 25px !important;
+  }
+  .auth-sheet[aria-labelledby="auth-title"] .sheet-header h2 {
+    font-size: 29px !important;
+  }
+  .auth-sheet[aria-labelledby="auth-title"] .sheet-copy {
+    margin-bottom: 19px !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-sheet[aria-labelledby="auth-title"] {
+    animation: none !important;
+  }
+  .auth-sheet[aria-labelledby="auth-title"] .google-sign-in-button,
+  .auth-sheet[aria-labelledby="auth-title"] .primary-button.full,
+  .auth-sheet[aria-labelledby="auth-title"] .mode-switch {
+    transition: none !important;
+  }
+}
