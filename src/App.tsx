@@ -4136,7 +4136,7 @@ export function App() {
                             aria-label={`Comments: ${post.comments}`}
                             title="Comments"
                           >
-                            <svg className="rpw-action-icon" viewBox="0 0 32 32" aria-hidden="true"><path d="M16 4.5C9.1 4.5 3.8 9.4 3.8 15.7c0 3.3 1.5 6.2 4.1 8.2l-.7 4.1 5-2.4c1.2.4 2.5.6 3.8.6 6.9 0 12.2-4.8 12.2-10.5S22.9 4.5 16 4.5Z" /></svg>
+                            <svg className="rpw-action-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5a8.5 8.5 0 0 0-7.1 13.2L4 20l3.7-1.2A8.5 8.5 0 1 0 12 3.5Z" /></svg>
                             <span>{post.comments}</span>
                           </button>
 
@@ -4147,7 +4147,7 @@ export function App() {
                             aria-label={`Likes: ${post.likes}`}
                             title="Like"
                           >
-                            <svg className="rpw-action-icon" viewBox="0 0 32 32" aria-hidden="true"><path d="M16 27 5.2 16.5C-1.2 9.8 8.5 1.2 15.9 8.2 23.4 1.2 33.1 9.8 26.7 16.5L16 27Z" fill={post.liked ? "currentColor" : "none"} /></svg>
+                            <svg className="rpw-action-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 8.8c0 5.2-8.8 11-8.8 11S3.2 14 3.2 8.8A4.8 4.8 0 0 1 12 6.1a4.8 4.8 0 0 1 8.8 2.7Z" fill={post.liked ? "currentColor" : "none"} /></svg>
                             <span>{post.likes}</span>
                           </button>
 
@@ -4159,7 +4159,7 @@ export function App() {
                             aria-label={`Reposts: ${post.reposts || 0}`}
                             title={post.reposted ? "Reposted" : "Repost"}
                           >
-                            <svg className="rpw-action-icon" viewBox="0 0 32 32" aria-hidden="true"><path d="M5 12V9.5A4.5 4.5 0 0 1 9.5 5H25l-4.2-4M25 5l-4.2 4M27 20v2.5a4.5 4.5 0 0 1-4.5 4.5H7l4.2 4M7 27l4.2-4" /></svg>
+                            <svg className="rpw-action-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 7.5A8.5 8.5 0 0 0 6 5L4 7" /><path d="M4 3.5V7h3.5" /><path d="M3.5 16.5A8.5 8.5 0 0 0 18 19l2-2" /><path d="M20 20.5V17h-3.5" /></svg>
                             <span>{post.reposts || 0}</span>
                           </button>
 
@@ -4170,7 +4170,7 @@ export function App() {
                             aria-label="Share post"
                             title="Share post"
                           >
-                            <svg className="rpw-action-icon" viewBox="0 0 32 32" aria-hidden="true"><path d="M28 3.5 13.4 28.2 9.6 17.1 3.2 12.7 28 3.5Z" /><path d="M9.6 17.1 28 3.5" /></svg>
+                            <svg className="rpw-action-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21.5 2.8 14.7 21a.8.8 0 0 1-1.5 0l-3.5-7.1-7.1-3.5a.8.8 0 0 1 0-1.5L20.8 2a.6.6 0 0 1 .7.8Z" /><path d="m9.7 13.9 6.1-6.1" /></svg>
                           </button>
                         </div>
 
