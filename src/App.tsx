@@ -4140,7 +4140,7 @@ export function App() {
                             aria-label={`Comments: ${post.comments}`}
                             title="Comments"
                           >
-                            <MessageCircle size={18} strokeWidth={1.7} fill={openComments === post.id ? "currentColor" : "none"} />
+                            <svg className="rpw-action-icon" viewBox="0 0 32 32" aria-hidden="true"><path d="M16 4.5C9.1 4.5 3.8 9.4 3.8 15.7c0 3.3 1.5 6.2 4.1 8.2l-.7 4.1 5-2.4c1.2.4 2.5.6 3.8.6 6.9 0 12.2-4.8 12.2-10.5S22.9 4.5 16 4.5Z" /></svg>
                             <span>{post.comments}</span>
                           </button>
 
@@ -4151,7 +4151,7 @@ export function App() {
                             title="Bookmark (coming soon)"
                             onClick={() => window.alert("Bookmarking is not available yet.")}
                           >
-                            <Bookmark size={18} strokeWidth={1.7} />
+                            <svg className="rpw-action-icon" viewBox="0 0 32 32" aria-hidden="true"><path d="M7.5 27V5.5h17V27L16 20.5 7.5 27Z" /></svg>
                           </button>
 
                           <button
@@ -4161,7 +4161,7 @@ export function App() {
                             aria-label={`Likes: ${post.likes}`}
                             title="Like"
                           >
-                            <Heart size={18} strokeWidth={1.7} fill={post.liked ? "currentColor" : "none"} />
+                            <svg className="rpw-action-icon" viewBox="0 0 32 32" aria-hidden="true"><path d="M16 27 5.2 16.5C-1.2 9.8 8.5 1.2 15.9 8.2 23.4 1.2 33.1 9.8 26.7 16.5L16 27Z" fill={post.liked ? "currentColor" : "none"} /></svg>
                             <span>{post.likes}</span>
                           </button>
 
@@ -4172,7 +4172,7 @@ export function App() {
                             aria-label={`Shares: ${post.shares || 0}`}
                             title="Share post"
                           >
-                            <Send size={18} strokeWidth={1.7} />
+                            <svg className="rpw-action-icon" viewBox="0 0 32 32" aria-hidden="true"><path d="M28 3.5 13.4 28.2 9.6 17.1 3.2 12.7 28 3.5Z" /><path d="M9.6 17.1 28 3.5" /></svg>
                             <span>{post.shares || 0}</span>
                           </button>
 
@@ -4184,7 +4184,7 @@ export function App() {
                             aria-label={`Reposts: ${post.reposts || 0}`}
                             title={post.reposted ? "Reposted" : "Repost"}
                           >
-                            <Repeat2 size={18} strokeWidth={1.7} />
+                            <svg className="rpw-action-icon" viewBox="0 0 32 32" aria-hidden="true"><path d="M5 12V9.5A4.5 4.5 0 0 1 9.5 5H25l-4.2-4M25 5l-4.2 4M27 20v2.5a4.5 4.5 0 0 1-4.5 4.5H7l4.2 4M7 27l4.2-4" /></svg>
                             <span>{post.reposts || 0}</span>
                           </button>
                         </div>
