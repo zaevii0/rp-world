@@ -8587,3 +8587,9 @@ body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; 
 .rpw-collection-post-picker{display:flex;flex-direction:column;gap:8px;max-height:240px;overflow:auto;padding:12px;border:1px solid color-mix(in srgb,var(--accent) 15%,transparent);border-radius:15px}.rpw-collection-post-picker>div{display:flex;flex-direction:column;gap:4px;margin-bottom:4px}.rpw-collection-post-picker>div strong{font-size:12px}.rpw-collection-post-picker>div small{color:var(--muted);font-size:10px}.rpw-collection-post-option{display:flex;align-items:flex-start;gap:9px;padding:9px;border-radius:10px;background:color-mix(in srgb,var(--accent) 4%,transparent)}.rpw-collection-post-option input{margin-top:3px;accent-color:var(--accent)}.rpw-collection-post-option span{display:flex;min-width:0;flex-direction:column;gap:4px}.rpw-collection-post-option strong{overflow:hidden;font-size:11px;text-overflow:ellipsis}.rpw-collection-post-option small{color:var(--muted);font-size:10px}
 @media(max-width:560px){.rpw-collections-area,.rpw-public-collections{padding:12px;border-radius:18px}.rpw-collection-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.rpw-collection-cover{min-height:100px}.rpw-collection-card-copy{padding:10px}.rpw-collection-create-card{min-height:180px}.rpw-collection-editor{padding:20px!important}.rpw-collection-kind{gap:7px}.rpw-collection-kind button{padding:10px}.rpw-collections-toolbar h3{font-size:18px}}
 @media(prefers-reduced-motion:reduce){.rpw-collection-card,.rpw-collection-create-card{transition:none}}
+
+/* RP WORLD profile cover: keep uploaded cover images clean, without a dark bottom gradient. */
+.profile-page .profile-cover::after {
+  display: none !important;
+  background: none !important;
+}
