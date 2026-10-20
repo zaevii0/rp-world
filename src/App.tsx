@@ -4510,9 +4510,6 @@ export function App() {
                       <button className="glass circle-button" type="button" aria-label="Back" title="Back" onClick={() => setView("home")}>
                         <ArrowLeft size={17} />
                       </button>
-                      <button className="glass circle-button" type="button" aria-label="Search" title="Search" onClick={() => setView("search")}>
-                        <Search size={17} />
-                      </button>
                       <button
                         className="glass circle-button profile-cover-more"
                         type="button"
