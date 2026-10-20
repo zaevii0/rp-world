@@ -7729,14 +7729,9 @@ body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; 
 }
 
 
-/* Modern sans-serif numerals for all post engagement counts. */
+/* Keep engagement counts regular; slightly emphasize only the icons. */
 .post-card .post-actions .post-action span,
 .post-card .post-actions .post-view-count,
 .post-card .post-actions .post-view-count span {
-  font-family: "Inter", -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif !important;
-  font-weight: 550 !important;
-  font-variant-numeric: tabular-nums lining-nums !important;
-  font-feature-settings: "tnum" 1, "lnum" 1;
-  letter-spacing: -0.02em;
-  -webkit-font-smoothing: antialiased;
+  font-weight: 400 !important;
 }
