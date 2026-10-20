@@ -7739,3 +7739,18 @@ body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; 
   font-weight: 400 !important;
   letter-spacing: normal !important;
 }
+
+
+/* Slightly larger post engagement icons for better visibility. */
+.post-card .post-actions .rpw-action-icon {
+  width: 24px !important;
+  height: 24px !important;
+  flex-basis: 24px !important;
+}
+@media (max-width: 560px) {
+  .post-card .post-actions .rpw-action-icon {
+    width: 23px !important;
+    height: 23px !important;
+    flex-basis: 23px !important;
+  }
+}
