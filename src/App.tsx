@@ -170,7 +170,7 @@ type RPNotification = {
   actor_id: string | null;
   actor_name: string;
   actor_avatar_url: string | null;
-  type: "follow" | "like" | "comment" | "reply";
+  type: "follow" | "like" | "comment" | "reply" | "message";
   message: string;
   post_id: string | null;
   comment_id: string | null;
@@ -609,6 +609,35 @@ export function App() {
     { type: "angry", emoji: "😡", label: "Angry" },
   ];
 
+
+  useEffect(() => {
+    if (!session?.user.id || !supabase) {
+      setNotifications([]);
+      return;
+    }
+    void loadNotifications();
+    const channel = supabase
+      .channel(`rpw-notifications-${session.user.id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "notifications",
+          filter: `recipient_id=eq.${session.user.id}`,
+        },
+        (payload) => {
+          const incoming = payload.new as RPNotification;
+          setNotifications((current) => current.some((item) => item.id === incoming.id)
+            ? current
+            : [incoming, ...current].slice(0, 100));
+        },
+      )
+      .subscribe();
+    return () => {
+      void supabase?.removeChannel(channel);
+    };
+  }, [session?.user.id]);
 
   useEffect(() => {
     localStorage.setItem(THEME_KEY, theme);
