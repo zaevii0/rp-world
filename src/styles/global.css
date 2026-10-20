@@ -8437,8 +8437,8 @@ body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; 
 
 
 
-/* More-options control on the profile cover photo */
+/* Keep the profile-cover more-options button beside the back chevron. */
 .profile-cover .public-profile-cover-actions .profile-cover-more {
-  margin-left: auto;
+  margin-left: 0;
   flex-shrink: 0;
 }
