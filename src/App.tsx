@@ -4699,7 +4699,7 @@ export function App() {
                     ))}
                     {!viewAs && (
                       <button
-                        className="small-add highlight-add-inline"
+                        className={highlightStyle === "portrait" ? "small-add highlight-add-inline highlight-add-portrait" : "small-add highlight-add-inline highlight-add-circle"}
                         type="button"
                         onClick={() => setHighlightOpen(true)}
                         aria-label="Add highlight"
