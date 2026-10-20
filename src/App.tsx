@@ -4130,11 +4130,7 @@ export function App() {
                         ) : null}
                         <div className="post-actions">
                           <button
-                            className={
-                              openComments === post.id
-                                ? "post-action active"
-                                : "post-action"
-                            }
+                            className={openComments === post.id ? "post-action active" : "post-action"}
                             type="button"
                             onClick={() => void toggleComments(post.id)}
                             aria-label={`Comments: ${post.comments}`}
@@ -4142,16 +4138,6 @@ export function App() {
                           >
                             <svg className="rpw-action-icon" viewBox="0 0 32 32" aria-hidden="true"><path d="M16 4.5C9.1 4.5 3.8 9.4 3.8 15.7c0 3.3 1.5 6.2 4.1 8.2l-.7 4.1 5-2.4c1.2.4 2.5.6 3.8.6 6.9 0 12.2-4.8 12.2-10.5S22.9 4.5 16 4.5Z" /></svg>
                             <span>{post.comments}</span>
-                          </button>
-
-                          <button
-                            className="post-action"
-                            type="button"
-                            aria-label="Bookmark post"
-                            title="Bookmark (coming soon)"
-                            onClick={() => window.alert("Bookmarking is not available yet.")}
-                          >
-                            <svg className="rpw-action-icon" viewBox="0 0 32 32" aria-hidden="true"><path d="M7.5 27V5.5h17V27L16 20.5 7.5 27Z" /></svg>
                           </button>
 
                           <button
@@ -4166,17 +4152,6 @@ export function App() {
                           </button>
 
                           <button
-                            className="post-action"
-                            type="button"
-                            onClick={() => void sharePost(post)}
-                            aria-label={`Shares: ${post.shares || 0}`}
-                            title="Share post"
-                          >
-                            <svg className="rpw-action-icon" viewBox="0 0 32 32" aria-hidden="true"><path d="M28 3.5 13.4 28.2 9.6 17.1 3.2 12.7 28 3.5Z" /><path d="M9.6 17.1 28 3.5" /></svg>
-                            <span>{post.shares || 0}</span>
-                          </button>
-
-                          <button
                             className={post.reposted ? "post-action reposted" : "post-action"}
                             type="button"
                             onClick={() => void repostPost(post)}
@@ -4186,6 +4161,16 @@ export function App() {
                           >
                             <svg className="rpw-action-icon" viewBox="0 0 32 32" aria-hidden="true"><path d="M5 12V9.5A4.5 4.5 0 0 1 9.5 5H25l-4.2-4M25 5l-4.2 4M27 20v2.5a4.5 4.5 0 0 1-4.5 4.5H7l4.2 4M7 27l4.2-4" /></svg>
                             <span>{post.reposts || 0}</span>
+                          </button>
+
+                          <button
+                            className="post-action"
+                            type="button"
+                            onClick={() => void sharePost(post)}
+                            aria-label="Share post"
+                            title="Share post"
+                          >
+                            <svg className="rpw-action-icon" viewBox="0 0 32 32" aria-hidden="true"><path d="M28 3.5 13.4 28.2 9.6 17.1 3.2 12.7 28 3.5Z" /><path d="M9.6 17.1 28 3.5" /></svg>
                           </button>
                         </div>
 
