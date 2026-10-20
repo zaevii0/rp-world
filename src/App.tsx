@@ -4152,18 +4152,6 @@ export function App() {
                             <span>{post.likes}</span>
                           </button>
 
-                          <button
-                            className={post.reposted ? "post-action reposted" : "post-action"}
-                            type="button"
-                            onClick={() => void repostPost(post)}
-                            disabled={repostBusy === post.id}
-                            aria-label={`Reposts: ${post.reposts || 0}`}
-                            title={post.reposted ? "Reposted" : "Repost"}
-                          >
-                            <svg className="rpw-action-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 7.5A8.5 8.5 0 0 0 6 5L4 7" /><path d="M4 3.5V7h3.5" /><path d="M3.5 16.5A8.5 8.5 0 0 0 18 19l2-2" /><path d="M20 20.5V17h-3.5" /></svg>
-                            <span>{post.reposts || 0}</span>
-                          </button>
-
                           <div className="post-action post-view-count" aria-label={`Views: ${post.views || 0}`} title="Post views">
                             <svg className="rpw-action-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.4-6 9.5-6 9.5 6 9.5 6-3.4 6-9.5 6-9.5-6-9.5-6Z" /><circle cx="12" cy="12" r="2.7" /></svg>
                             <span>{post.views || 0}</span>
@@ -4966,9 +4954,6 @@ export function App() {
                           </button>
                           <button className={openComments === post.id ? "post-action active" : "post-action"} type="button" onClick={() => void toggleComments(post.id)}>
                             <MessageCircle size={17} /> {post.comments}
-                          </button>
-                          <button className={post.reposted ? "post-action reposted" : "post-action"} type="button" onClick={() => void repostPost(post)} disabled={repostBusy === post.id} title={post.reposted ? "Reposted" : "Repost"}>
-                            <Repeat2 size={17} />{post.reposts || 0}
                           </button>
                           <button className="post-action" type="button" onClick={() => void sharePost(post)} aria-label="Share post" title="Share post">
                             <Forward size={17} />
