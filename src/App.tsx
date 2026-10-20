@@ -5846,6 +5846,14 @@ export function App() {
                         )
                       }
                       placeholder="Email"
+                      onFocus={(event) => {
+                        event.currentTarget.placeholder = "name@example.com";
+                      }}
+                      onBlur={(event) => {
+                        if (!event.currentTarget.value) {
+                          event.currentTarget.placeholder = "Email";
+                        }
+                      }}
                       aria-label="Email"
                       autoComplete="email"
                       required
