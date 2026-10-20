@@ -8412,3 +8412,23 @@ body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; 
   border-color: color-mix(in srgb, var(--accent) 32%, transparent) !important;
   background: color-mix(in srgb, var(--accent-soft) 100%, transparent) !important;
 }
+
+
+/* Dark mode correction: override the legacy white secondary-button treatment on the edit pencil circle. */
+.app.dark .profile-page .profile-social-actions button.profile-icon-action.secondary-profile-action,
+.app:not(.light) .profile-page .profile-social-actions button.profile-icon-action.secondary-profile-action {
+  color: var(--accent) !important;
+  background: color-mix(in srgb, var(--accent-soft) 78%, transparent) !important;
+  background-color: color-mix(in srgb, var(--accent-soft) 78%, transparent) !important;
+  border-color: color-mix(in srgb, var(--accent) 22%, transparent) !important;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 10%, transparent) !important;
+}
+.app.dark .profile-page .profile-social-actions button.profile-icon-action.secondary-profile-action:hover,
+.app.dark .profile-page .profile-social-actions button.profile-icon-action.secondary-profile-action:focus-visible,
+.app:not(.light) .profile-page .profile-social-actions button.profile-icon-action.secondary-profile-action:hover,
+.app:not(.light) .profile-page .profile-social-actions button.profile-icon-action.secondary-profile-action:focus-visible {
+  color: var(--accent) !important;
+  background: color-mix(in srgb, var(--accent-soft) 100%, transparent) !important;
+  background-color: color-mix(in srgb, var(--accent-soft) 100%, transparent) !important;
+  border-color: color-mix(in srgb, var(--accent) 32%, transparent) !important;
+}
