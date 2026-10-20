@@ -5668,6 +5668,14 @@ body { min-height:100vh; min-height:100dvh; background:transparent; }
   min-height: 38px !important;
 }
 
+.profile-page .profile-activity-username {
+  margin: 0 0 4px !important;
+  font-size: 14px !important;
+  line-height: 1.25 !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.02em !important;
+}
+
 .profile-page .profile-content-tabs {
   padding: 3px !important;
   border: 1px solid color-mix(in srgb, currentColor 7%, transparent) !important;
