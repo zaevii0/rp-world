@@ -113,7 +113,7 @@ type Post = {
   comments: number;
   reposts: number;
   shares: number;
-  views: number;
+  views?: number;
   reposted: boolean;
   reposted_at?: string | null;
   pinned_at?: string | null;
