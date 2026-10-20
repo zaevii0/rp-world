@@ -698,7 +698,6 @@ export function App() {
 
     return () => listener.subscription.unsubscribe();
   }, []);
-
   useEffect(() => {
     let active = true;
 
@@ -1302,6 +1301,31 @@ export function App() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
+  async function handleGoogleAuth() {
+    if (!supabase) return;
+
+    setBusy(true);
+    resetAuthMessages();
+
+    try {
+      localStorage.setItem("rpw-stay-signed-in", String(staySignedIn));
+    } catch {
+      // Storage can be unavailable in privacy-restricted environments.
+    }
+
+    const { error: googleError } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: window.location.origin,
+      },
+    });
+
+    if (googleError) {
+      setBusy(false);
+      setError(googleError.message);
+    }
+  }
+
   async function handleAuth(event: FormEvent) {
     event.preventDefault();
 
@@ -1397,8 +1421,7 @@ export function App() {
       return;
     }
 
-    setSupportCheckoutUrl(checkout.checkout_url);
-    setSupportMessage("Secure checkout is ready for ₱" + selected.amount + " · " + selected.label + ".");
+    setSupportCheckoutUrl(checkout.checkout_url);    setSupportMessage("Secure checkout is ready for ₱" + selected.amount + " · " + selected.label + ".");
     const opened = window.open(checkout.checkout_url, "_blank", "noopener,noreferrer");
     if (!opened) setSupportMessage("Your secure checkout is ready. Tap “Open secure checkout” below.");
   }
@@ -2097,8 +2120,7 @@ export function App() {
         if (node) node.scrollTop = node.scrollHeight;
       });
     }
-    const unread = rows.filter((item) => item.sender_id !== session.user.id && !item.read_at).map((item) => item.id);
-    if (unread.length) {
+    const unread = rows.filter((item) => item.sender_id !== session.user.id && !item.read_at).map((item) => item.id);    if (unread.length) {
       await supabase.from("messages").update({ read_at: new Date().toISOString(), delivered_at: new Date().toISOString() }).in("id", unread);
     }
   }
@@ -2797,8 +2819,7 @@ export function App() {
       setMessage("Post updated.");
     } catch (updateError) {
       if (uploadedEditMediaPath && supabase) {
-        try {
-          await supabase.storage.from("post-media").remove([uploadedEditMediaPath]);
+        try {          await supabase.storage.from("post-media").remove([uploadedEditMediaPath]);
         } catch {
           // Best-effort cleanup only; preserve the original edit error.
         }
@@ -3497,7 +3518,6 @@ export function App() {
       setPostActionTarget(null);
       return;
     }
-
     setPostActionBusy(true);
     const payload: { pinned_at?: string | null; archived_at?: string | null; trashed_at?: string | null } =
       action === "pin"
@@ -4197,8 +4217,7 @@ export function App() {
                                 )
                               }
                             >
-                              <span
-                                className="avatar small-avatar"
+                              <span                                className="avatar small-avatar"
                                 style={
                                   profile.avatar_url
                                     ? {
@@ -4897,8 +4916,7 @@ export function App() {
                             className="avatar profile-link-button"
                             type="button"
                             aria-label={`Open ${post.profile?.display_name ?? "member"} profile`}
-                            onClick={() => void loadPublicProfile(post.author_id)}
-                            style={post.profile?.avatar_url ? { backgroundImage: `url(${post.profile.avatar_url})` } : undefined}
+                            onClick={() => void loadPublicProfile(post.author_id)}                            style={post.profile?.avatar_url ? { backgroundImage: `url(${post.profile.avatar_url})` } : undefined}
                           >
                             {!post.profile?.avatar_url && initials(post.profile?.display_name ?? "RP")}
                           </button>
@@ -5597,8 +5615,7 @@ export function App() {
               </button>
               </>
               )}
-            </div>
-          </section>
+            </div>          </section>
         </div>
       )}
 
@@ -5811,6 +5828,22 @@ export function App() {
               </div>
             ) : (
               <>
+              <button
+                className="secondary-button full google-sign-in-button"
+                type="button"
+                onClick={() => void handleGoogleAuth()}
+                disabled={busy}
+              >
+                <span className="google-sign-in-mark" aria-hidden="true">G</span>
+                {busy ? "Connecting…" : "Continue with Google"}
+              </button>
+
+              <div className="auth-divider" aria-hidden="true">
+                <span />
+                <small>or continue with email</small>
+                <span />
+              </div>
+
               <form
                 className="auth-form"
                 onSubmit={handleAuth}
@@ -6297,8 +6330,7 @@ export function App() {
 
                 <h2 id="profile-title">
                   Build your profile.
-                </h2>
-              </div>
+                </h2>              </div>
 
               {profile && (
                 <button
