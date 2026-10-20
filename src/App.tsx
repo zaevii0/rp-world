@@ -5184,6 +5184,7 @@ export function App() {
                     ))}
                   </div>
                 </div>
+                {publicProfileCollections.length > 0 && <div className="profile-section rpw-public-collections glass"><div className="rpw-collections-toolbar"><div><span className="eyebrow">CURATED BY @{publicProfile.username}</span><h3>Albums &amp; collections</h3></div></div><div className="rpw-collection-grid">{publicProfileCollections.map((item) => { const cover = publicProfilePosts.find((post) => item.post_ids.includes(post.id) && post.media_url); return <div className="rpw-collection-card" key={item.id}><span className="rpw-collection-cover" style={cover?.media_url ? {backgroundImage: "url(" + (signedMediaUrls[cover.media_url] ?? cover.media_url) + ")"} : undefined}><span className="rpw-collection-cover-icon">{item.collection_type === "album" ? <Image size={22} /> : <Sparkles size={22} />}</span><span className="rpw-collection-count">{item.post_ids.length} {item.post_ids.length === 1 ? "post" : "posts"}</span></span><span className="rpw-collection-card-copy"><strong>{item.title}</strong><small>{item.description || (item.collection_type === "album" ? "A little gallery of moments" : "A curated post collection")}</small><span className="rpw-collection-meta"><Globe2 size={11} /> Public · {item.collection_type === "album" ? "Album" : "Group"}</span></span></div>; })}</div></div>}
                 <div className="profile-section profile-posts">
                   <div className="section-heading profile-content-heading"><div><h3 className="profile-activity-username">@{publicProfile.username}</h3><p className="eyebrow">PUBLIC PROFILE</p><h3>Posts</h3></div></div>
                   {publicProfilePosts.length === 0 ? <div className="empty-state glass"><Image size={22} /><strong>No posts yet.</strong><span>This user's published posts will appear here.</span></div> : (
@@ -6265,6 +6266,24 @@ export function App() {
                 ? "New to RP WORLD? Create an account"
                 : "Already have an account? Sign in"}
             </button>
+          </section>
+        </div>
+      )}
+
+      {collectionEditorOpen && session && profile && (
+        <div className="sheet-backdrop" role="presentation" onClick={() => setCollectionEditorOpen(false)}>
+          <section className="auth-sheet glass rpw-collection-editor" role="dialog" aria-modal="true" aria-labelledby="rpw-collection-title" onClick={(event) => event.stopPropagation()}>
+            <div className="sheet-header"><div><p className="eyebrow">PROFILE ACTIVITY</p><h2 id="rpw-collection-title">{collectionType === "album" ? "Create an album" : "Create a collection"}</h2></div><button className="icon-button" type="button" aria-label="Close" onClick={() => setCollectionEditorOpen(false)}><X size={18} /></button></div>
+            <p className="sheet-copy">Bring your favorite posts together in a little corner of your profile.</p>
+            <form className="auth-form rpw-collection-form" onSubmit={(event) => void saveProfileCollection(event)}>
+              <div className="rpw-collection-kind"><button type="button" className={collectionType === "album" ? "active" : ""} onClick={() => setCollectionType("album")}><Image size={16} /> Album <small>Photos &amp; memories</small></button><button type="button" className={collectionType === "group" ? "active" : ""} onClick={() => setCollectionType("group")}><Sparkles size={16} /> Themed group <small>Posts with a shared vibe</small></button></div>
+              <label>Title<input required maxLength={60} value={collectionTitle} onChange={(event) => setCollectionTitle(event.target.value)} placeholder={collectionType === "album" ? "e.g. Little moments" : "e.g. After dark"} /></label>
+              <label>Description <span className="rpw-optional-label">OPTIONAL</span><textarea maxLength={240} value={collectionDescription} onChange={(event) => setCollectionDescription(event.target.value)} placeholder="A short note about this collection" rows={2} /></label>
+              <div className="rpw-collection-visibility"><span>Who can see it?</span><button type="button" className={collectionVisibility === "public" ? "active" : ""} onClick={() => setCollectionVisibility("public")}><Globe2 size={15} /> Public</button><button type="button" className={collectionVisibility === "private" ? "active" : ""} onClick={() => setCollectionVisibility("private")}><LockKeyhole size={15} /> Private</button></div>
+              <div className="rpw-collection-post-picker"><div><strong>Add posts</strong><small>Choose posts to include. Empty collections are allowed.</small></div>{profilePosts.length ? profilePosts.map((post) => <label className="rpw-collection-post-option" key={post.id}><input type="checkbox" checked={collectionPostIds.includes(post.id)} onChange={(event) => setCollectionPostIds((current) => event.target.checked ? [...current, post.id] : current.filter((id) => id !== post.id))} /><span><strong>{post.content.trim().slice(0, 80) || (post.media_url ? "Photo or video post" : "Untitled post")}</strong><small>{new Date(post.created_at).toLocaleDateString()}{post.media_url ? " · Media" : ""}</small></span></label>) : <p className="comments-empty">Your posts will appear here once you publish some.</p>}</div>
+              {profileError && <p className="form-message error">{profileError}</p>}
+              <button className="primary-button full" type="submit" disabled={collectionBusy || !collectionTitle.trim()}>{collectionBusy ? "Creating…" : collectionType === "album" ? "Create album" : "Create collection"}</button>
+            </form>
           </section>
         </div>
       )}
