@@ -609,8 +609,8 @@ export function App() {
 
     // The admin-controlled global unlock takes precedence over individual plans.
     if (!profile || allThemesUnlocked || hasPremiumThemes(profile)) return;
-    if (theme !== "midnight" && theme !== "black" && theme !== "ocean") {
-      setTheme("midnight");
+    if (!FREE_THEME_IDS.includes(theme)) {
+      setTheme("black");
     }
   }, [profile, theme, allThemesUnlocked, themeAccessLoaded, themeAccessLoadFailed]);
 
@@ -3941,7 +3941,7 @@ export function App() {
                   </div>
                   <div className="verified-benefits">
                     <div><ShieldCheck size={17} /><span>Verified badge appears beside your RP identity.</span></div>
-                    <div><Paintbrush size={17} /><span>{supportPlan === "verified_3m_themes" ? "Unlocks every RP WORLD theme color for 3 months." : "Free members keep Midnight and Ocean (blue)."}</span></div>
+                    <div><Paintbrush size={17} /><span>{supportPlan === "verified_3m_themes" ? "Unlocks every RP WORLD theme color for 3 months." : "Free members can use Black, Sage, and Powder Blue."}</span></div>
                     <div><CheckCheck size={17} /><span>One-time purchase. No automatic recurring charge.</span></div>
                   </div>
                   <div className="support-disclosure"><strong>Secure checkout</strong><span>Payment is handled on a PayMongo-hosted checkout. RP WORLD never receives your card or payment details.</span></div>
