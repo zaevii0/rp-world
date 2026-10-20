@@ -8476,3 +8476,39 @@ body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; 
     border-radius: 12px;
   }
 }
+
+
+/* Keep the profile username centered and group highlights in one surface. */
+.profile-highlights-section {
+  padding: 14px 14px 10px;
+  border-radius: 20px;
+  gap: 12px;
+}
+
+.profile-highlights-heading {
+  justify-content: center;
+  text-align: center;
+  padding: 0;
+}
+
+.profile-highlights-heading > div {
+  width: 100%;
+  text-align: center;
+}
+
+.profile-highlights-heading h3 {
+  margin: 0;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.profile-highlights-section .highlights-row {
+  min-width: 0;
+}
+
+@media (max-width: 560px) {
+  .profile-highlights-section {
+    padding: 12px 10px 8px;
+    border-radius: 18px;
+  }
+}
