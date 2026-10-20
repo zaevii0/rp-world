@@ -8214,11 +8214,11 @@ body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; 
   align-items: center;
   justify-content: center;
   gap: 10px;
-  min-height: 54px;
-  padding: 0 22px;
+  min-height: 44px;
+  padding: 0 18px;
   color: #fff !important;
   border: 1px solid color-mix(in srgb, var(--accent, #8f8f98) 72%, white 28%);
-  border-radius: 17px;
+  border-radius: 999px;
   background: linear-gradient(
     135deg,
     color-mix(in srgb, var(--accent, #8f8f98) 82%, #777 18%) 0%,
@@ -8258,9 +8258,9 @@ body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; 
 
 @media (max-width: 560px) {
   .auth-entry-button {
-    width: 100%;
-    min-height: 52px;
-    border-radius: 16px;
+    min-height: 44px;
+    padding: 0 18px;
+    border-radius: 999px;
   }
 }
 
