@@ -8676,3 +8676,55 @@ body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; 
   box-shadow: none !important;
   background: transparent !important;
 }
+
+
+/* Consistent, balanced sizing for post engagement icons and the top-right post menu. */
+.post-card .post-actions {
+  align-items: center;
+  gap: 8px;
+}
+.post-card .post-actions .post-action {
+  min-height: 36px;
+  gap: 7px;
+}
+.post-card .post-actions .post-action > svg,
+.post-card .post-actions .rpw-action-icon {
+  width: 19px !important;
+  height: 19px !important;
+  flex: 0 0 19px;
+}
+.post-card .post-actions .post-action > span {
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.post-card .post-head .post-more-button {
+  top: -2px;
+  right: -2px;
+  width: 36px;
+  height: 36px;
+  opacity: .78;
+}
+.post-card .post-head .post-more-button > svg {
+  width: 20px;
+  height: 20px;
+}
+.post-card .post-head .post-more-button:hover,
+.post-card .post-head .post-more-button:focus-visible {
+  opacity: 1;
+}
+@media (max-width: 560px) {
+  .post-card .post-actions {
+    gap: 5px;
+  }
+  .post-card .post-actions .post-action {
+    min-height: 35px;
+    gap: 6px;
+    padding-inline: 8px;
+  }
+  .post-card .post-actions .post-action > svg,
+  .post-card .post-actions .rpw-action-icon {
+    width: 18px !important;
+    height: 18px !important;
+    flex-basis: 18px;
+  }
+}
