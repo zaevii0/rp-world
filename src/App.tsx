@@ -3633,7 +3633,22 @@ export function App() {
   }
   async function managePostAction(action: "pin" | "archive" | "trash" | "copy" | "delete_shared") {
     const post = postActionTarget;
-    if (!supabase || !session?.user || !post || post.author_id !== session.user.id) return;
+    if (!post || !session?.user) return;
+
+    if (action === "copy") {
+      const url = new URL(window.location.href);
+      url.hash = `post-${post.id}`;
+      try {
+        await navigator.clipboard.writeText(url.toString());
+        setMessage("Post link copied.");
+      } catch {
+        setMessage("Could not copy the post link.");
+      }
+      setPostActionTarget(null);
+      return;
+    }
+
+    if (post.author_id !== session.user.id || !supabase) return;
 
     if (action === "delete_shared") {
       if (!post.shared_post_id) return;
@@ -3653,18 +3668,6 @@ export function App() {
 
     if (post.shared_post_id) return;
 
-    if (action === "copy") {
-      const url = new URL(window.location.href);
-      url.hash = `post-${post.id}`;
-      try {
-        await navigator.clipboard.writeText(url.toString());
-        setMessage("Post link copied.");
-      } catch {
-        setMessage("Could not copy the post link.");
-      }
-      setPostActionTarget(null);
-      return;
-    }
     setPostActionBusy(true);
     const payload: { pinned_at?: string | null; archived_at?: string | null; trashed_at?: string | null } =
       action === "pin"
@@ -5845,7 +5848,16 @@ export function App() {
               <button className="icon-button" type="button" aria-label="Close" onClick={() => setPostActionTarget(null)} disabled={postActionBusy}><X size={18} /></button>
             </div>
             <div className="post-action-menu">
-              {postActionTarget.shared_post_id ? (
+              {postActionTarget.author_id !== session.user.id ? (
+                <>
+                  <button type="button" onClick={() => void managePostAction("copy")} disabled={postActionBusy}>
+                    <Link2 size={18} /><span>Copy link</span>
+                  </button>
+                  <button type="button" onClick={() => setPostActionTarget(null)} disabled={postActionBusy}>
+                    <X size={18} /><span>Close</span>
+                  </button>
+                </>
+              ) : postActionTarget.shared_post_id ? (
                 <>
                   <button className="post-action-destructive" type="button" onClick={() => void managePostAction("delete_shared")} disabled={postActionBusy}>
                     <Trash2 size={18} /><span>{postActionBusy ? "Deleting…" : "Delete shared post"}</span>
