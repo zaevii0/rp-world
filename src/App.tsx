@@ -3920,6 +3920,15 @@ export function App() {
 
         <div className="header-actions">
           <button
+            className="auth-icon-button glass header-search-trigger"
+            type="button"
+            aria-label="Search RP WORLD"
+            title="Search"
+            onClick={() => setView("search")}
+          >
+            <Search size={18} />
+          </button>
+          <button
             className="theme-toggle"
             type="button"
             aria-label={
@@ -4089,9 +4098,6 @@ export function App() {
                   <h2 className={view === "home" ? `greeting-title greeting-${Math.min(3, Math.max(1, Math.ceil(title.length / 24)))}` : undefined}>{title}</h2>
                 </div>
                 <div className="page-heading-actions">
-                  <button className="glass circle-button" type="button" aria-label="Search" onClick={() => setView("search")}>
-                    <Search size={17} />
-                  </button>
                   {viewAs && (
                     <button className="glass circle-button" type="button" onClick={() => {
                         setViewAs(false);
@@ -5057,9 +5063,6 @@ export function App() {
                     <div className="public-profile-cover-actions">
                       <button className="glass circle-button" type="button" aria-label="Back" title="Back" onClick={() => { setView("discover"); setPublicProfile(null); }}>
                         <ChevronLeft size={19} strokeWidth={2} />
-                      </button>
-                      <button className="glass circle-button" type="button" aria-label="Search" title="Search" onClick={() => setView("search")}>
-                        <Search size={17} />
                       </button>
                     </div>
                   </div>
