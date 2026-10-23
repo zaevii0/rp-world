@@ -8630,3 +8630,49 @@ body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; 
   .theme-toggle { transition: none; }
 }
 
+
+
+/* Put the paintbrush theme picker in the Menu as a clean menu row. */
+.menu-card .menu-theme-trigger {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 48px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 14px;
+  color: inherit;
+  background: transparent;
+  box-shadow: none;
+  text-align: left;
+  cursor: pointer;
+  font-size: 13px;
+}
+.menu-card .menu-theme-trigger:hover,
+.menu-card .menu-theme-trigger:focus-visible {
+  border: 0;
+  outline: none;
+  background: var(--accent-soft);
+  box-shadow: none;
+}
+.menu-card .menu-theme-trigger .theme-trigger-icon {
+  display: grid;
+  place-items: center;
+  color: var(--accent);
+}
+.menu-card .menu-theme-trigger > span:last-child {
+  color: inherit;
+}
+
+/* The light/dark appearance icon stays borderless and shadow-free in every state. */
+.theme-toggle,
+.theme-toggle:hover,
+.theme-toggle:focus,
+.theme-toggle:focus-visible,
+.theme-toggle:active {
+  border: 0 !important;
+  outline: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
