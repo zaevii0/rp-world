@@ -3939,7 +3939,7 @@ export function App() {
           </button>
 
           <button
-            className="auth-icon-button glass header-search-trigger"
+            className="theme-toggle header-search-trigger"
             type="button"
             aria-label="Search RP WORLD"
             title="Search"
@@ -3949,7 +3949,7 @@ export function App() {
           </button>
           {session ? (
             <button
-              className="auth-icon-button glass notification-trigger"
+              className="theme-toggle notification-trigger"
               type="button"
               aria-label={notificationsOpen ? "Close notifications" : "Open notifications"}
               aria-expanded={notificationsOpen}
