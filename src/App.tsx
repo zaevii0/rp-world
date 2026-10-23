@@ -16,7 +16,6 @@ import {
   GraduationCap,
   Music,
   MessageCircle,
-  Bookmark,
   Bell,
   CheckCheck,
   ShoppingBag,
@@ -331,15 +330,6 @@ export function App() {
   const [adminUserIds, setAdminUserIds] = useState<Set<string>>(new Set());
 
   const [posts, setPosts] = useState<Post[]>([]);
-  const [savedPostIds, setSavedPostIds] = useState<string[]>(() => {
-    try {
-      const stored = localStorage.getItem("rpw-saved-post-ids");
-      const parsed: unknown = stored ? JSON.parse(stored) : [];
-      return Array.isArray(parsed) ? parsed.filter((id): id is string => typeof id === "string") : [];
-    } catch {
-      return [];
-    }
-  });
   const [profilePosts, setProfilePosts] = useState<Post[]>([]);
   const [profileReposts, setProfileReposts] = useState<Post[]>([]);
   const [profileSection, setProfileSection] = useState<"posts" | "reposts" | "albums" | "groups">("posts");
@@ -4391,27 +4381,6 @@ export function App() {
                           >
                             <svg className="rpw-action-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5a8.5 8.5 0 0 0-7.1 13.2L4 20l3.7-1.2A8.5 8.5 0 1 0 12 3.5Z" /></svg>
                             <span>{post.comments}</span>
-                          </button>
-
-                          <button
-                            className={savedPostIds.includes(post.id) ? "post-action active" : "post-action"}
-                            type="button"
-                            onClick={() => setSavedPostIds((current) => {
-                              const next = current.includes(post.id)
-                                ? current.filter((id) => id !== post.id)
-                                : [...current, post.id];
-                              try {
-                                localStorage.setItem("rpw-saved-post-ids", JSON.stringify(next));
-                              } catch {
-                                // Keep the save interaction usable when storage is unavailable.
-                              }
-                              return next;
-                            })}
-                            aria-label={savedPostIds.includes(post.id) ? "Remove saved post" : "Save post"}
-                            title={savedPostIds.includes(post.id) ? "Saved" : "Save post"}
-                            aria-pressed={savedPostIds.includes(post.id)}
-                          >
-                            <Bookmark size={17} fill={savedPostIds.includes(post.id) ? "currentColor" : "none"} />
                           </button>
 
                           <button
