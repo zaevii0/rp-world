@@ -9,7 +9,6 @@ interface ThemePickerProps {
   canUseAllThemes?: boolean;
   allThemesUnlocked?: boolean;
   onLockedTheme?: () => void;
-  menuPlacement?: boolean;
 }
 
 type ThemeCardStyle = CSSProperties & {
@@ -17,13 +16,13 @@ type ThemeCardStyle = CSSProperties & {
   "--theme-soft": string;
 };
 
-export function ThemePicker({ theme, onThemeChange, canUseAllThemes = true, allThemesUnlocked = false, onLockedTheme, menuPlacement = false }: ThemePickerProps) {
+export function ThemePicker({ theme, onThemeChange, canUseAllThemes = true, allThemesUnlocked = false, onLockedTheme }: ThemePickerProps) {
   const [open, setOpen] = useState(false);
 
   return (
     <>
       <button
-        className={menuPlacement ? "theme-trigger menu-theme-trigger" : "theme-trigger glass"}
+        className="theme-trigger glass"
         type="button"
         aria-label="Choose RP World theme"
         aria-expanded={open}
@@ -32,7 +31,6 @@ export function ThemePicker({ theme, onThemeChange, canUseAllThemes = true, allT
         <span className="theme-trigger-icon" aria-hidden="true">
           <Paintbrush size={17} strokeWidth={2.15} />
         </span>
-        {menuPlacement && <span>Appearance &amp; themes</span>}
       </button>
 
       {open &&
