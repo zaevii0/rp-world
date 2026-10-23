@@ -8593,3 +8593,114 @@ body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; 
   display: none !important;
   background: none !important;
 }
+
+
+/* iOS-inspired post action bar */
+.post-card .post-actions {
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
+  padding-top: 10px;
+  border-top: 1px solid color-mix(in srgb, currentColor 9%, transparent);
+}
+
+.post-card .post-actions .post-action {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 40px;
+  justify-content: center;
+  gap: 7px;
+  padding: 0 10px;
+  border: 1px solid transparent;
+  border-radius: 13px;
+  color: inherit;
+  background: color-mix(in srgb, currentColor 3.5%, transparent);
+  opacity: .76;
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  transition: color .18s ease, background .18s ease, border-color .18s ease, transform .16s ease, opacity .18s ease;
+}
+
+.post-card .post-actions .post-action .rpw-action-icon {
+  width: 19px;
+  height: 19px;
+  flex: 0 0 19px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform .18s ease;
+}
+
+.post-card .post-actions .post-action:hover {
+  opacity: 1;
+  background: color-mix(in srgb, currentColor 7%, transparent);
+}
+
+.post-card .post-actions .post-action:active {
+  transform: scale(.97);
+}
+
+.post-card .post-actions .post-action:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--accent) 55%, transparent);
+  outline-offset: 2px;
+}
+
+.post-card .post-actions .post-action.liked {
+  color: #ff375f;
+  background: rgba(255, 55, 95, .11);
+  border-color: rgba(255, 55, 95, .08);
+  opacity: 1;
+}
+
+.post-card .post-actions .post-action.liked .rpw-action-icon {
+  filter: drop-shadow(0 1px 5px rgba(255, 55, 95, .16));
+  transform: scale(1.04);
+}
+
+.post-card .post-actions .post-action.active {
+  color: #0a84ff;
+  background: rgba(10, 132, 255, .10);
+  border-color: rgba(10, 132, 255, .08);
+  opacity: 1;
+}
+
+.app.light .post-card .post-actions .post-action {
+  background: rgba(20, 20, 25, .035);
+}
+
+.app.light .post-card .post-actions .post-action.liked {
+  color: #ff2d55;
+  background: rgba(255, 45, 85, .09);
+}
+
+.app.light .post-card .post-actions .post-action.active {
+  color: #007aff;
+  background: rgba(0, 122, 255, .08);
+}
+
+@media (max-width: 560px) {
+  .post-card .post-actions {
+    gap: 5px;
+  }
+
+  .post-card .post-actions .post-action {
+    min-height: 42px;
+    gap: 6px;
+    padding: 0 5px;
+    border-radius: 12px;
+    font-size: 12px;
+  }
+
+  .post-card .post-actions .post-action .rpw-action-icon {
+    width: 20px;
+    height: 20px;
+    flex-basis: 20px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .post-card .post-actions .post-action,
+  .post-card .post-actions .post-action .rpw-action-icon {
+    transition: none;
+  }
+}
