@@ -3957,18 +3957,8 @@ export function App() {
               )
             }
           >
-            <span
-              className={
-                isDark
-                  ? "toggle-thumb dark-thumb"
-                  : "toggle-thumb"
-              }
-            >
-              {isDark ? (
-                <Moon size={15} />
-              ) : (
-                <Sun size={15} />
-              )}
+            <span className="toggle-thumb">
+              {isDark ? <Sun size={17} /> : <Moon size={17} />}
             </span>
           </button>
 
