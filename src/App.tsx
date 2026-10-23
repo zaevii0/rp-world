@@ -3929,20 +3929,6 @@ export function App() {
         </button>
 
         <div className="header-actions">
-          <ThemePicker
-            theme={theme}
-            canUseAllThemes={hasPremiumThemes(profile)}
-            allThemesUnlocked={allThemesUnlocked}
-            onThemeChange={(nextTheme) => {
-              void handleThemeChange(nextTheme);
-            }}
-            onLockedTheme={() => {
-              setView("support");
-              setSupportPlan("verified_3m_themes");
-              setSupportMessage("All theme colors are included with the ₱250 verified membership.");
-            }}
-          />
-
           <button
             className="theme-toggle"
             type="button"
@@ -5322,6 +5308,20 @@ export function App() {
 
             {view === "menu" && (
               <div className="menu-card glass">
+                <ThemePicker
+                  menuPlacement
+                  theme={theme}
+                  canUseAllThemes={hasPremiumThemes(profile)}
+                  allThemesUnlocked={allThemesUnlocked}
+                  onThemeChange={(nextTheme) => {
+                    void handleThemeChange(nextTheme);
+                  }}
+                  onLockedTheme={() => {
+                    setView("support");
+                    setSupportPlan("verified_3m_themes");
+                    setSupportMessage("All theme colors are included with the ₱250 verified membership.");
+                  }}
+                />
                 <div className="menu-progress-notice">
                   <span className="menu-progress-icon" aria-hidden="true">🚧</span>
                   <div>
