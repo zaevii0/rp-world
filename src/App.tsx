@@ -36,7 +36,6 @@ import {
   MapPin,
   Menu,
   Share2,
-  Forward,
   Repeat2,
   MoreVertical,
   Pin,
