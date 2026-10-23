@@ -3908,7 +3908,24 @@ export function App() {
           onClick={() => setView("home")}
           aria-label="RP WORLD home"
         >
-          <span className="brand-mark">
+          <span
+            className="brand-mark"
+            role="button"
+            tabIndex={0}
+            aria-label="Open theme options"
+            title="Themes"
+            onClick={(event) => {
+              event.stopPropagation();
+              setView("menu");
+            }}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                event.stopPropagation();
+                setView("menu");
+              }
+            }}
+          >
             <RPWorldMark />
           </span>
 
@@ -3938,15 +3955,6 @@ export function App() {
             </span>
           </button>
 
-          <button
-            className="theme-toggle header-search-trigger"
-            type="button"
-            aria-label="Search RP WORLD"
-            title="Search"
-            onClick={() => setView("search")}
-          >
-            <Search size={18} />
-          </button>
           {session ? (
             <button
               className="theme-toggle notification-trigger"
@@ -3976,6 +3984,15 @@ export function App() {
               <LogIn size={17} />
             </button>
           )}
+          <button
+            className="theme-toggle header-search-trigger"
+            type="button"
+            aria-label="Search RP WORLD"
+            title="Search"
+            onClick={() => setView("search")}
+          >
+            <Search size={18} />
+          </button>
         </div>
       </header>
 
