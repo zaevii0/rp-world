@@ -5206,27 +5206,7 @@ export function App() {
                           <button className={openComments === post.id ? "post-action active" : "post-action"} type="button" onClick={() => void toggleComments(post.id)} aria-label={`Comments: ${post.comments}`} title="Comments">
                             <MessageCircle size={17} /> {post.comments}
                           </button>
-                          <button
-                            className={savedPostIds.includes(post.id) ? "post-action active" : "post-action"}
-                            type="button"
-                            onClick={() => setSavedPostIds((current) => {
-                              const next = current.includes(post.id)
-                                ? current.filter((id) => id !== post.id)
-                                : [...current, post.id];
-                              try {
-                                localStorage.setItem("rpw-saved-post-ids", JSON.stringify(next));
-                              } catch {
-                                // Keep the save interaction usable when storage is unavailable.
-                              }
-                              return next;
-                            })}
-                            aria-label={savedPostIds.includes(post.id) ? "Remove saved post" : "Save post"}
-                            title={savedPostIds.includes(post.id) ? "Saved" : "Save post"}
-                            aria-pressed={savedPostIds.includes(post.id)}
-                          >
-                            <Bookmark size={17} fill={savedPostIds.includes(post.id) ? "currentColor" : "none"} />
-                          </button>
-                          <button className="post-action" type="button" onClick={() => void sharePost(post)} aria-label="Share post" title="Share post">
+                                                    <button className="post-action" type="button" onClick={() => void sharePost(post)} aria-label="Share post" title="Share post">
                             <Forward size={17} />
                           </button>
                         </div>
