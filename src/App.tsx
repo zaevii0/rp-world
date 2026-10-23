@@ -3920,15 +3920,6 @@ export function App() {
 
         <div className="header-actions">
           <button
-            className="auth-icon-button glass header-search-trigger"
-            type="button"
-            aria-label="Search RP WORLD"
-            title="Search"
-            onClick={() => setView("search")}
-          >
-            <Search size={18} />
-          </button>
-          <button
             className="theme-toggle"
             type="button"
             aria-label={
@@ -3947,6 +3938,15 @@ export function App() {
             </span>
           </button>
 
+          <button
+            className="auth-icon-button glass header-search-trigger"
+            type="button"
+            aria-label="Search RP WORLD"
+            title="Search"
+            onClick={() => setView("search")}
+          >
+            <Search size={18} />
+          </button>
           {session ? (
             <button
               className="auth-icon-button glass notification-trigger"
