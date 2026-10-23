@@ -36,6 +36,7 @@ import {
   MapPin,
   Menu,
   Share2,
+  Forward,
   Repeat2,
   MoreVertical,
   Pin,
@@ -4400,7 +4401,7 @@ export function App() {
                             aria-label={`Likes: ${post.likes}`}
                             title="Like"
                           >
-                            <Heart className="rpw-action-icon" size={19} strokeWidth={1.9} fill={post.liked ? "currentColor" : "none"} />
+                            <svg className="rpw-action-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 8.8c0 5.2-8.8 11-8.8 11S3.2 14 3.2 8.8A4.8 4.8 0 0 1 12 6.1a4.8 4.8 0 0 1 8.8 2.7Z" fill={post.liked ? "currentColor" : "none"} /></svg>
                             <span>{post.likes}</span>
                           </button>
 
@@ -4411,7 +4412,7 @@ export function App() {
                             aria-label={`Comments: ${post.comments}`}
                             title="Comments"
                           >
-                            <MessageCircle className="rpw-action-icon" size={19} strokeWidth={1.9} />
+                            <svg className="rpw-action-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5a8.5 8.5 0 0 0-7.1 13.2L4 20l3.7-1.2A8.5 8.5 0 1 0 12 3.5Z" /></svg>
                             <span>{post.comments}</span>
                           </button>
 
@@ -4424,7 +4425,7 @@ export function App() {
                             aria-label={`Shares: ${post.shares || 0}`}
                             title="Share post"
                           >
-                            <Share2 className="rpw-action-icon" size={19} strokeWidth={1.9} />
+                            <svg className="rpw-action-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V3" /><path d="m7.5 7.5 4.5-4.5 4.5 4.5" /><path d="M5 12.5v6A2.5 2.5 0 0 0 7.5 21h9a2.5 2.5 0 0 0 2.5-2.5v-6" /></svg>
                             <span>{post.shares || 0}</span>
                           </button>
                         </div>
@@ -5235,14 +5236,14 @@ export function App() {
                         ) : null}
                         <div className="post-actions">
                           <button className={post.liked ? "post-action liked" : "post-action"} type="button" onClick={() => void toggleLike(post)}>
-                            <Heart className="rpw-action-icon" size={19} strokeWidth={1.9} fill={post.liked ? "currentColor" : "none"} /><span>{post.likes}</span>
+                            <Heart size={17} fill={post.liked ? "currentColor" : "none"} />{post.likes}
                           </button>
                           <button className={openComments === post.id ? "post-action active" : "post-action"} type="button" onClick={() => void toggleComments(post.id)} aria-label={`Comments: ${post.comments}`} title="Comments">
-                            <MessageCircle className="rpw-action-icon" size={19} strokeWidth={1.9} /><span>{post.comments}</span>
+                            <MessageCircle size={17} /> {post.comments}
                           </button>
 
-                          <button className="post-action" type="button" onClick={() => void sharePost(post)} aria-label={`Shares: ${post.shares || 0}`} title="Share post">
-                            <Share2 className="rpw-action-icon" size={19} strokeWidth={1.9} /><span>{post.shares || 0}</span>
+                          <button className="post-action" type="button" onClick={() => void sharePost(post)} aria-label="Share post" title="Share post">
+                            <Forward size={17} />
                           </button>
                         </div>
                         {openComments === post.id && (
