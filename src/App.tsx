@@ -5029,6 +5029,15 @@ export function App() {
                                 {!post.profile?.avatar_url && initials(post.profile?.display_name ?? "R")}
                               </div>
                               <div>
+                                <button
+                                  className="post-more-button"
+                                  type="button"
+                                  aria-label="Post options"
+                                  title="Post options"
+                                  onClick={() => setPostActionTarget(post)}
+                                >
+                                  <MoreVertical size={18} />
+                                </button>
                                 <strong>{post.profile?.display_name ?? "RP WORLD member"}{(isVerifiedProfile(post.profile) || isAdminProfile(post.profile, adminUserIds)) && <span className="verified-badge" aria-label="Verified">✓</span>}</strong>
                                 <span className="post-meta">
                                   @{post.profile?.username ?? "member"} ·{" "}
