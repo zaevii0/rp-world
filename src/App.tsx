@@ -16,6 +16,7 @@ import {
   GraduationCap,
   Music,
   MessageCircle,
+  Bookmark,
   Bell,
   CheckCheck,
   ShoppingBag,
@@ -330,6 +331,15 @@ export function App() {
   const [adminUserIds, setAdminUserIds] = useState<Set<string>>(new Set());
 
   const [posts, setPosts] = useState<Post[]>([]);
+  const [savedPostIds, setSavedPostIds] = useState<string[]>(() => {
+    try {
+      const stored = localStorage.getItem("rpw-saved-post-ids");
+      const parsed: unknown = stored ? JSON.parse(stored) : [];
+      return Array.isArray(parsed) ? parsed.filter((id): id is string => typeof id === "string") : [];
+    } catch {
+      return [];
+    }
+  });
   const [profilePosts, setProfilePosts] = useState<Post[]>([]);
   const [profileReposts, setProfileReposts] = useState<Post[]>([]);
   const [profileSection, setProfileSection] = useState<"posts" | "reposts" | "albums" | "groups">("posts");
@@ -3908,24 +3918,7 @@ export function App() {
           onClick={() => setView("home")}
           aria-label="RP WORLD home"
         >
-          <span
-            className="brand-mark"
-            role="button"
-            tabIndex={0}
-            aria-label="Open theme options"
-            title="Themes"
-            onClick={(event) => {
-              event.stopPropagation();
-              setView("menu");
-            }}
-            onKeyDown={(event) => {
-              if (event.key === "Enter" || event.key === " ") {
-                event.preventDefault();
-                event.stopPropagation();
-                setView("menu");
-              }
-            }}
-          >
+          <span className="brand-mark">
             <RPWorldMark />
           </span>
 
@@ -3936,6 +3929,20 @@ export function App() {
         </button>
 
         <div className="header-actions">
+          <ThemePicker
+            theme={theme}
+            canUseAllThemes={hasPremiumThemes(profile)}
+            allThemesUnlocked={allThemesUnlocked}
+            onThemeChange={(nextTheme) => {
+              void handleThemeChange(nextTheme);
+            }}
+            onLockedTheme={() => {
+              setView("support");
+              setSupportPlan("verified_3m_themes");
+              setSupportMessage("All theme colors are included with the ₱250 verified membership.");
+            }}
+          />
+
           <button
             className="theme-toggle"
             type="button"
@@ -3950,14 +3957,24 @@ export function App() {
               )
             }
           >
-            <span className="toggle-thumb">
-              {isDark ? <Sun size={17} /> : <Moon size={17} />}
+            <span
+              className={
+                isDark
+                  ? "toggle-thumb dark-thumb"
+                  : "toggle-thumb"
+              }
+            >
+              {isDark ? (
+                <Moon size={15} />
+              ) : (
+                <Sun size={15} />
+              )}
             </span>
           </button>
 
           {session ? (
             <button
-              className="theme-toggle notification-trigger"
+              className="auth-icon-button glass notification-trigger"
               type="button"
               aria-label={notificationsOpen ? "Close notifications" : "Open notifications"}
               aria-expanded={notificationsOpen}
@@ -3984,15 +4001,6 @@ export function App() {
               <LogIn size={17} />
             </button>
           )}
-          <button
-            className="theme-toggle header-search-trigger"
-            type="button"
-            aria-label="Search RP WORLD"
-            title="Search"
-            onClick={() => setView("search")}
-          >
-            <Search size={18} />
-          </button>
         </div>
       </header>
 
@@ -4115,6 +4123,9 @@ export function App() {
                   <h2 className={view === "home" ? `greeting-title greeting-${Math.min(3, Math.max(1, Math.ceil(title.length / 24)))}` : undefined}>{title}</h2>
                 </div>
                 <div className="page-heading-actions">
+                  <button className="glass circle-button" type="button" aria-label="Search" onClick={() => setView("search")}>
+                    <Search size={17} />
+                  </button>
                   {viewAs && (
                     <button className="glass circle-button" type="button" onClick={() => {
                         setViewAs(false);
@@ -4404,6 +4415,27 @@ export function App() {
                           >
                             <svg className="rpw-action-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5a8.5 8.5 0 0 0-7.1 13.2L4 20l3.7-1.2A8.5 8.5 0 1 0 12 3.5Z" /></svg>
                             <span>{post.comments}</span>
+                          </button>
+
+                          <button
+                            className={savedPostIds.includes(post.id) ? "post-action active" : "post-action"}
+                            type="button"
+                            onClick={() => setSavedPostIds((current) => {
+                              const next = current.includes(post.id)
+                                ? current.filter((id) => id !== post.id)
+                                : [...current, post.id];
+                              try {
+                                localStorage.setItem("rpw-saved-post-ids", JSON.stringify(next));
+                              } catch {
+                                // Keep the save interaction usable when storage is unavailable.
+                              }
+                              return next;
+                            })}
+                            aria-label={savedPostIds.includes(post.id) ? "Remove saved post" : "Save post"}
+                            title={savedPostIds.includes(post.id) ? "Saved" : "Save post"}
+                            aria-pressed={savedPostIds.includes(post.id)}
+                          >
+                            <Bookmark size={17} fill={savedPostIds.includes(post.id) ? "currentColor" : "none"} />
                           </button>
 
                           <button
@@ -5081,6 +5113,9 @@ export function App() {
                       <button className="glass circle-button" type="button" aria-label="Back" title="Back" onClick={() => { setView("discover"); setPublicProfile(null); }}>
                         <ChevronLeft size={19} strokeWidth={2} />
                       </button>
+                      <button className="glass circle-button" type="button" aria-label="Search" title="Search" onClick={() => setView("search")}>
+                        <Search size={17} />
+                      </button>
                     </div>
                   </div>
                   <div className="profile-main">
@@ -5226,7 +5261,27 @@ export function App() {
                           <button className={openComments === post.id ? "post-action active" : "post-action"} type="button" onClick={() => void toggleComments(post.id)} aria-label={`Comments: ${post.comments}`} title="Comments">
                             <MessageCircle size={17} /> {post.comments}
                           </button>
-                                                    <button className="post-action" type="button" onClick={() => void sharePost(post)} aria-label="Share post" title="Share post">
+                          <button
+                            className={savedPostIds.includes(post.id) ? "post-action active" : "post-action"}
+                            type="button"
+                            onClick={() => setSavedPostIds((current) => {
+                              const next = current.includes(post.id)
+                                ? current.filter((id) => id !== post.id)
+                                : [...current, post.id];
+                              try {
+                                localStorage.setItem("rpw-saved-post-ids", JSON.stringify(next));
+                              } catch {
+                                // Keep the save interaction usable when storage is unavailable.
+                              }
+                              return next;
+                            })}
+                            aria-label={savedPostIds.includes(post.id) ? "Remove saved post" : "Save post"}
+                            title={savedPostIds.includes(post.id) ? "Saved" : "Save post"}
+                            aria-pressed={savedPostIds.includes(post.id)}
+                          >
+                            <Bookmark size={17} fill={savedPostIds.includes(post.id) ? "currentColor" : "none"} />
+                          </button>
+                          <button className="post-action" type="button" onClick={() => void sharePost(post)} aria-label="Share post" title="Share post">
                             <Forward size={17} />
                           </button>
                         </div>
@@ -5277,20 +5332,6 @@ export function App() {
 
             {view === "menu" && (
               <div className="menu-card glass">
-                <ThemePicker
-                  menuPlacement
-                  theme={theme}
-                  canUseAllThemes={hasPremiumThemes(profile)}
-                  allThemesUnlocked={allThemesUnlocked}
-                  onThemeChange={(nextTheme) => {
-                    void handleThemeChange(nextTheme);
-                  }}
-                  onLockedTheme={() => {
-                    setView("support");
-                    setSupportPlan("verified_3m_themes");
-                    setSupportMessage("All theme colors are included with the ₱250 verified membership.");
-                  }}
-                />
                 <div className="menu-progress-notice">
                   <span className="menu-progress-icon" aria-hidden="true">🚧</span>
                   <div>
