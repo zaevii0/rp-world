@@ -1,0 +1,185 @@
+/* RP WORLD visual refinement — expressive iOS color, quieter surfaces, deliberate hierarchy. */
+:root {
+  --rpw-blue: #0a84ff;
+  --rpw-cyan: #64d2ff;
+  --rpw-purple: #bf5af2;
+  --rpw-pink: #ff375f;
+  --rpw-green: #30d158;
+  --rpw-orange: #ff9f0a;
+  --rpw-border: rgba(127,127,127,.10);
+  --rpw-surface-dark: rgba(28,28,30,.78);
+  --rpw-surface-light: rgba(255,255,255,.76);
+}
+.app.dark {
+  background:
+    radial-gradient(ellipse at 8% 0%, color-mix(in srgb, var(--accent) 13%, transparent), transparent 32rem),
+    radial-gradient(ellipse at 100% 24%, rgba(10,132,255,.055), transparent 28rem),
+    #08090c;
+}
+.app.light {
+  background:
+    radial-gradient(ellipse at 0% 0%, color-mix(in srgb, var(--accent) 10%, transparent), transparent 30rem),
+    radial-gradient(ellipse at 100% 18%, rgba(10,132,255,.045), transparent 26rem),
+    #f5f6fa;
+}
+.glass {
+  border-color: var(--rpw-border);
+  background: rgba(31,32,37,.68);
+  box-shadow: 0 10px 36px rgba(0,0,0,.12);
+  backdrop-filter: blur(28px) saturate(165%);
+  -webkit-backdrop-filter: blur(28px) saturate(165%);
+}
+.app.light .glass {
+  border-color: rgba(25,30,45,.055);
+  background: var(--rpw-surface-light);
+  box-shadow: 0 8px 30px rgba(32,40,65,.055);
+}
+.topbar {
+  border: 0;
+  border-radius: 22px;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+.brand-mark {
+  border-radius: 12px;
+  color: var(--rpw-blue);
+  background: color-mix(in srgb, var(--rpw-blue) 13%, transparent);
+}
+.hero-icon {
+  color: var(--rpw-blue);
+  background: color-mix(in srgb, var(--rpw-blue) 10%, transparent);
+}
+.primary-button,
+.nav-create {
+  border: 0;
+  color: #fff;
+  background: var(--rpw-blue);
+  box-shadow: 0 7px 18px rgba(10,132,255,.22);
+}
+.primary-button:hover,
+.nav-create:hover {
+  background: #0077ed;
+  box-shadow: 0 9px 24px rgba(10,132,255,.25);
+}
+.status {
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  border: 0;
+}
+.status-dot { background: var(--rpw-green); box-shadow: 0 0 9px rgba(48,209,88,.25); }
+.circle-button, .icon-button, .auth-icon-button {
+  background: color-mix(in srgb, var(--accent) 7%, transparent);
+  transition: background .18s ease, transform .18s ease, color .18s ease;
+}
+.circle-button:hover, .icon-button:hover, .auth-icon-button:hover {
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+}
+.composer, .post-card, .profile-hero, .profile-card, .menu-card, .empty-state {
+  border: 0;
+  box-shadow: 0 7px 28px rgba(0,0,0,.075);
+}
+.app.dark .composer,
+.app.dark .post-card,
+.app.dark .profile-hero,
+.app.dark .profile-card,
+.app.dark .menu-card,
+.app.dark .empty-state {
+  background: rgba(25,26,31,.76);
+}
+.app.light .composer,
+.app.light .post-card,
+.app.light .profile-hero,
+.app.light .profile-card,
+.app.light .menu-card,
+.app.light .empty-state {
+  background: rgba(255,255,255,.88);
+  box-shadow: 0 5px 24px rgba(35,45,75,.045);
+}
+.composer {
+  min-height: 66px;
+  border-radius: 20px;
+  transition: background .18s ease, transform .18s ease;
+}
+.composer:hover { transform: translateY(-1px); }
+.post-card { border-radius: 22px; }
+.feed-list { gap: 14px; }
+.post-actions { border-top-color: rgba(127,127,127,.08); }
+.post-action { border-radius: 12px; }
+.post-action:hover, .post-action.liked, .post-action.active {
+  color: var(--rpw-pink);
+  background: color-mix(in srgb, var(--rpw-pink) 10%, transparent);
+}
+.nav-item.active {
+  color: var(--rpw-blue);
+  background: color-mix(in srgb, var(--rpw-blue) 12%, transparent);
+}
+.bottom-nav {
+  border: 1px solid rgba(127,127,127,.08);
+  background: rgba(27,28,33,.82);
+  box-shadow: 0 12px 36px rgba(0,0,0,.20);
+  backdrop-filter: blur(30px) saturate(180%);
+  -webkit-backdrop-filter: blur(30px) saturate(180%);
+}
+.app.light .bottom-nav {
+  border-color: rgba(30,40,60,.06);
+  background: rgba(255,255,255,.84);
+  box-shadow: 0 8px 28px rgba(35,45,75,.12);
+}
+.nav-create { border-radius: 16px; }
+.avatar {
+  border: 0;
+  background-color: color-mix(in srgb, var(--rpw-blue) 13%, transparent);
+  color: var(--rpw-blue);
+}
+.profile-cover {
+  background:
+    radial-gradient(ellipse at 20% 10%, color-mix(in srgb, var(--rpw-purple) 30%, transparent), transparent 50%),
+    radial-gradient(ellipse at 85% 20%, color-mix(in srgb, var(--rpw-blue) 27%, transparent), transparent 45%),
+    color-mix(in srgb, var(--accent) 7%, #17181d);
+}
+.app.light .profile-cover {
+  background:
+    radial-gradient(ellipse at 20% 10%, color-mix(in srgb, var(--rpw-purple) 22%, transparent), transparent 50%),
+    radial-gradient(ellipse at 85% 20%, color-mix(in srgb, var(--rpw-blue) 20%, transparent), transparent 45%),
+    #eef1fa;
+}
+.input-wrap, .comment-form input {
+  border-color: transparent;
+  background: rgba(127,127,127,.09);
+}
+.input-wrap:focus-within, .comment-form input:focus {
+  border-color: color-mix(in srgb, var(--rpw-blue) 48%, transparent);
+  box-shadow: 0 0 0 3px rgba(10,132,255,.10);
+}
+.outline-button, .small-add {
+  border-color: transparent;
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+}
+.theme-card, .rpw-collection-card, .rpw-collection-create-card {
+  border-color: transparent;
+  box-shadow: 0 5px 18px rgba(0,0,0,.06);
+}
+.theme-card.selected {
+  border-color: color-mix(in srgb, var(--theme-accent) 48%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--theme-accent) 20%, transparent);
+}
+.rpw-collections-area, .rpw-public-collections {
+  border-color: transparent;
+  background: color-mix(in srgb, var(--surface, #15151a) 68%, transparent);
+  box-shadow: 0 6px 24px rgba(0,0,0,.06);
+}
+.comments-panel { background: rgba(127,127,127,.055); }
+.comment-row > div { background: rgba(127,127,127,.075); }
+.sheet-backdrop { background: rgba(5,8,15,.42); }
+.theme-sheet, .auth-sheet, .profile-sheet {
+  border: 1px solid rgba(127,127,127,.10);
+  box-shadow: 0 24px 80px rgba(0,0,0,.25);
+}
+button:focus-visible, a:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--rpw-blue) 72%, transparent);
+  outline-offset: 3px;
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
+}
