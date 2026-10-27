@@ -8593,3 +8593,60 @@ body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; 
   display: none !important;
   background: none !important;
 }
+
+
+/* Floating field labels: compact, accessible, and driven by the active theme accent. */
+label:has(> .input-wrap) {
+  position: relative;
+  display: block;
+}
+label:has(> .input-wrap) > span {
+  position: absolute;
+  z-index: 2;
+  top: 13px;
+  left: 14px;
+  max-width: calc(100% - 28px);
+  overflow: hidden;
+  color: var(--muted, #8e8e93);
+  font-size: 13px;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  pointer-events: none;
+  transform: scale(1);
+  transform-origin: left top;
+  transition: top 180ms ease, transform 180ms ease, color 180ms ease;
+}
+label:has(> .input-wrap input:focus) > span,
+label:has(> .input-wrap textarea:focus) > span,
+label:has(> .input-wrap input:not(:placeholder-shown)) > span,
+label:has(> .input-wrap textarea:not(:placeholder-shown)) > span,
+label:has(> .input-wrap select) > span {
+  top: 7px;
+  color: var(--accent);
+  transform: scale(.74);
+}
+label:has(> .input-wrap) > .input-wrap input,
+label:has(> .input-wrap) > .input-wrap textarea,
+label:has(> .input-wrap) > .input-wrap select {
+  box-sizing: border-box;
+  min-height: 48px;
+  padding: 21px 14px 7px;
+}
+label:has(> .input-wrap) > .input-wrap textarea {
+  min-height: 112px;
+  padding-top: 24px;
+  resize: vertical;
+}
+label:has(> .input-wrap) > .input-wrap input::placeholder,
+label:has(> .input-wrap) > .input-wrap textarea::placeholder {
+  color: transparent;
+  opacity: 0;
+}
+label:has(> .input-wrap:focus-within) > .input-wrap {
+  border-color: color-mix(in srgb, var(--accent) 65%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 12%, transparent);
+}
+@media (prefers-reduced-motion: reduce) {
+  label:has(> .input-wrap) > span { transition: none; }
+}

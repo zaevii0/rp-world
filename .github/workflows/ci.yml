@@ -1,4 +1,4 @@
-name: RP WORLD CI
+name: RP WORLD
 
 on:
   push:
